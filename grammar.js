@@ -795,11 +795,20 @@ grammar({
       token.immediate('"'),
     ),
 
-    command_string: $ => token(seq(
-      '`',
-      repeat(choice(/[^`\\\n]/, /\\./)),
-      '`'
-    )),
+    command_string: $ => seq(
+      choice(
+        '`',
+        seq(
+          field('prefix', $.identifier),
+          token.immediate('`')
+        )
+      ),
+      optional(token.immediate(repeat1(choice(
+        /[^`\\\n]/,
+        /\\./
+      )))),
+      token.immediate('`'),
+    ),
 
     character: $ => token(seq(
       "'",

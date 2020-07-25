@@ -43,11 +43,14 @@ Command strings
 `foo`
 `foo \` bar`
 
+custom`foo`
+
 ---
 
 (source_file
   (command_string)
-  (command_string))
+  (command_string)
+  (command_string prefix: (identifier)))
 
 =================
 Prefixed strings

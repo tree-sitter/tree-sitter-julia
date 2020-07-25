@@ -588,6 +588,22 @@
     }
   },
   {
+    "type": "command_string",
+    "named": true,
+    "fields": {
+      "prefix": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "compound_expression",
     "named": true,
     "fields": {},
@@ -2078,6 +2094,10 @@
     "named": false
   },
   {
+    "type": "`",
+    "named": false
+  },
+  {
     "type": "abstract",
     "named": false
   },
@@ -2099,10 +2119,6 @@
   },
   {
     "type": "character",
-    "named": true
-  },
-  {
-    "type": "command_string",
     "named": true
   },
   {
