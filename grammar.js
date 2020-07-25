@@ -250,6 +250,17 @@ grammar({
       $._expression
     ),
 
+    scoped_expression: $ => prec(-1, seq(
+      choice('local', 'global'),
+      choice(
+        $.assignment_expression,
+        $.function_definition,
+        $.bare_tuple_expression,
+        $.tuple_expression,
+        $.identifier,
+      ),
+    )),
+
     // Statements
 
     _statement: $ => choice(
@@ -406,6 +417,7 @@ grammar({
       $.ternary_expression,
       $.generator_expression,
       $.function_expression,
+      $.scoped_expression,
       $.coefficient_expression,
       $.spread_expression,
       $.range_expression,

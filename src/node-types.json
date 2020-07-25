@@ -134,6 +134,10 @@
         "named": true
       },
       {
+        "type": "scoped_expression",
+        "named": true
+      },
+      {
         "type": "spread_expression",
         "named": true
       },
@@ -1600,6 +1604,37 @@
     }
   },
   {
+    "type": "scoped_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "assignment_expression",
+          "named": true
+        },
+        {
+          "type": "bare_tuple_expression",
+          "named": true
+        },
+        {
+          "type": "function_definition",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "tuple_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "scoped_identifier",
     "named": true,
     "fields": {},
@@ -2162,6 +2197,10 @@
     "named": false
   },
   {
+    "type": "global",
+    "named": false
+  },
+  {
     "type": "identifier",
     "named": true
   },
@@ -2183,6 +2222,10 @@
   },
   {
     "type": "let",
+    "named": false
+  },
+  {
+    "type": "local",
     "named": false
   },
   {

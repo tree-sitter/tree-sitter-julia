@@ -500,3 +500,44 @@ Generator expressions
     (call_expression (identifier) (argument_list (identifier) (identifier)))
     (for_clause (for_binding (identifier) (identifier)))
     (for_clause (for_binding (identifier) (identifier)))))
+
+============================
+Local & global expressions
+============================
+
+local x
+local x, y
+local (x, y, z) = (1, 2, 3)
+
+function f()
+    global g = 1
+    local h() =  g
+    return h
+end
+
+let a = []
+    global function b(c)
+        push!(a, c)
+    end
+end
+
+---
+
+(source_file
+  (scoped_expression
+    (identifier))
+  (scoped_expression
+    (bare_tuple_expression (identifier) (identifier)))
+  (scoped_expression
+    (assignment_expression
+      (tuple_expression (identifier) (identifier) (identifier))
+      (tuple_expression (number) (number) (number))))
+  (function_definition (identifier) (parameter_list)
+    (scoped_expression (assignment_expression (identifier) (number)))
+    (scoped_expression (assignment_expression (call_expression (identifier) (argument_list)) (identifier)))
+    (return_statement (identifier)))
+  (let_statement
+    (variable_declaration (identifier) (array_expression))
+    (scoped_expression
+      (function_definition (identifier) (parameter_list (identifier))
+        (call_expression (identifier) (argument_list (identifier) (identifier)))))))
