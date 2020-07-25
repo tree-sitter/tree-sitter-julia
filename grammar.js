@@ -67,6 +67,37 @@ const POWER_OPERATORS = `
   ^ ↑ ↓ ⇵ ⟰ ⟱ ⤈ ⤉ ⤊ ⤋ ⤒ ⤓ ⥉ ⥌ ⥍ ⥏ ⥑ ⥔ ⥕ ⥘ ⥙ ⥜ ⥝ ⥠ ⥡ ⥣ ⥥ ⥮ ⥯ ￪ ￬
 `;
 
+const IDENTIFIER = (() => {
+  operators = [
+    ',',
+    ';',
+    ':',
+    '(', ')',
+    '{', '}',
+    '&',
+    '|',
+    '$',
+    ARROW_OPERATORS,
+    ASSIGN_OPERATORS,
+    COMPARISON_OPERATORS,
+    PLUS_OPERATORS,
+    POWER_OPERATORS,
+    TIMES_OPERATORS,
+  ];
+
+  operatorCharacters = operators
+    .join(' ')
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/-/g, '')
+    .replace(/\\/g, '\\\\')
+    .replace(/!/g, '');
+
+  // First char: ASCII letter, Greek letter, Extended Latin letter, or ∇
+  // Remaining characters: not delimiter, not operator
+  return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`)
+})()
+
 module.exports =
 grammar({
   name: 'julia',
@@ -140,9 +171,13 @@ grammar({
     function_definition: $ => seq(
       'function',
       field('name', $.identifier),
-      field('type_parameters', optional($.type_parameter_list)),
-      field('parametere', $.parameter_list),
-      optional($._expression_list),
+      optional(
+        seq(
+          field('type_parameters', optional($.type_parameter_list)),
+          field('parametere', $.parameter_list),
+          optional($._expression_list),
+        )
+      ),
       'end'
     ),
 
@@ -176,7 +211,10 @@ grammar({
     ),
 
     module_definition: $ => seq(
-      'module',
+      choice(
+        'module',
+        'baremodule'
+      ),
       field('name', $.identifier),
       optional($._expression_list),
       'end'
@@ -221,9 +259,9 @@ grammar({
     spread_parameter: $ => seq($.identifier, '...'),
 
     typed_parameter: $ => seq(
-      $.identifier,
+      field('parameter', optional($.identifier)),
       '::',
-      choice($.identifier, $.parameterized_identifier)
+      field('type', choice($.identifier, $.parameterized_identifier))
     ),
 
     type_parameter_list: $ => seq(
@@ -242,6 +280,17 @@ grammar({
       '<:',
       $._expression
     ),
+
+    scoped_expression: $ => prec(-1, seq(
+      choice('local', 'global'),
+      choice(
+        $.assignment_expression,
+        $.function_definition,
+        $.bare_tuple_expression,
+        $.tuple_expression,
+        $.identifier,
+      ),
+    )),
 
     // Statements
 
@@ -399,11 +448,13 @@ grammar({
       $.ternary_expression,
       $.generator_expression,
       $.function_expression,
+      $.scoped_expression,
       $.coefficient_expression,
       $.spread_expression,
       $.range_expression,
       $.quote_expression,
       $.interpolation_expression,
+      $.symbol,
       $.number,
       $._primary_expression,
     ),
@@ -543,7 +594,7 @@ grammar({
 
     unary_expression: $ => choice(
       prec(PREC.prefix, seq(
-        choice('>:', '+', '-', '!', '~', '¬', '√', '∛', '∜'),
+        choice('::', '>:', '+', '-', '!', '~', '¬', '√', '∛', '∜'),
         $._expression
       )),
       prec(PREC.postfix, seq(
@@ -729,36 +780,9 @@ grammar({
       alias('.', $.operator)
     )),
 
-    identifier: $ => {
-      const operators = [
-        ',',
-        ';',
-        ':',
-        '(', ')',
-        '{', '}',
-        '&',
-        '|',
-        '$',
-        ARROW_OPERATORS,
-        ASSIGN_OPERATORS,
-        COMPARISON_OPERATORS,
-        PLUS_OPERATORS,
-        POWER_OPERATORS,
-        TIMES_OPERATORS,
-      ];
+    identifier: $ => IDENTIFIER,
 
-      const operatorCharacters = operators
-        .join(' ')
-        .trim()
-        .replace(/\s+/g, '')
-        .replace(/-/g, '')
-        .replace(/\\/g, '\\\\')
-        .replace(/!/g, '');
-
-      // First char: ASCII letter, Greek letter, Extended Latin letter, or ∇
-      // Remaining characters: not delimiter, not operator
-      return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\\s\\.\\-\\[\\]${operatorCharacters}]*`)
-    },
+    symbol: $ => seq(':', token.immediate(IDENTIFIER)),
 
     number: $ => {
       const decimal = /[0-9][0-9_]*/;
@@ -788,11 +812,20 @@ grammar({
       token.immediate('"'),
     ),
 
-    command_string: $ => token(seq(
-      '`',
-      repeat(choice(/[^`\\\n]/, /\\./)),
-      '`'
-    )),
+    command_string: $ => seq(
+      choice(
+        '`',
+        seq(
+          field('prefix', $.identifier),
+          token.immediate('`')
+        )
+      ),
+      optional(token.immediate(repeat1(choice(
+        /[^`\\\n]/,
+        /\\./
+      )))),
+      token.immediate('`'),
+    ),
 
     character: $ => token(seq(
       "'",

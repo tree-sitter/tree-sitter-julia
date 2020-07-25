@@ -10,12 +10,16 @@ end
 module C
 end
 
+baremodule D
+end
+
 end
 
 ---
 
 (source_file
   (module_definition (identifier)
+    (module_definition (identifier))
     (module_definition (identifier))
     (module_definition (identifier))))
 
