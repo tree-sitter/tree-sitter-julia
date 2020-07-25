@@ -176,7 +176,10 @@ grammar({
     ),
 
     module_definition: $ => seq(
-      'module',
+      choice(
+        'module',
+        'baremodule'
+      ),
       field('name', $.identifier),
       optional($._expression_list),
       'end'

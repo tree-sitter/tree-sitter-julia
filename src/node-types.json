@@ -2082,6 +2082,10 @@
     "named": false
   },
   {
+    "type": "baremodule",
+    "named": false
+  },
+  {
     "type": "begin",
     "named": false
   },
