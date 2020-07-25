@@ -764,7 +764,7 @@ grammar({
 
       // First char: ASCII letter, Greek letter, Extended Latin letter, or ∇
       // Remaining characters: not delimiter, not operator
-      return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\\s\\.\\-\\[\\]${operatorCharacters}]*`)
+      return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`)
     },
 
     number: $ => {
