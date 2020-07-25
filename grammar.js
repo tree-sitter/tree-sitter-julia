@@ -140,9 +140,13 @@ grammar({
     function_definition: $ => seq(
       'function',
       field('name', $.identifier),
-      field('type_parameters', optional($.type_parameter_list)),
-      field('parametere', $.parameter_list),
-      optional($._expression_list),
+      optional(
+        seq(
+          field('type_parameters', optional($.type_parameter_list)),
+          field('parametere', $.parameter_list),
+          optional($._expression_list),
+        )
+      ),
       'end'
     ),
 

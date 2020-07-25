@@ -100,12 +100,16 @@ a, b = c, d, e
 Functions
 =================
 
+function bare end
+
 function test(x, y)
 end
 
 ---
 
 (source_file
+  (function_definition
+    (identifier))
   (function_definition
     (identifier)
     (parameter_list (identifier) (identifier))))
