@@ -150,6 +150,10 @@
         "named": true
       },
       {
+        "type": "symbol",
+        "named": true
+      },
+      {
         "type": "ternary_expression",
         "named": true
       },
@@ -1824,6 +1828,11 @@
     }
   },
   {
+    "type": "symbol",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "ternary_expression",
     "named": true,
     "fields": {},
@@ -1940,20 +1949,31 @@
   {
     "type": "typed_parameter",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "parameterized_identifier",
-          "named": true
-        }
-      ]
+    "fields": {
+      "parameter": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "parameterized_identifier",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {

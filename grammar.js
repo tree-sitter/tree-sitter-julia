@@ -67,6 +67,37 @@ const POWER_OPERATORS = `
   ^ ↑ ↓ ⇵ ⟰ ⟱ ⤈ ⤉ ⤊ ⤋ ⤒ ⤓ ⥉ ⥌ ⥍ ⥏ ⥑ ⥔ ⥕ ⥘ ⥙ ⥜ ⥝ ⥠ ⥡ ⥣ ⥥ ⥮ ⥯ ￪ ￬
 `;
 
+const IDENTIFIER = (() => {
+  operators = [
+    ',',
+    ';',
+    ':',
+    '(', ')',
+    '{', '}',
+    '&',
+    '|',
+    '$',
+    ARROW_OPERATORS,
+    ASSIGN_OPERATORS,
+    COMPARISON_OPERATORS,
+    PLUS_OPERATORS,
+    POWER_OPERATORS,
+    TIMES_OPERATORS,
+  ];
+
+  operatorCharacters = operators
+    .join(' ')
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/-/g, '')
+    .replace(/\\/g, '\\\\')
+    .replace(/!/g, '');
+
+  // First char: ASCII letter, Greek letter, Extended Latin letter, or ∇
+  // Remaining characters: not delimiter, not operator
+  return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`)
+})()
+
 module.exports =
 grammar({
   name: 'julia',
@@ -228,9 +259,9 @@ grammar({
     spread_parameter: $ => seq($.identifier, '...'),
 
     typed_parameter: $ => seq(
-      $.identifier,
+      field('parameter', optional($.identifier)),
       '::',
-      choice($.identifier, $.parameterized_identifier)
+      field('type', choice($.identifier, $.parameterized_identifier))
     ),
 
     type_parameter_list: $ => seq(
@@ -423,6 +454,7 @@ grammar({
       $.range_expression,
       $.quote_expression,
       $.interpolation_expression,
+      $.symbol,
       $.number,
       $._primary_expression,
     ),
@@ -562,7 +594,7 @@ grammar({
 
     unary_expression: $ => choice(
       prec(PREC.prefix, seq(
-        choice('>:', '+', '-', '!', '~', '¬', '√', '∛', '∜'),
+        choice('::', '>:', '+', '-', '!', '~', '¬', '√', '∛', '∜'),
         $._expression
       )),
       prec(PREC.postfix, seq(
@@ -748,36 +780,9 @@ grammar({
       alias('.', $.operator)
     )),
 
-    identifier: $ => {
-      const operators = [
-        ',',
-        ';',
-        ':',
-        '(', ')',
-        '{', '}',
-        '&',
-        '|',
-        '$',
-        ARROW_OPERATORS,
-        ASSIGN_OPERATORS,
-        COMPARISON_OPERATORS,
-        PLUS_OPERATORS,
-        POWER_OPERATORS,
-        TIMES_OPERATORS,
-      ];
+    identifier: $ => IDENTIFIER,
 
-      const operatorCharacters = operators
-        .join(' ')
-        .trim()
-        .replace(/\s+/g, '')
-        .replace(/-/g, '')
-        .replace(/\\/g, '\\\\')
-        .replace(/!/g, '');
-
-      // First char: ASCII letter, Greek letter, Extended Latin letter, or ∇
-      // Remaining characters: not delimiter, not operator
-      return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`)
-    },
+    symbol: $ => seq(':', token.immediate(IDENTIFIER)),
 
     number: $ => {
       const decimal = /[0-9][0-9_]*/;

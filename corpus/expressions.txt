@@ -21,6 +21,19 @@ logŷ
   (identifier)
   (identifier))
 
+===============================
+Symbols
+===============================
+
+:local, :global
+x = :symbol
+
+---
+
+(source_file
+  (bare_tuple_expression (symbol) (symbol))
+  (assignment_expression (identifier) (symbol)))
+
 =================
 Strings
 =================
