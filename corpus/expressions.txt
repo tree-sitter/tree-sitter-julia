@@ -451,7 +451,7 @@ x -> x^2
 (x,y,z)->2x+y-z
 ()->3
 () -> (sleep(0.1); i += 1; l)
-
+c->begin end
 ---
 
 (source_file
@@ -471,7 +471,10 @@ x -> x^2
     (parenthesized_expression
       (call_expression (identifier) (argument_list (number)))
       (assignment_expression (identifier) (number))
-      (identifier))))
+      (identifier)))
+  (function_expression
+   (identifier)
+   (compound_expression)))
 
 ============================
 Generator expressions
