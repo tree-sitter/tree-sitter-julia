@@ -471,7 +471,7 @@ grammar({
 
     compound_expression: $ => seq(
       'begin',
-      $._expression_list,
+      optional($._expression_list),
       'end'
     ),
 
