@@ -471,7 +471,8 @@ grammar({
 
     compound_expression: $ => seq(
       'begin',
-      $._expression_list,
+      optional($._terminator),
+      optional($._expression_list),
       'end'
     ),
 
@@ -516,7 +517,8 @@ grammar({
 
     do_clause: $ => seq(
       'do',
-      $._expression_list,
+      optional($._terminator),
+      optional($._expression_list),
       'end'
     ),
 
