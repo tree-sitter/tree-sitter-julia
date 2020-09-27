@@ -141,7 +141,7 @@ grammar({
       'function',
       field('name', $.identifier),
       field('type_parameters', optional($.type_parameter_list)),
-      field('parametere', $.parameter_list),
+      field('parameters', $.parameter_list),
       optional($._expression_list),
       'end'
     ),
@@ -471,7 +471,8 @@ grammar({
 
     compound_expression: $ => seq(
       'begin',
-      $._expression_list,
+      optional($._terminator),
+      optional($._expression_list),
       'end'
     ),
 
@@ -516,7 +517,8 @@ grammar({
 
     do_clause: $ => seq(
       'do',
-      $._expression_list,
+      optional($._terminator),
+      optional($._expression_list),
       'end'
     ),
 

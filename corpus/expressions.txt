@@ -142,6 +142,11 @@ a(b) do
   print(c)
 end
 
+# empty bodies
+a(b) do; end
+a(b) do
+end
+
 ---
 
 (source_file
@@ -149,7 +154,16 @@ end
     (identifier)
     (argument_list (identifier))
     (do_clause
-      (call_expression (identifier) (argument_list (identifier))))))
+      (call_expression (identifier) (argument_list (identifier)))))
+  (comment)
+  (call_expression
+    (identifier)
+    (argument_list (identifier))
+    (do_clause))
+  (call_expression
+    (identifier)
+    (argument_list (identifier))
+    (do_clause)))
 
 =====================
 Fields and subscripts
@@ -183,6 +197,11 @@ Macro calls
   b = c
 end
 
+# empty bodies
+@testset "b" begin; end
+@testset "c" begin
+end
+
 ---
 
 (source_file
@@ -200,7 +219,18 @@ end
     (macro_identifier (identifier))
     (macro_argument_list
       (string)
-      (compound_expression (assignment_expression (identifier) (identifier))))))
+      (compound_expression (assignment_expression (identifier) (identifier)))))
+  (comment)
+  (macro_expression
+    (macro_identifier (identifier))
+    (macro_argument_list
+      (string)
+      (compound_expression)))
+  (macro_expression
+    (macro_identifier (identifier))
+    (macro_argument_list
+      (string)
+      (compound_expression))))
 
 =================
 Binary operators
