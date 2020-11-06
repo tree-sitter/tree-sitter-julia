@@ -915,7 +915,7 @@
           }
         ]
       },
-      "parametere": {
+      "parameter": {
         "multiple": false,
         "required": true,
         "types": [
