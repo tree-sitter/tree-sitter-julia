@@ -144,7 +144,7 @@
         },
         {
           "type": "FIELD",
-          "name": "parametere",
+          "name": "parameter",
           "content": {
             "type": "SYMBOL",
             "name": "parameter_list"
@@ -1802,15 +1802,15 @@
         },
         {
           "type": "SYMBOL",
-          "name": "_plus_operator"
+          "name": "plus_operator"
         },
         {
           "type": "SYMBOL",
-          "name": "_times_operator"
+          "name": "times_operator"
         },
         {
           "type": "SYMBOL",
-          "name": "_power_operator"
+          "name": "power_operator"
         }
       ]
     },
@@ -2415,7 +2415,7 @@
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_assign_operator"
+                "name": "assign_operator"
               },
               {
                 "type": "STRING",
@@ -2543,7 +2543,7 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "_power_operator"
+                "name": "power_operator"
               },
               {
                 "type": "SYMBOL",
@@ -2564,7 +2564,7 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "_times_operator"
+                "name": "times_operator"
               },
               {
                 "type": "SYMBOL",
@@ -2592,7 +2592,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "_plus_operator"
+                    "name": "plus_operator"
                   }
                 ]
               },
@@ -2615,7 +2615,7 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "_arrow_operator"
+                "name": "arrow_operator"
               },
               {
                 "type": "SYMBOL",
@@ -2689,7 +2689,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "_comparison_operator"
+                    "name": "comparison_operator"
                   }
                 ]
               },
@@ -3588,7 +3588,7 @@
         ]
       }
     },
-    "_power_operator": {
+    "power_operator": {
       "type": "TOKEN",
       "content": {
         "type": "SEQ",
@@ -3737,7 +3737,7 @@
         ]
       }
     },
-    "_times_operator": {
+    "times_operator": {
       "type": "TOKEN",
       "content": {
         "type": "SEQ",
@@ -4066,7 +4066,7 @@
         ]
       }
     },
-    "_plus_operator": {
+    "plus_operator": {
       "type": "TOKEN",
       "content": {
         "type": "CHOICE",
@@ -4324,7 +4324,7 @@
         ]
       }
     },
-    "_arrow_operator": {
+    "arrow_operator": {
       "type": "TOKEN",
       "content": {
         "type": "CHOICE",
@@ -4930,7 +4930,7 @@
         ]
       }
     },
-    "_comparison_operator": {
+    "comparison_operator": {
       "type": "TOKEN",
       "content": {
         "type": "CHOICE",
@@ -6096,7 +6096,7 @@
         ]
       }
     },
-    "_assign_operator": {
+    "assign_operator": {
       "type": "TOKEN",
       "content": {
         "type": "CHOICE",
