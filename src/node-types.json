@@ -335,6 +335,10 @@
           "named": true
         },
         {
+          "type": "assign_operator",
+          "named": true
+        },
+        {
           "type": "assignment_expression",
           "named": true
         },
@@ -370,6 +374,26 @@
       "types": [
         {
           "type": "_expression",
+          "named": true
+        },
+        {
+          "type": "arrow_operator",
+          "named": true
+        },
+        {
+          "type": "comparison_operator",
+          "named": true
+        },
+        {
+          "type": "plus_operator",
+          "named": true
+        },
+        {
+          "type": "power_operator",
+          "named": true
+        },
+        {
+          "type": "times_operator",
           "named": true
         }
       ]
@@ -1361,7 +1385,25 @@
   {
     "type": "operator",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "plus_operator",
+          "named": true
+        },
+        {
+          "type": "power_operator",
+          "named": true
+        },
+        {
+          "type": "times_operator",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "optional_parameter",
@@ -2151,6 +2193,14 @@
     "named": false
   },
   {
+    "type": "arrow_operator",
+    "named": true
+  },
+  {
+    "type": "assign_operator",
+    "named": true
+  },
+  {
     "type": "begin",
     "named": false
   },
@@ -2165,6 +2215,10 @@
   {
     "type": "catch",
     "named": false
+  },
+  {
+    "type": "comparison_operator",
+    "named": true
   },
   {
     "type": "const",
@@ -2255,6 +2309,14 @@
     "named": false
   },
   {
+    "type": "plus_operator",
+    "named": true
+  },
+  {
+    "type": "power_operator",
+    "named": true
+  },
+  {
     "type": "primitive",
     "named": false
   },
@@ -2269,6 +2331,10 @@
   {
     "type": "struct",
     "named": false
+  },
+  {
+    "type": "times_operator",
+    "named": true
   },
   {
     "type": "try",

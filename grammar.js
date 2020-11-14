@@ -436,7 +436,7 @@ grammar({
       repeat1(prec(-1, seq(',', $._expression)))
     )),
 
-    operator: $ => choice('+', $._plus_operator, $._times_operator, $._power_operator),
+    operator: $ => choice('+', $.plus_operator, $.times_operator, $.power_operator),
 
     parenthesized_expression: $ => prec(1, seq(
       '(', choice($._expression_list, $.spread_expression), ')'
@@ -540,7 +540,7 @@ grammar({
         $._expression,
         $.bare_tuple_expression
       ),
-      choice($._assign_operator, '='),
+      choice($.assign_operator, '='),
       choice(
         $._expression,
         $.assignment_expression,
@@ -562,22 +562,22 @@ grammar({
     binary_expression: $ => choice(
       prec.left(PREC.power, seq(
         $._expression,
-        $._power_operator,
+        $.power_operator,
         $._expression
       )),
       prec.left(PREC.times, seq(
         $._expression,
-        $._times_operator,
+        $.times_operator,
         $._expression
       )),
       prec.left(PREC.plus, seq(
         $._expression,
-        choice('+', $._plus_operator),
+        choice('+', $.plus_operator),
         $._expression
       )),
       prec.right(PREC.arrow, seq(
         $._expression,
-        $._arrow_operator,
+        $.arrow_operator,
         $._expression
       )),
       prec.right(PREC.pipe_left, seq(
@@ -592,7 +592,7 @@ grammar({
       )),
       prec.left(PREC.comparison, seq(
         $._expression,
-        choice('in', 'isa', $._comparison_operator),
+        choice('in', 'isa', $.comparison_operator),
         $._expression
       )),
       prec.left(PREC.lazy_or, seq(
@@ -872,19 +872,19 @@ grammar({
       ),
     ),
 
-    _power_operator: $ => token(addDots(POWER_OPERATORS)),
+    power_operator: $ => token(addDots(POWER_OPERATORS)),
 
-    _times_operator: $ => token(addDots(TIMES_OPERATORS)),
+    times_operator: $ => token(addDots(TIMES_OPERATORS)),
 
-    _plus_operator: $ => token(choice('$', addDots(PLUS_OPERATORS))),
+    plus_operator: $ => token(choice('$', addDots(PLUS_OPERATORS))),
 
-    _arrow_operator: $ => token(choice('--', '-->', addDots(ARROW_OPERATORS))),
+    arrow_operator: $ => token(choice('--', '-->', addDots(ARROW_OPERATORS))),
 
-    _comparison_operator: $ => token(choice(
+    comparison_operator: $ => token(choice(
       '|<:|', '|>:|', addDots(COMPARISON_OPERATORS)
     )),
 
-    _assign_operator: $ => token(choice(':=', '~', '$=', addDots(ASSIGN_OPERATORS))),
+    assign_operator: $ => token(choice(':=', '~', '$=', addDots(ASSIGN_OPERATORS))),
 
     _terminator: $ => choice('\n', ';'),
 
