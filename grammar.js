@@ -285,8 +285,12 @@ grammar({
     try_statement: $ => seq(
       'try',
       optional($._expression_list),
-      optional($.catch_clause),
-      optional($.finally_clause),
+      choice(
+        $.catch_clause,
+        $.finally_clause,
+        seq($.catch_clause, $.finally_clause),
+        seq($.finally_clause, $.catch_clause)
+      ),
       'end'
     ),
 
