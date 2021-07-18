@@ -1873,6 +1873,15 @@
           "name": "_primary_expression"
         },
         {
+          "type": "SYMBOL",
+          "name": "subscript_argument_list"
+        }
+      ]
+    },
+    "subscript_argument_list": {
+      "type": "SEQ",
+      "members": [
+        {
           "type": "IMMEDIATE_TOKEN",
           "content": {
             "type": "STRING",

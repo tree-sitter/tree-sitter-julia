@@ -164,7 +164,7 @@ Fields and subscripts
     (parenthesized_expression (field_expression
       (call_expression
         (field_expression
-          (subscript_expression (identifier) (number))
+          (subscript_expression (identifier) (subscript_argument_list (number)))
           (identifier))
         (argument_list))
       (identifier)))

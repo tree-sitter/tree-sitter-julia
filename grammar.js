@@ -446,6 +446,10 @@ grammar({
 
     subscript_expression: $ => seq(
       $._primary_expression,
+      $.subscript_argument_list,
+    ),
+
+    subscript_argument_list: $ => seq(
       token.immediate('['),
       sep(',', $._expression),
       optional(','),
