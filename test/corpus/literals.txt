@@ -1,3 +1,54 @@
+==============================
+integer number literals
+==============================
+
+0b01
+0o01234567
+0123456789
+123_456_789
+0x0123456789_abcdef_ABCDEF
+
+---
+
+(source_file
+  (integer_literal)
+  (integer_literal)
+  (integer_literal)
+  (integer_literal)
+  (integer_literal))
+
+
+==============================
+float number literals
+==============================
+
+0123456789.
+.0123456789
+0123456789.0123456789
+9e10
+9E-1
+9f10
+9f-1
+
+0x0123456789_abcdef.ABCDEFp0
+0x0123456789_abcdef_ABCDEF.p-1
+0x.0123456789_abcdef_ABCDEFp1
+
+----
+
+(source_file
+  (float_literal)
+  (float_literal)
+  (float_literal)
+  (float_literal)
+  (float_literal)
+  (float_literal)
+  (float_literal)
+  (float_literal)
+  (float_literal)
+  (float_literal))
+
+
 =================
 Strings
 =================
@@ -49,27 +100,4 @@ Characters
 ---
 
 (source_file (character) (character))
-
-============================
-Numerical expressions
-============================
-
-1
-2.0
-3.
-0xdeadbeef999
-100_000_000
-.4
-1.0e-7
-
----
-
-(source_file
-  (number)
-  (number)
-  (number)
-  (number)
-  (number)
-  (number)
-  (number))
 

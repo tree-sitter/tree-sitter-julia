@@ -67,16 +67,16 @@ end
   (comment)
   (primitive_definition
     (identifier)
-    (number))
+    (integer_literal))
   (primitive_definition
     (identifier)
     (subtype_clause (identifier))
-    (number))
+    (integer_literal))
   (primitive_definition
     (identifier)
     (type_parameter_list
       (identifier))
-    (number))
+    (integer_literal))
   (comment)
   (abstract_definition
     (identifier))
@@ -151,12 +151,12 @@ end
   (function_definition
     (identifier)
     (parameter_list
-      (optional_parameter (typed_parameter (identifier) (identifier)) (number))
+      (optional_parameter (typed_parameter (identifier) (identifier)) (integer_literal))
       (keyword_parameters
         (identifier)
         (optional_parameter
           (typed_parameter (identifier) (identifier))
-          (number))))))
+          (integer_literal))))))
 
 ============================
 Macro definitions

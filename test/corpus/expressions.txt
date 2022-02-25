@@ -72,7 +72,7 @@ new{typeof(xs)}(xs)
 
 (source_file
   (call_expression (identifier) (argument_list))
-  (call_expression (identifier) (argument_list (string) (number)))
+  (call_expression (identifier) (argument_list (string) (integer_literal)))
   (call_expression (identifier) (argument_list (spread_expression (identifier))))
   (call_expression (identifier) (argument_list (identifier) (named_argument (identifier) (identifier))))
   (call_expression
@@ -112,7 +112,7 @@ Fields and subscripts
     (parenthesized_expression (field_expression
       (call_expression
         (field_expression
-          (subscript_expression (identifier) (number))
+          (subscript_expression (identifier) (integer_literal))
           (identifier))
         (argument_list))
       (identifier)))
@@ -205,7 +205,7 @@ Unary operators
 (source_file
   (unary_expression (identifier))
   (unary_expression (identifier))
-  (unary_expression (number))
+  (unary_expression (integer_literal))
   (unary_expression (array_expression (identifier)))
   (unary_expression
     (parenthesized_expression (binary_expression (identifier) (identifier)))))
@@ -224,9 +224,9 @@ x = batch_size == 1 ?
   (assignment_expression
     (identifier)
     (ternary_expression
-      (binary_expression (identifier) (number))
-      (call_expression (identifier) (argument_list (number)))
-      (call_expression (identifier) (argument_list (number) (identifier))))))
+      (binary_expression (identifier) (integer_literal))
+      (call_expression (identifier) (argument_list (integer_literal)))
+      (call_expression (identifier) (argument_list (integer_literal) (identifier))))))
 
 ====================
 Operators as values
@@ -258,31 +258,31 @@ Coefficient expressions
   (binary_expression
     (binary_expression
       (binary_expression
-        (coefficient_expression (number) (identifier))
-        (number))
-      (coefficient_expression (number) (identifier)))
-    (number))
+        (coefficient_expression (integer_literal) (identifier))
+        (integer_literal))
+      (coefficient_expression (integer_literal) (identifier)))
+    (integer_literal))
   (binary_expression
     (binary_expression
       (binary_expression
-        (coefficient_expression (number) (identifier))
-        (number))
-      (coefficient_expression (number) (identifier)))
-    (number))
+        (coefficient_expression (float_literal) (identifier))
+        (integer_literal))
+      (coefficient_expression (float_literal) (identifier)))
+    (integer_literal))
   (binary_expression
-    (number)
-    (coefficient_expression (number) (identifier)))
+    (integer_literal)
+    (coefficient_expression (integer_literal) (identifier)))
   (binary_expression
     (binary_expression
       (binary_expression
         (coefficient_expression
-          (number)
-          (parenthesized_expression (binary_expression (identifier) (number))))
-        (number))
+          (integer_literal)
+          (parenthesized_expression (binary_expression (identifier) (integer_literal))))
+        (integer_literal))
       (coefficient_expression
-        (number)
-        (parenthesized_expression (binary_expression (identifier) (number)))))
-    (number)))
+        (integer_literal)
+        (parenthesized_expression (binary_expression (identifier) (integer_literal)))))
+    (integer_literal)))
 
 =================
 Tuples
@@ -297,9 +297,9 @@ Tuples
 
 (source_file
   (tuple_expression)
-  (parenthesized_expression (number))
-  (tuple_expression (number))
-  (tuple_expression (number) (number) (number)))
+  (parenthesized_expression (integer_literal))
+  (tuple_expression (integer_literal))
+  (tuple_expression (integer_literal) (integer_literal) (integer_literal)))
 
 =================
 Named tuples
@@ -313,12 +313,12 @@ Named tuples
 
 (source_file
   (parenthesized_expression
-    (assignment_expression (identifier) (number)))
+    (assignment_expression (identifier) (integer_literal)))
   (tuple_expression
-    (named_field (identifier) (number)))
+    (named_field (identifier) (integer_literal)))
   (tuple_expression
-    (named_field (identifier) (number))
-    (named_field (identifier) (number))))
+    (named_field (identifier) (integer_literal))
+    (named_field (identifier) (integer_literal))))
 
 =================
 Arrays
@@ -331,7 +331,7 @@ Arrays
 
 (source_file
   (array_expression)
-  (array_expression (number) (number)))
+  (array_expression (integer_literal) (integer_literal)))
 
 =================
 Matrices
@@ -345,13 +345,13 @@ Matrices
 
 (source_file
   (matrix_expression
-    (matrix_row (number) (number)))
+    (matrix_row (integer_literal) (integer_literal)))
   (matrix_expression
-    (matrix_row (number) (number))
-    (matrix_row (number) (number)))
+    (matrix_row (integer_literal) (integer_literal))
+    (matrix_row (integer_literal) (integer_literal)))
   (matrix_expression
-    (matrix_row (number) (number))
-    (matrix_row (number) (number))))
+    (matrix_row (integer_literal) (integer_literal))
+    (matrix_row (integer_literal) (integer_literal))))
 
 =================
 Pairs
@@ -383,23 +383,23 @@ function () 3 end
 (source_file
   (function_expression
     (identifier)
-    (binary_expression (identifier) (number)))
+    (binary_expression (identifier) (integer_literal)))
   (function_expression
     (parameter_list (identifier) (identifier) (identifier))
     (binary_expression
-      (binary_expression (coefficient_expression (number) (identifier)) (identifier))
+      (binary_expression (coefficient_expression (integer_literal) (identifier)) (identifier))
       (identifier)))
   (function_expression
     (parameter_list)
-    (number))
+    (integer_literal))
   (function_expression
     (parameter_list)
-    (number))
+    (integer_literal))
   (function_expression
     (parameter_list)
     (parenthesized_expression
-      (call_expression (identifier) (argument_list (number)))
-      (assignment_expression (identifier) (number))
+      (call_expression (identifier) (argument_list (float_literal)))
+      (assignment_expression (identifier) (integer_literal))
       (identifier))))
 
 ============================
@@ -416,7 +416,7 @@ Generator expressions
     (call_expression (identifier) (argument_list (identifier) (identifier)))
     (for_clause
       (for_binding (identifier) (identifier))
-      (for_binding (identifier) (number)))
+      (for_binding (identifier) (integer_literal)))
     (if_clause (identifier)))
   (array_comprehension_expression
     (call_expression (identifier) (argument_list (identifier) (identifier)))

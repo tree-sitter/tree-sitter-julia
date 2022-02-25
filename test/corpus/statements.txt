@@ -54,7 +54,7 @@ end
   (for_statement
     (for_binding
       (identifier)
-      (array_expression (number) (number) (number)))
+      (array_expression (integer_literal) (integer_literal) (integer_literal)))
     (call_expression (identifier) (argument_list (identifier))))
   (for_statement
     (for_binding
@@ -78,7 +78,7 @@ while a(); b(); end
 
 (source_file
   (while_statement
-    (binary_expression (identifier) (number))
+    (binary_expression (identifier) (integer_literal))
     (call_expression (identifier) (argument_list (identifier)))
     (continue_statement)
     (break_statement))
@@ -131,7 +131,7 @@ const x, y = 5
 (source_file
   (const_statement
     (variable_declaration (identifier))
-    (variable_declaration (identifier) (number))))
+    (variable_declaration (identifier) (integer_literal))))
 
 ===============================
 Quote statements
@@ -147,8 +147,8 @@ end
 
 (source_file
   (quote_statement
-    (assignment_expression (identifier) (number))
-    (assignment_expression (identifier) (number))
+    (assignment_expression (identifier) (integer_literal))
+    (assignment_expression (identifier) (integer_literal))
     (binary_expression (identifier) (identifier))))
 
 ===============================
@@ -176,7 +176,7 @@ end
       (call_expression
         (identifier)
         (argument_list
-          (call_expression (identifier) (argument_list (identifier) (number)))))))
+          (call_expression (identifier) (argument_list (identifier) (integer_literal)))))))
   (try_statement
     (call_expression (identifier) (argument_list (identifier)))
     (finally_clause
@@ -235,6 +235,6 @@ nested #= comments =# =#
   (comment)
   (block_comment)
   (block_comment)
-  (assignment_expression (identifier) (block_comment) (number))
+  (assignment_expression (identifier) (block_comment) (integer_literal))
   (block_comment)
   (block_comment))

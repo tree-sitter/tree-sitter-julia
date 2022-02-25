@@ -161,7 +161,7 @@ grammar({
       field('name', $.identifier),
       field('type_parameters', optional($.type_parameter_list)),
       optional($.subtype_clause),
-      alias(/[1-9][0-9]*/, $.number),
+      alias(numeral('0-9'), $.integer_literal),
       'end'
     ),
 
@@ -713,7 +713,10 @@ grammar({
     )),
 
     coefficient_expression: $ => prec(PREC.call, seq(
-      $.number,
+      choice(
+        alias(numeral('0-9'), $.integer_literal),
+        $.float_literal,
+      ),
       choice(
         $.parenthesized_expression,
         $.identifier
@@ -769,28 +772,42 @@ grammar({
       return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\\s\\.\\-\\[\\]${operatorCharacters}]*`)
     },
 
-
     // Literals
 
     _literal: $ => choice(
-      $.number,
+      $.integer_literal,
+      $.float_literal,
       $.string,
       $.command_string,
       $.character,
       $.triple_string,
     ),
 
-    number: $ => {
-      const decimal = /[0-9][0-9_]*/;
-      const hexadecimal = /[0-9a-fA-F][0-9a-fA-F_]*/;
-      return token(seq(
+    integer_literal: $ => choice(
+      token(seq('0b', numeral('01'))),
+      token(seq('0o', numeral('0-7'))),
+      token(seq('0x', numeral('0-9a-fA-F'))),
+      numeral('0-9'),
+    ),
+
+    float_literal: $ => {
+      const dec = numeral('0-9');
+      const hex = numeral('0-9a-fA-F');
+      const float = seq(
         choice(
-          seq(/0[xX]/, hexadecimal),
-          seq(decimal, optional('.'), optional(decimal)),
-          seq('.', decimal)
+          seq(dec, optional('.'), optional(dec)),
+          seq('.', dec),
         ),
-        optional(/[eE][+-]?\d+/)
-      ))
+        optional(/[eEf][+-]?\d+/), // the exponent doesn't allow underscores
+      )
+      const hex_float = seq(
+        choice(
+          seq('0x', hex, optional('.'), optional(hex)),
+          seq('0x.', hex),
+        ),
+        /p[+-]?\d+/, // hex floats must always have an exponent
+      )
+      return token(choice(float, hex_float))
     },
 
     string: $ => seq(
@@ -853,4 +870,8 @@ function sep1(separator, rule) {
 function addDots(operatorString) {
   const operators = operatorString.trim().split(/\s+/)
   return seq(optional('.'), choice(...operators))
+}
+
+function numeral(range) {
+  return RegExp(`[${range}]|([${range}][${range}_]*[${range}])`)
 }
