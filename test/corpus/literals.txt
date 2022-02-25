@@ -49,6 +49,26 @@ float number literals
   (float_literal))
 
 
+==============================
+character literals
+==============================
+
+' '
+'o'
+'\t'
+'\uffff'
+'\U10ffff'
+
+---
+
+(source_file
+  (character_literal)
+  (character_literal)
+  (character_literal (escape_sequence))
+  (character_literal (escape_sequence))
+  (character_literal (escape_sequence)))
+
+
 =================
 Strings
 =================
@@ -89,15 +109,4 @@ y = v"1.0"
 (source_file
   (assignment_expression (identifier) (string (identifier)))
   (assignment_expression (identifier) (string (identifier))))
-
-=================
-Characters
-=================
-
-'o'
-'\t'
-
----
-
-(source_file (character) (character))
 

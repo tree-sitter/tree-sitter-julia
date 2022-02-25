@@ -777,9 +777,9 @@ grammar({
     _literal: $ => choice(
       $.integer_literal,
       $.float_literal,
+      $.character_literal,
       $.string,
       $.command_string,
-      $.character,
       $.triple_string,
     ),
 
@@ -810,6 +810,24 @@ grammar({
       return token(choice(float, hex_float))
     },
 
+    escape_sequence: $ => token(seq(
+      '\\',
+      choice(
+        /[uU][0-9a-fA-F]{1,6}/, // unicode codepoints
+        /x[0-9a-fA-F]{2}/,
+        /['"abfrntv\\]/,
+      ),
+    )),
+
+    character_literal: $ => seq(
+      "'",
+      choice(
+        $.escape_sequence,
+        /[^'\\]/,
+      ),
+      "'",
+    ),
+
     string: $ => seq(
       choice(
         '"',
@@ -830,14 +848,6 @@ grammar({
       repeat(choice(/[^`\\\n]/, /\\./)),
       '`'
     )),
-
-    character: $ => token(seq(
-      "'",
-      choice(/\\./, /[^'\\]/),
-      "'",
-    )),
-
-    // Operators
 
     _power_operator: $ => token(addDots(POWER_OPERATORS)),
 
