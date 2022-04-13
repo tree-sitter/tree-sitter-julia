@@ -64,7 +64,7 @@ end
 ---
 
 (source_file
-  (comment)
+  (line_comment)
   (primitive_definition
     (identifier)
     (integer_literal))
@@ -77,7 +77,7 @@ end
     (type_parameter_list
       (identifier))
     (integer_literal))
-  (comment)
+  (line_comment)
   (abstract_definition
     (identifier))
   (abstract_definition
@@ -88,28 +88,28 @@ end
     (type_parameter_list
       (identifier))
     (subtype_clause (identifier)))
-  (comment)
+  (line_comment)
   (struct_definition
     (identifier))
-  (comment)
+  (line_comment)
   (struct_definition
     (identifier)
     (identifier)
     (typed_expression (identifier) (identifier)))
-  (comment)
+  (line_comment)
   (struct_definition
     (identifier)
     (type_parameter_list (identifier))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
-  (comment)
+  (line_comment)
   (struct_definition
     (identifier)
     (type_parameter_list (constrained_parameter (identifier) (identifier)))
     (subtype_clause (identifier))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
-  (comment)
+  (line_comment)
   (struct_definition
     (identifier)
     (subtype_clause (identifier))

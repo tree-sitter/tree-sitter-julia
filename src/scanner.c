@@ -7,23 +7,7 @@ enum TokenType {
   IMMEDIATE_PAREN,
 };
 
-bool tree_sitter_julia_external_scanner_scan(
-  void *payload,
-  TSLexer *lexer,
-  const bool *valid_symbols
-) {
-  if (
-    lexer->lookahead == '(' &&
-    valid_symbols[IMMEDIATE_PAREN]
-  ) {
-    lexer->result_symbol = IMMEDIATE_PAREN;
-    return true;
-  }
-
-  while (iswspace(lexer->lookahead)) {
-    lexer->advance(lexer, true);
-  }
-
+static bool scan_block_comment(TSLexer *lexer) {
   if (lexer->lookahead == '#') {
     lexer->advance(lexer, false);
     if (lexer->lookahead != '=') {
@@ -65,6 +49,26 @@ bool tree_sitter_julia_external_scanner_scan(
           break;
       }
     }
+  }
+  return false;
+}
+
+bool tree_sitter_julia_external_scanner_scan(void *payload,
+    TSLexer *lexer,
+    const bool *valid_symbols) {
+
+  if (lexer->lookahead == '(' && valid_symbols[IMMEDIATE_PAREN]) {
+    lexer->result_symbol = IMMEDIATE_PAREN;
+    return true;
+  }
+
+  // Ignore whitespace
+  while (iswspace(lexer->lookahead)) {
+    lexer->advance(lexer, true);
+  }
+
+  if (valid_symbols[BLOCK_COMMENT] && scan_block_comment(lexer)) {
+    return true;
   }
 
   if (!valid_symbols[TRIPLE_STRING]) return false;

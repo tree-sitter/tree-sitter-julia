@@ -110,7 +110,7 @@ grammar({
 
   extras: $ => [
     /\s/,
-    $.comment,
+    $.line_comment,
     $.block_comment,
   ],
 
@@ -865,7 +865,7 @@ grammar({
 
     _terminator: $ => choice('\n', ';'),
 
-    comment: $ => token(seq('#', /.*/))
+    line_comment: $ => token(seq('#', /.*/))
   }
 });
 

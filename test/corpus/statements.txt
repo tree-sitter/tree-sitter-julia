@@ -29,7 +29,7 @@ end
       (call_expression (identifier) (argument_list)))
     (else_clause
       (call_expression (identifier) (argument_list))))
-  (comment)
+  (line_comment)
   (if_statement
     (identifier)
     (elseif_clause
@@ -214,27 +214,3 @@ export a, b, c
   (export_statement (identifier))
   (export_statement (identifier) (identifier) (identifier)))
 
-===============================
-Comments
-===============================
-
-# comment
-#= comment =#
-#=
-comment
-=#
-x = #= comment =# 1
-
-#=
-nested #= comments =# =#
-#==#
-
----
-
-(source_file
-  (comment)
-  (block_comment)
-  (block_comment)
-  (assignment_expression (identifier) (block_comment) (integer_literal))
-  (block_comment)
-  (block_comment))

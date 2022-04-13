@@ -110,3 +110,29 @@ y = v"1.0"
   (assignment_expression (identifier) (string (identifier)))
   (assignment_expression (identifier) (string (identifier))))
 
+
+==============================
+comments
+==============================
+
+# comment
+#= comment =#
+#=
+comment
+=#
+x = #= comment =# 1
+
+#=
+nested #= comments =# =#
+#==#
+
+---
+
+(source_file
+  (line_comment)
+  (block_comment)
+  (block_comment)
+  (assignment_expression (identifier) (block_comment) (integer_literal))
+  (block_comment)
+  (block_comment))
+
