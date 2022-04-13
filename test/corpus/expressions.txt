@@ -22,58 +22,6 @@ logŷ
   (identifier))
 
 =================
-Strings
-=================
-
-"foo"
-"""a "quoted" string"""
-"fo\"o"
-
----
-
-(source_file
-  (string)
-  (triple_string)
-  (string))
-
-=================
-Command strings
-=================
-
-`foo`
-`foo \` bar`
-
----
-
-(source_file
-  (command_string)
-  (command_string))
-
-=================
-Prefixed strings
-=================
-
-x = r"foo"
-y = v"1.0"
-
----
-
-(source_file
-  (assignment_expression (identifier) (string (identifier)))
-  (assignment_expression (identifier) (string (identifier))))
-
-=================
-Characters
-=================
-
-'o'
-'\t'
-
----
-
-(source_file (character) (character))
-
-=================
 Assignments
 =================
 
@@ -294,29 +242,6 @@ foo(^, ÷)
   (assignment_expression (identifier) (operator))
   (call_expression (identifier) (argument_list (operator)))
   (call_expression (identifier) (argument_list (operator) (operator))))
-
-============================
-Numerical expressions
-============================
-
-1
-2.0
-3.
-0xdeadbeef999
-100_000_000
-.4
-1.0e-7
-
----
-
-(source_file
-  (number)
-  (number)
-  (number)
-  (number)
-  (number)
-  (number)
-  (number))
 
 ===========================
 Coefficient expressions

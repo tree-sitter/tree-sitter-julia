@@ -404,17 +404,13 @@ grammar({
       $.range_expression,
       $.quote_expression,
       $.interpolation_expression,
-      $.number,
       $._primary_expression,
+      $._literal,
     ),
 
     _primary_expression: $ => choice(
       $.identifier,
       $.operator,
-      $.string,
-      $.command_string,
-      $.character,
-      $.triple_string,
       $.array_expression,
       $.array_comprehension_expression,
       $.matrix_expression,
@@ -445,7 +441,10 @@ grammar({
     )),
 
     subscript_expression: $ => seq(
-      $._primary_expression,
+      choice(
+        $._primary_expression,
+        $._literal,
+      ),
       token.immediate('['),
       sep(',', $._expression),
       optional(','),
@@ -770,6 +769,17 @@ grammar({
       return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\\s\\.\\-\\[\\]${operatorCharacters}]*`)
     },
 
+
+    // Literals
+
+    _literal: $ => choice(
+      $.number,
+      $.string,
+      $.command_string,
+      $.character,
+      $.triple_string,
+    ),
+
     number: $ => {
       const decimal = /[0-9][0-9_]*/;
       const hexadecimal = /[0-9a-fA-F][0-9a-fA-F_]*/;
@@ -809,6 +819,8 @@ grammar({
       choice(/\\./, /[^'\\]/),
       "'",
     )),
+
+    // Operators
 
     _power_operator: $ => token(addDots(POWER_OPERATORS)),
 
