@@ -88,8 +88,16 @@ grammar({
 
   externals: $ => [
     $.block_comment,
-    $.triple_string,
     $._immediate_paren,
+
+    $._string_start,
+    $._command_start,
+    $._immediate_string_start,
+    $._immediate_command_start,
+    $._string_end,
+    $._command_end,
+    $._string_content,
+    $._string_content_no_interp,
   ],
 
   conflicts: $ => [
@@ -769,7 +777,7 @@ grammar({
 
       // First char: ASCII letter, Greek letter, Extended Latin letter, or ∇
       // Remaining characters: not delimiter, not operator
-      return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\\s\\.\\-\\[\\]${operatorCharacters}]*`)
+      return new RegExp(`[_a-zA-ZͰ-ϿĀ-ſ∇][^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`)
     },
 
     // Literals
@@ -778,9 +786,10 @@ grammar({
       $.integer_literal,
       $.float_literal,
       $.character_literal,
-      $.string,
-      $.command_string,
-      $.triple_string,
+      $.string_literal,
+      $.command_literal,
+      $.prefixed_string_literal,
+      $.prefixed_command_literal,
     ),
 
     integer_literal: $ => choice(
@@ -812,11 +821,11 @@ grammar({
 
     escape_sequence: $ => token(seq(
       '\\',
-      choice(
+      token.immediate(choice(
         /[uU][0-9a-fA-F]{1,6}/, // unicode codepoints
         /x[0-9a-fA-F]{2}/,
-        /['"abfrntv\\]/,
-      ),
+        /["'`$\\abfnrtv]/,
+      )),
     )),
 
     character_literal: $ => seq(
@@ -828,26 +837,40 @@ grammar({
       "'",
     ),
 
-    string: $ => seq(
-      choice(
-        '"',
-        seq(
-          field('prefix', $.identifier),
-          token.immediate('"')
-        )
-      ),
-      optional(token.immediate(repeat1(choice(
-        /[^"\\\n]/,
-        /\\./
-      )))),
-      token.immediate('"'),
+    string_literal: $ => seq(
+      $._string_start,
+      repeat(choice($._string_content, $.string_interpolation, $.escape_sequence)),
+      $._string_end,
     ),
 
-    command_string: $ => token(seq(
-      '`',
-      repeat(choice(/[^`\\\n]/, /\\./)),
-      '`'
-    )),
+    command_literal: $ => seq(
+      $._command_start,
+      repeat(choice($._string_content, $.string_interpolation, $.escape_sequence)),
+      $._command_end,
+    ),
+
+    prefixed_string_literal: $ => seq(
+      field('prefix', $.identifier),
+      $._immediate_string_start,
+      repeat(choice($._string_content_no_interp, $.escape_sequence)),
+      $._string_end,
+    ),
+
+    prefixed_command_literal: $ => seq(
+      field('prefix', $.identifier),
+      $._immediate_command_start,
+      $._command_start,
+      repeat(choice($._string_content_no_interp, $.escape_sequence)),
+      $._command_end,
+    ),
+
+    string_interpolation: $ => seq(
+      '$',
+      choice(
+        $.identifier,
+        seq('(', $._expression, ')'),
+      ),
+    ),
 
     _power_operator: $ => token(addDots(POWER_OPERATORS)),
 

@@ -72,7 +72,7 @@ new{typeof(xs)}(xs)
 
 (source_file
   (call_expression (identifier) (argument_list))
-  (call_expression (identifier) (argument_list (string) (integer_literal)))
+  (call_expression (identifier) (argument_list (string_literal) (integer_literal)))
   (call_expression (identifier) (argument_list (spread_expression (identifier))))
   (call_expression (identifier) (argument_list (identifier) (named_argument (identifier) (identifier))))
   (call_expression
@@ -142,12 +142,12 @@ end
     (macro_identifier (identifier))
     (macro_argument_list
       (binary_expression (identifier) (identifier))
-      (string)))
+      (string_literal)))
   (macro_expression (macro_identifier (operator)) (macro_argument_list (identifier)))
   (macro_expression
     (macro_identifier (identifier))
     (macro_argument_list
-      (string)
+      (string_literal)
       (compound_expression (assignment_expression (identifier) (identifier))))))
 
 =================

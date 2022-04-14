@@ -69,46 +69,77 @@ character literals
   (character_literal (escape_sequence)))
 
 
-=================
-Strings
-=================
+==============================
+string literals
+==============================
 
-"foo"
-"""a "quoted" string"""
-"fo\"o"
-
----
-
-(source_file
-  (string)
-  (triple_string)
-  (string))
-
-=================
-Command strings
-=================
-
-`foo`
-`foo \` bar`
+""
+"\""
+"foo
+ bar"
+"this is a \"string\"."
+"""this is also a "string"."""
+band = "Interpol"
+"$band is a cool band"
+"$(2π) is a cool number"
+"cells interlinked within $("cells interlinked whithin $("cells interlinked whithin one stem")")"
 
 ---
 
 (source_file
-  (command_string)
-  (command_string))
+  (string_literal)
+  (string_literal (escape_sequence))
+  (string_literal)
+  (string_literal (escape_sequence) (escape_sequence))
+  (string_literal)
+  (assignment_expression
+    (identifier)
+    (string_literal))
+  (string_literal
+    (string_interpolation (identifier)))
+  (string_literal
+    (string_interpolation (coefficient_expression (integer_literal) (identifier))))
+  (string_literal
+    (string_interpolation
+      (string_literal
+        (string_interpolation
+          (string_literal))))))
 
-=================
-Prefixed strings
-=================
 
-x = r"foo"
-y = v"1.0"
+==============================
+command string literals
+==============================
+
+`pwd`
+`cd $dir`
+`echo \`cmd\``
 
 ---
 
 (source_file
-  (assignment_expression (identifier) (string (identifier)))
-  (assignment_expression (identifier) (string (identifier))))
+  (command_literal)
+  (command_literal (string_interpolation (identifier)))
+  (command_literal (escape_sequence) (escape_sequence)))
+
+
+==============================
+non-standard string literals
+==============================
+
+trailing_ws = r"\s+$"
+version = v"1.0"
+
+---
+
+(source_file
+  (assignment_expression
+    (identifier)
+    (prefixed_string_literal 
+        prefix: (identifier)))
+  (assignment_expression
+    (identifier)
+    (prefixed_string_literal 
+        prefix: (identifier))))
 
 
 ==============================
