@@ -158,6 +158,33 @@ end
           (typed_parameter (identifier) (identifier))
           (integer_literal))))))
 
+===============================================
+Short function definition
+===============================================
+
+f(x, y) = x + y
+
+f(x, y) = begin
+  x + y
+end
+
+---
+
+(source_file
+  (short_function_definition
+    name: (identifier)
+    parameters: (parameter_list 
+      (identifier) (identifier))
+    (binary_expression 
+      (identifier) (operator) (identifier)))
+  (short_function_definition
+    name: (identifier)
+    parameters: (parameter_list 
+      (identifier) (identifier))
+    (compound_expression
+      (binary_expression
+        (identifier) (operator) (identifier)))))
+
 ============================
 Macro definitions
 ======================

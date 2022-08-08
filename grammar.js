@@ -105,7 +105,7 @@ grammar({
   ],
 
   conflicts: $ => [
-    // Arrow functions vs tuples
+    [$._primary_expression, $.short_function_definition],
     [$._primary_expression, $.parameter_list],
     [$._primary_expression, $.spread_parameter],
     [$._primary_expression, $.typed_parameter],
@@ -146,6 +146,7 @@ grammar({
       $.struct_definition,
       $.module_definition,
       $.function_definition,
+      $.short_function_definition,
       $.macro_definition
     ),
 
@@ -156,6 +157,14 @@ grammar({
       field('parameters', $.parameter_list),
       optional($._expression_list),
       'end'
+    ),
+
+    short_function_definition: $ => seq(
+      field('name', $.identifier),
+      $._immediate_paren,
+      field('parameters', $.parameter_list),
+      '=',
+      $._expression,
     ),
 
     abstract_definition: $ => seq(
