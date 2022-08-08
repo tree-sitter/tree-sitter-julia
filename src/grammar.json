@@ -3504,6 +3504,14 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "true"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "false"
+        },
+        {
+          "type": "SYMBOL",
           "name": "integer_literal"
         },
         {
@@ -3531,6 +3539,14 @@
           "name": "prefixed_command_literal"
         }
       ]
+    },
+    "true": {
+      "type": "STRING",
+      "value": "true"
+    },
+    "false": {
+      "type": "STRING",
+      "value": "false"
     },
     "integer_literal": {
       "type": "CHOICE",
