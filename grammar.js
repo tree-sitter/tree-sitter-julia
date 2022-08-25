@@ -83,13 +83,6 @@ grammar({
     $._statement,
   ],
 
-  supertypes: $ => [
-    $._statement,
-    $._definition,
-    $._expression,
-    $._primary_expression,
-  ],
-
   externals: $ => [
     $.block_comment,
     $._immediate_paren,
