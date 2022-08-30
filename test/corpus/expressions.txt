@@ -314,3 +314,40 @@ Generator expressions
     (call_expression (identifier) (argument_list (identifier) (identifier)))
     (for_clause (for_binding (identifier) (identifier)))
     (for_clause (for_binding (identifier) (identifier)))))
+    
+============================
+Do expressions (no arg)
+============================
+
+f() do 
+  5
+end 
+
+---
+
+(source_file (call_expression (identifier) (argument_list) (do_clause (integer_literal))))
+
+============================
+Do expressions (one arg)
+============================
+
+f() do x 
+  5
+end 
+
+---
+
+(source_file (call_expression (identifier) (argument_list) (do_clause (identifier) (integer_literal))))
+
+============================
+Do expressions (multiple arg)
+============================
+
+f() do x, y 
+  5
+end 
+
+---
+
+(source_file (call_expression (identifier) (argument_list) (do_clause (bare_tuple_expression (identifier) (identifier)) (integer_literal))))
+
