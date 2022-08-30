@@ -328,6 +328,20 @@ end
 (source_file (call_expression (identifier) (argument_list) (do_clause (integer_literal))))
 
 ============================
+Do expressions (no arg, semicolon)
+============================
+
+f() do ; 
+  5
+end 
+
+---
+
+(source_file (call_expression (identifier) (argument_list) (do_clause (integer_literal))))
+
+
+
+============================
 Do expressions (one arg)
 ============================
 
