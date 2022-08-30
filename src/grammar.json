@@ -2659,7 +2659,7 @@
         },
         {
           "type": "PREC_LEFT",
-          "value": 20,
+          "value": 19,
           "content": {
             "type": "SEQ",
             "members": [
@@ -3371,7 +3371,7 @@
     },
     "range_expression": {
       "type": "PREC_LEFT",
-      "value": 20,
+      "value": 19,
       "content": {
         "type": "SEQ",
         "members": [
@@ -3432,7 +3432,7 @@
     },
     "quote_expression": {
       "type": "PREC_LEFT",
-      "value": 19,
+      "value": 20,
       "content": {
         "type": "SEQ",
         "members": [
@@ -3449,7 +3449,7 @@
     },
     "interpolation_expression": {
       "type": "PREC_LEFT",
-      "value": 19,
+      "value": 20,
       "content": {
         "type": "SEQ",
         "members": [

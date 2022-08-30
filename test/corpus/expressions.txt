@@ -314,3 +314,23 @@ Generator expressions
     (call_expression (identifier) (argument_list (identifier) (identifier)))
     (for_clause (for_binding (identifier) (identifier)))
     (for_clause (for_binding (identifier) (identifier)))))
+
+============================
+Nested quote nodes
+============================
+
+2 ? :(3) : 5
+
+---
+
+(source_file (ternary_expression (integer_literal) (quote_expression (parenthesized_expression (integer_literal))) (integer_literal)))
+
+============================
+Nested interpolated nodes
+============================
+
+2 ? $(3) : 5
+
+---
+
+(source_file (ternary_expression (integer_literal) (interpolation_expression (parenthesized_expression (integer_literal))) (integer_literal)))
