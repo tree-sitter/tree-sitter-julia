@@ -655,8 +655,10 @@ grammar({
     ),
 
     _comprehension_clause: $ => seq(
+      $.for_clause,
+      optional($._terminator),
       sep1(
-        optional($._terminator), 
+        optional($._terminator),
         choice($.for_clause, $.if_clause)
       ),
       optional($._terminator)
