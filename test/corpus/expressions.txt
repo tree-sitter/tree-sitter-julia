@@ -314,3 +314,24 @@ Generator expressions
     (call_expression (identifier) (argument_list (identifier) (identifier)))
     (for_clause (for_binding (identifier) (identifier)))
     (for_clause (for_binding (identifier) (identifier)))))
+
+============================
+Generator expressions with weird spacing
+============================
+
+(c
+ for x in [1, 2]
+ if true
+) 
+(c
+ for x in [1, 2]
+ if true)
+(c
+ for x in [1, 2] if true)
+
+---
+
+(source_file 
+  (generator_expression (identifier) (for_clause (for_binding (identifier) (array_expression (integer_literal) (integer_literal)))) (if_clause (identifier))) 
+  (generator_expression (identifier) (for_clause (for_binding (identifier) (array_expression (integer_literal) (integer_literal)))) (if_clause (identifier))) 
+  (generator_expression (identifier) (for_clause (for_binding (identifier) (array_expression (integer_literal) (integer_literal)))) (if_clause (identifier))))

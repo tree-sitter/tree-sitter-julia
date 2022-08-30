@@ -642,6 +642,7 @@ grammar({
     generator_expression: $ => seq(
       '(',
       $._expression,
+      optional($._terminator),
       $._comprehension_clause,
       ')'
     ),
@@ -654,22 +655,22 @@ grammar({
     ),
 
     _comprehension_clause: $ => seq(
-      $.for_clause,
-      repeat(choice(
-        $.for_clause,
-        $.if_clause
-      ))
+      sep1(
+        optional($._terminator), 
+        choice($.for_clause, $.if_clause)
+      ),
+      optional($._terminator)
     ),
 
-    if_clause: $ => seq(
+    if_clause: $ => prec(1, seq(
       'if',
       $._expression
-    ),
+    )),
 
-    for_clause: $ => seq(
+    for_clause: $ => prec(1, seq(
       'for',
       sep1(',', $.for_binding)
-    ),
+    )),
 
     for_binding: $ => seq(
       choice($.identifier, $.tuple_expression),

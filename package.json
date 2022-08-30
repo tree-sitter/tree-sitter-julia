@@ -10,15 +10,16 @@
   "author": "Max Brunsfeld",
   "license": "MIT",
   "dependencies": {
-    "nan": "^2.14.0"
+    "nan": "^2.16.0"
   },
   "devDependencies": {
-    "tree-sitter-cli": "^0.19.1"
+    "tree-sitter-cli": "^0.19.5"
   },
   "scripts": {
     "build": "tree-sitter generate && node-gyp build",
     "test": "tree-sitter test && script/parse-examples",
-    "test-windows": "tree-sitter test"
+    "test-windows": "tree-sitter test",
+    "install": "node-gyp rebuild"
   },
   "tree-sitter": [
     {
@@ -27,5 +28,18 @@
       ],
       "scope": "source.julia"
     }
-  ]
+  ],
+  "gypfile": true,
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tree-sitter/tree-sitter-julia.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tree-sitter/tree-sitter-julia/issues"
+  },
+  "homepage": "https://github.com/tree-sitter/tree-sitter-julia#readme"
 }
