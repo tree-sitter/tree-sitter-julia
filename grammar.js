@@ -536,12 +536,14 @@ grammar({
 
     do_clause: $ => seq(
       'do',
-      choice(
-        $._terminator, 
-        seq($._expression, $._terminator),
-        seq($.bare_tuple_expression, $._terminator),
+      field('parameters',
+        choice(
+          $._terminator,
+          seq($._expression, optional($._terminator)),
+          seq($.bare_tuple_expression, optional($._terminator)),
+        )
       ),
-      $._expression_list,
+      optional($._expression_list),
       'end'
     ),
 

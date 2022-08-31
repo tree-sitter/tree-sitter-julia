@@ -349,9 +349,16 @@ f() do x
   5
 end 
 
+f() do x x end
+
+f() do x end
+
 ---
 
-(source_file (call_expression (identifier) (argument_list) (do_clause (identifier) (integer_literal))))
+(source_file 
+  (call_expression (identifier) (argument_list) (do_clause (identifier) (integer_literal))) 
+  (call_expression (identifier) (argument_list) (do_clause (identifier) (identifier))) 
+  (call_expression (identifier) (argument_list) (do_clause (identifier))))
 
 ============================
 Do expressions (multiple arg)
