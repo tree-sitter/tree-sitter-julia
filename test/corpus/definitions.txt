@@ -159,7 +159,7 @@ end
           (integer_literal))))))
 
 ===============================================
-Short function definition
+Short form function definition
 ===============================================
 
 f(x, y) = x + y
@@ -171,13 +171,13 @@ end
 ---
 
 (source_file
-  (short_function_definition
+  (function_definition
     name: (identifier)
     parameters: (parameter_list 
       (identifier) (identifier))
     (binary_expression 
       (identifier) (operator) (identifier)))
-  (short_function_definition
+  (function_definition
     name: (identifier)
     parameters: (parameter_list 
       (identifier) (identifier))

@@ -105,7 +105,7 @@ grammar({
   ],
 
   conflicts: $ => [
-    [$._primary_expression, $.short_function_definition],
+    [$._primary_expression, $._short_form_function_definition],
     [$._primary_expression, $.parameter_list],
     [$._primary_expression, $.spread_parameter],
     [$._primary_expression, $.typed_parameter],
@@ -146,11 +146,15 @@ grammar({
       $.struct_definition,
       $.module_definition,
       $.function_definition,
-      $.short_function_definition,
       $.macro_definition
     ),
 
-    function_definition: $ => seq(
+    function_definition: $ => choice(
+      $._long_form_function_definition,
+      $._short_form_function_definition
+    ),
+    
+    _long_form_function_definition: $ => seq(
       'function',
       field('name', $.identifier),
       field('type_parameters', optional($.type_parameter_list)),
@@ -159,7 +163,7 @@ grammar({
       'end'
     ),
 
-    short_function_definition: $ => seq(
+    _short_form_function_definition: $ => seq(
       field('name', $.identifier),
       $._immediate_paren,
       field('parameters', $.parameter_list),
