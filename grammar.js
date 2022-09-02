@@ -769,6 +769,8 @@ grammar({
     // Literals
 
     _literal: $ => choice(
+      $.true,
+      $.false,
       $.integer_literal,
       $.float_literal,
       $.character_literal,
@@ -777,7 +779,10 @@ grammar({
       $.prefixed_string_literal,
       $.prefixed_command_literal,
     ),
-
+    
+    true: $ => 'true',
+    false: $ => 'false',
+    
     integer_literal: $ => choice(
       token(seq('0b', numeral('01'))),
       token(seq('0o', numeral('0-7'))),

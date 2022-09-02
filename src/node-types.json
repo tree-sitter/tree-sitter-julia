@@ -78,6 +78,10 @@
         "named": true
       },
       {
+        "type": "false",
+        "named": true
+      },
+      {
         "type": "field_expression",
         "named": true
       },
@@ -159,6 +163,10 @@
       },
       {
         "type": "ternary_expression",
+        "named": true
+      },
+      {
+        "type": "true",
         "named": true
       },
       {
@@ -2163,6 +2171,10 @@
     "named": false
   },
   {
+    "type": "false",
+    "named": true
+  },
+  {
     "type": "finally",
     "named": false
   },
@@ -2229,6 +2241,10 @@
   {
     "type": "struct",
     "named": false
+  },
+  {
+    "type": "true",
+    "named": true
   },
   {
     "type": "try",
