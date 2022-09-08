@@ -2659,7 +2659,7 @@
         },
         {
           "type": "PREC_LEFT",
-          "value": 20,
+          "value": 18,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2685,7 +2685,7 @@
         },
         {
           "type": "PREC_RIGHT",
-          "value": 15,
+          "value": 14,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2711,7 +2711,7 @@
         },
         {
           "type": "PREC_RIGHT",
-          "value": 17,
+          "value": 15,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2737,7 +2737,7 @@
         },
         {
           "type": "PREC_LEFT",
-          "value": 18,
+          "value": 16,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2763,7 +2763,7 @@
         },
         {
           "type": "PREC_LEFT",
-          "value": 16,
+          "value": 20,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2802,7 +2802,7 @@
         },
         {
           "type": "PREC_LEFT",
-          "value": 13,
+          "value": 12,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2828,7 +2828,7 @@
         },
         {
           "type": "PREC_LEFT",
-          "value": 14,
+          "value": 13,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2856,7 +2856,7 @@
     },
     "ternary_expression": {
       "type": "PREC_RIGHT",
-      "value": 12,
+      "value": 19,
       "content": {
         "type": "SEQ",
         "members": [
@@ -3297,7 +3297,7 @@
     },
     "function_expression": {
       "type": "PREC_RIGHT",
-      "value": 15,
+      "value": 14,
       "content": {
         "type": "CHOICE",
         "members": [
@@ -3371,7 +3371,7 @@
     },
     "range_expression": {
       "type": "PREC_LEFT",
-      "value": 20,
+      "value": 18,
       "content": {
         "type": "SEQ",
         "members": [
@@ -3432,7 +3432,7 @@
     },
     "quote_expression": {
       "type": "PREC_LEFT",
-      "value": 19,
+      "value": 17,
       "content": {
         "type": "SEQ",
         "members": [
@@ -3449,7 +3449,7 @@
     },
     "interpolation_expression": {
       "type": "PREC_LEFT",
-      "value": 19,
+      "value": 17,
       "content": {
         "type": "SEQ",
         "members": [

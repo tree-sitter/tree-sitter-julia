@@ -1,15 +1,15 @@
 const PREC = [
   'assign',
   'pair',
-  'conditional',
   'lazy_or',
   'lazy_and',
   'arrow',
-  'comparison',
   'pipe_left',
   'pipe_right',
   'colon_quote',
   'colon_range',
+  'conditional',
+  'comparison',
   'plus',
   'times',
   'rational',
@@ -779,10 +779,10 @@ grammar({
       $.prefixed_string_literal,
       $.prefixed_command_literal,
     ),
-    
+
     true: $ => 'true',
     false: $ => 'false',
-    
+
     integer_literal: $ => choice(
       token(seq('0b', numeral('01'))),
       token(seq('0o', numeral('0-7'))),

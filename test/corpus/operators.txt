@@ -228,6 +228,27 @@ x = batch_size == 1 ?
 
 
 ==============================
+ternary operator precedence
+==============================
+
+a == nothing ? true : a == 1
+
+---
+
+(source_file
+  (ternary_expression
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier))
+    (true)
+    (binary_expression
+      (identifier)
+      (operator)
+      (integer_literal))))
+
+
+==============================
 operators as values
 ==============================
 
