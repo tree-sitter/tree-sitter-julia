@@ -151,6 +151,7 @@ grammar({
 
     function_definition: $ => seq(
       'function',
+      field('module', optional(seq($.identifier, '.'))),
       field('name', $.identifier),
       field('type_parameters', optional($.type_parameter_list)),
       field('parameters', $.parameter_list),

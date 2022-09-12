@@ -117,6 +117,23 @@ end
       (identifier)
       (parameterized_identifier (identifier) (type_argument_list (identifier))))))
 
+==============================
+Function with specified module
+==============================
+
+function Base.getproperty(x, y)
+    return 0
+end
+
+---
+
+(source_file
+  (function_definition
+    (identifier)
+    (identifier)
+    (parameter_list (identifier) (identifier))
+    (return_statement (integer_literal))))
+
 ===============================
 Functions with typed parameters
 ===============================
