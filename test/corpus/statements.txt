@@ -198,7 +198,7 @@ using A, B, C
   (import_statement (identifier))
   (import_statement (selected_import (identifier) (identifier) (identifier)))
   (import_statement (scoped_identifier (identifier) (identifier)))
-  (import_statement (selected_import (scoped_identifier (identifier)) (macro_identifier (identifier))))
+  (import_statement (selected_import (identifier) (macro_identifier (identifier))))
   (import_statement (identifier) (identifier) (identifier)))
 
 ===============================
