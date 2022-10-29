@@ -317,18 +317,31 @@ grammar({
     // Statements
 
     _statement: $ => choice(
+      $.compound_statement,
+      $.quote_statement,
+      $.let_statement,
       $.if_statement,
       $.try_statement,
       $.for_statement,
       $.while_statement,
-      $.let_statement,
-      $.const_statement,
-      $.quote_statement,
       $.break_statement,
       $.continue_statement,
       $.return_statement,
+      $.const_statement,
+      $.export_statement,
       $.import_statement,
-      $.export_statement
+    ),
+
+    compound_statement: $ => seq('begin', optional($._block), 'end'),
+
+    quote_statement: $ => seq('quote', optional($._block), 'end'),
+
+    let_statement: $ => seq(
+      'let',
+      sep(',', $.variable_declaration),
+      $._terminator,
+      optional($._block),
+      'end'
     ),
 
     if_statement: $ => seq(
@@ -402,14 +415,6 @@ grammar({
       ))
     )),
 
-    let_statement: $ => seq(
-      'let',
-      sep1(',', $.variable_declaration),
-      optional($._terminator),
-      optional($._block),
-      'end'
-    ),
-
     const_statement: $ => seq(
       'const',
       prec.right(sep1(',', $.variable_declaration))
@@ -420,42 +425,54 @@ grammar({
       optional(seq('=', $._expression))
     )),
 
-    quote_statement: $ => seq(
-      'quote',
-      optional($._block),
-      'end'
+    export_statement: $ => seq(
+      'export',
+      prec.right(sep1(',', choice(
+        $.identifier,
+        $.macro_identifier,
+        $.operator,
+      ))),
     ),
 
     import_statement: $ => seq(
-      choice('using', 'import'),
+      choice('import', 'using'),
       choice(
         $._import_list,
         $.selected_import,
       ),
     ),
 
-    _import_list: $ => prec.right(sep1(',', seq(
-      repeat('.'),
+    relative_qualifier: $ => seq(
+      repeat1('.'),
       choice(
         $.identifier,
         $.scoped_identifier,
       )
+    ),
+
+    _importable: $ => choice(
+      $.identifier,
+      $.scoped_identifier,
+      $.relative_qualifier,
+    ),
+
+    import_alias: $ => seq($._importable, 'as', $.identifier),
+
+    _import_list: $ => prec.right(sep1(',', choice(
+      $._importable,
+      $.import_alias,
     ))),
 
     selected_import: $ => seq(
-      repeat('.'),
-      choice($.identifier, $.scoped_identifier),
+      $._importable,
       token.immediate(':'),
       prec.right(sep1(',', choice(
-        $.identifier,
-        $.macro_identifier
+        $._importable,
+        $.import_alias,
+        $.macro_identifier,
+        $.operator,
       )))
     ),
-
-    export_statement: $ => prec.right(seq(
-      'export',
-      sep1(',', $.identifier)
-    )),
 
     // Expressions
 
@@ -463,7 +480,6 @@ grammar({
       $._statement,
       $._definition,
       $.typed_expression,
-      $.compound_expression,
       $.pair_expression,
       alias(':', $.operator),
       $.macro_expression,
@@ -548,12 +564,6 @@ grammar({
       '{',
       sep1(',', choice($._expression)),
       '}'
-    ),
-
-    compound_expression: $ => seq(
-      'begin',
-      $._block,
-      'end'
     ),
 
     call_expression: $ => prec(PREC.call, seq(

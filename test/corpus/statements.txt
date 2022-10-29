@@ -1,141 +1,31 @@
-=================
-If statements
-=================
-
-if a
-  b()
-elseif c
-  d()
-  d()
-else
-  e()
-end
-
-# empty bodies
-if a
-elseif b
-else
-end
-
----
-
-(source_file
-  (if_statement
-    (identifier)
-    (call_expression (identifier) (argument_list))
-    (elseif_clause
-      (identifier)
-      (call_expression (identifier) (argument_list))
-      (call_expression (identifier) (argument_list)))
-    (else_clause
-      (call_expression (identifier) (argument_list))))
-  (line_comment)
-  (if_statement
-    (identifier)
-    (elseif_clause
-      (identifier))
-    (else_clause)))
-
-===============================
-For statements
-===============================
-
-for i in [1, 2, 3]
-  print(i)
-end
-
-for (a, b) in c
-  print(a, b)
-end
-
----
-
-(source_file
-  (for_statement
-    (for_binding
-      (identifier)
-      (array_expression (integer_literal) (integer_literal) (integer_literal)))
-    (call_expression (identifier) (argument_list (identifier))))
-  (for_statement
-    (for_binding
-      (tuple_expression (identifier) (identifier))
-      (identifier))
-    (call_expression (identifier) (argument_list (identifier) (identifier)))))
-
-===============================
-While statements
-===============================
-
-while i < 5
-  print(i)
-  continue
-  break
-end
-
-while a(); b(); end
-
----
-
-(source_file
-  (while_statement
-    (binary_expression (identifier) (operator) (integer_literal))
-    (call_expression (identifier) (argument_list (identifier)))
-    (continue_statement)
-    (break_statement))
-  (while_statement
-    (call_expression (identifier) (argument_list))
-    (call_expression (identifier) (argument_list))))
-
 ==============================
-Return statements
+compound statements
 ==============================
 
-return
-return a
-return a || b
-return a, b, c
+begin
+end
 
----
-
-(source_file
-  (return_statement)
-  (return_statement (identifier))
-  (return_statement (binary_expression (identifier) (operator) (identifier)))
-  (return_statement (bare_tuple_expression (identifier) (identifier) (identifier))))
-
-===============================
-Let statements
-===============================
-
-let var1 = value1, var2, var3 = value3
-    code
+begin
+    foo
+    bar
+    baz
 end
 
 ---
 
 (source_file
-  (let_statement
-    (variable_declaration (identifier) (identifier))
-    (variable_declaration (identifier))
-    (variable_declaration (identifier) (identifier))
+  (compound_statement)
+  (compound_statement
+    (identifier)
+    (identifier)
     (identifier)))
 
-===============================
-Const statements
-===============================
 
-const x, y = 5
+==============================
+quote statements
+==============================
 
----
-
-(source_file
-  (const_statement
-    (variable_declaration (identifier))
-    (variable_declaration (identifier) (integer_literal))))
-
-===============================
-Quote statements
-===============================
+quote end
 
 quote
   x = 1
@@ -146,14 +36,88 @@ end
 ---
 
 (source_file
+  (quote_statement)
   (quote_statement
     (assignment_expression (identifier) (operator) (integer_literal))
     (assignment_expression (identifier) (operator) (integer_literal))
     (binary_expression (identifier) (operator) (identifier))))
 
-===============================
-Try statements
-===============================
+
+==============================
+let statements
+==============================
+
+let
+end
+
+let var1 = value1, var2, var3 = value3
+    code
+end
+
+---
+
+(source_file
+  (let_statement)
+  (let_statement
+    (variable_declaration (identifier) (identifier))
+    (variable_declaration (identifier))
+    (variable_declaration (identifier) (identifier))
+    (identifier)))
+
+
+==============================
+if statements
+==============================
+
+if a
+elseif b
+else
+end
+
+if true 1 else 0 end
+
+if a
+  b()
+elseif c
+  d()
+  d()
+else
+  e()
+end
+
+---
+
+(source_file
+
+  (if_statement
+    (identifier)
+    (elseif_clause
+      (identifier))
+    (else_clause))
+
+  (if_statement
+    (true)
+    (integer_literal)
+    (else_clause
+      (integer_literal)))
+
+  (if_statement
+    (identifier)
+    (call_expression (identifier) (argument_list))
+    (elseif_clause
+      (identifier)
+      (call_expression (identifier) (argument_list))
+      (call_expression (identifier) (argument_list)))
+    (else_clause
+      (call_expression (identifier) (argument_list)))))
+
+
+==============================
+try statements
+==============================
+
+try catch end
+try finally end
 
 try
     sqrt(x)
@@ -171,46 +135,187 @@ end
 
 (source_file
   (try_statement
+    (catch_clause))
+
+  (try_statement
+    (finally_clause))
+
+  (try_statement
     (call_expression (identifier) (argument_list (identifier)))
     (catch_clause
       (call_expression
         (identifier)
         (argument_list
           (call_expression (identifier) (argument_list (identifier) (integer_literal)))))))
+
   (try_statement
     (call_expression (identifier) (argument_list (identifier)))
     (finally_clause
       (call_expression (identifier) (argument_list (identifier))))))
 
-===============================
-Import statements
-===============================
 
-using Lib
-using BigLib: thing1, thing2
-import Base.show
-import .A: @b
-using A, B, C
+==============================
+for statements
+==============================
+
+for x in xs end
+
+for x in xs foo!(x) end
+
+for i in [1, 2, 3]
+  print(i)
+end
+
+for (a, b) in c
+  print(a, b)
+end
 
 ---
 
 (source_file
-  (import_statement (identifier))
-  (import_statement (selected_import (identifier) (identifier) (identifier)))
-  (import_statement (scoped_identifier (identifier) (identifier)))
-  (import_statement (selected_import (identifier) (macro_identifier (identifier))))
-  (import_statement (identifier) (identifier) (identifier)))
+  (for_statement
+    (for_binding
+      (identifier)
+      (identifier)))
+
+  (for_statement
+    (for_binding
+      (identifier)
+      (identifier))
+    (call_expression (identifier) (argument_list (identifier))))
+
+  (for_statement
+    (for_binding
+      (identifier)
+      (array_expression (integer_literal) (integer_literal) (integer_literal)))
+    (call_expression (identifier) (argument_list (identifier))))
+
+  (for_statement
+    (for_binding
+      (tuple_expression (identifier) (identifier))
+      (identifier))
+    (call_expression (identifier) (argument_list (identifier) (identifier)))))
+
+
+==============================
+while statements
+==============================
+
+while true end
+
+while i < 5
+  print(i)
+  continue
+  break
+end
+
+while a(); b(); end
+
+---
+
+(source_file
+  (while_statement (true))
+
+  (while_statement
+    (binary_expression (identifier) (operator) (integer_literal))
+    (call_expression (identifier) (argument_list (identifier)))
+    (continue_statement)
+    (break_statement))
+
+  (while_statement
+    (call_expression (identifier) (argument_list))
+    (call_expression (identifier) (argument_list))))
+
+
+==============================
+return statements
+==============================
+
+return
+return a
+return a || b
+return a, b, c
+
+---
+
+(source_file
+  (return_statement)
+  (return_statement (identifier))
+  (return_statement (binary_expression (identifier) (operator) (identifier)))
+  (return_statement (bare_tuple_expression (identifier) (identifier) (identifier))))
+
 
 ===============================
-Export statements
+Const statements
 ===============================
+
+const x, y = 5
+
+---
+
+(source_file
+  (const_statement
+    (variable_declaration (identifier))
+    (variable_declaration (identifier) (integer_literal))))
+
+
+==============================
+export statements
+==============================
 
 export a
-export a, b, c
+export a, b, +, *
+export @macroMcAtface
 
 ---
 
 (source_file
   (export_statement (identifier))
-  (export_statement (identifier) (identifier) (identifier)))
+  (export_statement (identifier) (identifier) (operator) (operator))
+  (export_statement (macro_identifier (identifier))))
+
+
+==============================
+import statements
+==============================
+
+import Pkg
+
+using Sockets
+
+using ..Foo, ..Bar
+
+import CSV, Chain, DataFrames
+
+import Base: show, @kwdef, +, *
+
+import LinearAlgebra as la
+
+
+---
+
+(source_file
+  ;; Simple import
+  (import_statement (identifier))
+  (import_statement (identifier))
+
+  ;; Relative paths
+  (import_statement
+    (relative_qualifier (identifier))
+    (relative_qualifier (identifier)))
+
+  ;; List import
+  (import_statement (identifier) (identifier) (identifier))
+
+  ;; Selected import
+  (import_statement
+    (selected_import
+      (identifier)
+      (identifier)
+      (macro_identifier (identifier))
+      (operator)
+      (operator)))
+
+  ;; Alias
+  (import_statement (import_alias (identifier) (identifier))))
 
