@@ -128,9 +128,9 @@ grammar({
   ],
 
   rules: {
-    source_file: $ => optional($._expression_list),
+    source_file: $ => optional($._block),
 
-    _expression_list: $ => seq(
+    _block: $ => seq(
       sep1($._terminator, choice(
         $._expression,
         $.assignment_expression,
@@ -155,7 +155,7 @@ grammar({
       choice('module', 'baremodule'),
       field('name', $.identifier),
       optional($._terminator),
-      optional($._expression_list),
+      optional($._block),
       'end'
     ),
 
@@ -185,7 +185,7 @@ grammar({
       field('type_parameters', optional($.type_parameter_list)),
       optional($.subtype_clause),
       optional($._terminator),
-      optional($._expression_list),
+      optional($._block),
       'end'
     ),
 
@@ -199,7 +199,7 @@ grammar({
             $._function_signature,
             field('parameters', $.parameter_list),
           ),
-          optional($._expression_list),
+          optional($._block),
         ),
         // zero method functions
         field('name', choice(
@@ -251,7 +251,7 @@ grammar({
       )),
       $._immediate_paren,
       field('parameters', $.parameter_list),
-      optional($._expression_list),
+      optional($._block),
       'end'
     ),
 
@@ -335,7 +335,7 @@ grammar({
       'if',
       field('condition', $._expression),
       optional($._terminator),
-      optional($._expression_list),
+      optional($._block),
       field('alternative', repeat($.elseif_clause)),
       field('alternative', optional($.else_clause)),
       'end'
@@ -345,17 +345,17 @@ grammar({
       'elseif',
       field('condition', $._expression),
       optional($._terminator),
-      optional($._expression_list)
+      optional($._block)
     ),
 
     else_clause: $ => seq(
       'else',
-      optional($._expression_list)
+      optional($._block)
     ),
 
     try_statement: $ => seq(
       'try',
-      optional($._expression_list),
+      optional($._block),
       optional($.catch_clause),
       optional($.finally_clause),
       'end'
@@ -365,20 +365,20 @@ grammar({
       'catch',
       optional($.identifier),
       optional($._terminator),
-      optional($._expression_list),
+      optional($._block),
     )),
 
     finally_clause: $ => seq(
       'finally',
       optional($._terminator),
-      optional($._expression_list),
+      optional($._block),
     ),
 
     for_statement: $ => seq(
       'for',
       sep1(',', $.for_binding),
       optional($._terminator),
-      optional($._expression_list),
+      optional($._block),
       'end'
     ),
 
@@ -386,7 +386,7 @@ grammar({
       'while',
       field('condition', $._expression),
       optional($._terminator),
-      optional($._expression_list),
+      optional($._block),
       'end'
     ),
 
@@ -406,7 +406,7 @@ grammar({
       'let',
       sep1(',', $.variable_declaration),
       optional($._terminator),
-      optional($._expression_list),
+      optional($._block),
       'end'
     ),
 
@@ -422,7 +422,7 @@ grammar({
 
     quote_statement: $ => seq(
       'quote',
-      optional($._expression_list),
+      optional($._block),
       'end'
     ),
 
@@ -513,7 +513,7 @@ grammar({
     ),
 
     parenthesized_expression: $ => prec(1, seq(
-      '(', choice($._expression_list, $.spread_expression), ')'
+      '(', choice($._block, $.spread_expression), ')'
     )),
 
     field_expression: $ => prec(PREC.dot, seq(
@@ -552,7 +552,7 @@ grammar({
 
     compound_expression: $ => seq(
       'begin',
-      $._expression_list,
+      $._block,
       'end'
     ),
 
@@ -598,7 +598,7 @@ grammar({
     do_clause: $ => seq(
       'do',
       alias($._do_parameter_list, $.parameter_list),
-      optional($._expression_list),
+      optional($._block),
       'end'
     ),
 
