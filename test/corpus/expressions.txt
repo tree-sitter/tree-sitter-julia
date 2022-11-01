@@ -29,20 +29,6 @@ logŷ
 
 
 =================
-Functions
-=================
-
-function test(x, y)
-end
-
----
-
-(source_file
-  (function_definition
-    (identifier)
-    (parameter_list (identifier) (identifier))))
-
-=================
 Function calls
 =================
 
@@ -66,12 +52,13 @@ new{typeof(xs)}(xs)
         (call_expression (identifier) (argument_list (identifier)))))
     (argument_list (identifier))))
 
-=============================
-Function calls with do blocks
-=============================
 
-a(b) do
-  print(c)
+========================================
+function call expressions with do blocks
+========================================
+
+reduce(xs) do x, y
+  f(x, y)
 end
 
 ---
@@ -81,7 +68,12 @@ end
     (identifier)
     (argument_list (identifier))
     (do_clause
-      (call_expression (identifier) (argument_list (identifier))))))
+      (parameter_list
+        (identifier)
+        (identifier))
+      (call_expression
+        (identifier)
+        (argument_list (identifier) (identifier))))))
 
 =====================
 Fields and subscripts
@@ -263,7 +255,6 @@ Function expressions
 x -> x^2
 (x,y,z)->2x+y-z
 ()->3
-function () 3 end
 () -> (sleep(0.1); i += 1; l)
 
 ---
@@ -281,9 +272,6 @@ function () 3 end
         (identifier))
       (operator)
       (identifier)))
-  (function_expression
-    (parameter_list)
-    (integer_literal))
   (function_expression
     (parameter_list)
     (integer_literal))
