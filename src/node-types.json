@@ -74,10 +74,6 @@
         "named": true
       },
       {
-        "type": "compound_expression",
-        "named": true
-      },
-      {
         "type": "false",
         "named": true
       },
@@ -189,6 +185,10 @@
     "subtypes": [
       {
         "type": "break_statement",
+        "named": true
+      },
+      {
+        "type": "compound_statement",
         "named": true
       },
       {
@@ -610,12 +610,12 @@
     }
   },
   {
-    "type": "compound_expression",
+    "type": "compound_statement",
     "named": true,
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "_expression",
@@ -827,6 +827,14 @@
       "types": [
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "macro_identifier",
+          "named": true
+        },
+        {
+          "type": "operator",
           "named": true
         }
       ]
@@ -1213,6 +1221,29 @@
     }
   },
   {
+    "type": "import_alias",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "relative_qualifier",
+          "named": true
+        },
+        {
+          "type": "scoped_identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "import_statement",
     "named": true,
     "fields": {},
@@ -1222,6 +1253,14 @@
       "types": [
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "import_alias",
+          "named": true
+        },
+        {
+          "type": "relative_qualifier",
           "named": true
         },
         {
@@ -1288,7 +1327,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "_expression",
@@ -1794,6 +1833,25 @@
     }
   },
   {
+    "type": "relative_qualifier",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "scoped_identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "return_statement",
     "named": true,
     "fields": {},
@@ -1844,7 +1902,19 @@
           "named": true
         },
         {
+          "type": "import_alias",
+          "named": true
+        },
+        {
           "type": "macro_identifier",
+          "named": true
+        },
+        {
+          "type": "operator",
+          "named": true
+        },
+        {
+          "type": "relative_qualifier",
           "named": true
         },
         {
@@ -2500,6 +2570,10 @@
   },
   {
     "type": "abstract",
+    "named": false
+  },
+  {
+    "type": "as",
     "named": false
   },
   {
