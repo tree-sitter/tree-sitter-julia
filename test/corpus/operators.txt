@@ -52,6 +52,9 @@ a + b
 a ++ 1 × b ⥌ 2 → c
 a:(a // b)
 
+a |>
+b
+
 x = A \ (v × w)
 
 a & b | c
@@ -87,6 +90,12 @@ a & b | c
         (identifier)
         (operator)
         (identifier))))
+
+  ; newline
+  (binary_expression
+    (identifier)
+    (operator)
+    (identifier))
 
   ; LA
   (assignment_expression
