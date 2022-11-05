@@ -124,7 +124,7 @@ end
     (macro_identifier (identifier))
     (macro_argument_list
       (string_literal)
-      (compound_expression (assignment_expression (identifier) (operator) (identifier))))))
+      (compound_statement (assignment_expression (identifier) (operator) (identifier))))))
 
 
 ===========================

@@ -19,13 +19,11 @@ examples/Gadfly.jl/test/testscripts/timeseries_day.jl
 examples/Gadfly.jl/test/testscripts/timeseries_year_3.jl
 examples/Gadfly.jl/test/testscripts/unitful_geoms.jl
 examples/Gadfly.jl/test/testscripts/timeseries_year_1.jl
-examples/Gadfly.jl/test/testscripts/percent.jl
 examples/Gadfly.jl/test/testscripts/unitful_color.jl
 examples/Gadfly.jl/test/runtests.jl
 examples/Gadfly.jl/test/regen-precompiles.jl
 examples/Gadfly.jl/test/compare_examples.jl
 examples/Gadfly.jl/src/guide/keys.jl
-examples/Gadfly.jl/src/mapping.jl
 examples/Gadfly.jl/src/statistics.jl
 examples/Gadfly.jl/src/dataframes.jl
 examples/Gadfly.jl/src/scale/scales.jl
