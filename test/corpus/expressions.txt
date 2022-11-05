@@ -28,15 +28,95 @@ logŷ
   (identifier))
 
 
-=================
-Function calls
-=================
+==============================
+field expressions
+==============================
 
-a()
-b("hi", 2)
-c(d...)
-d(e; f = g)
-h(i; j)
+foo.x
+bar.x.y.z
+
+(a[1].b().c).d
+
+---
+
+(source_file
+  (field_expression
+    (identifier)
+    (identifier))
+  (field_expression
+    (field_expression
+      (field_expression
+        (identifier)
+        (identifier))
+      (identifier))
+      (identifier))
+
+  (field_expression
+    (parenthesized_expression
+      (field_expression
+        (call_expression
+          (field_expression
+            (index_expression (identifier) (integer_literal))
+            (identifier))
+          (argument_list))
+        (identifier)))
+    (identifier)))
+
+
+==============================
+index expressions
+==============================
+
+a[1, 2, 3]
+a[1, :]
+
+---
+(source_file
+  (index_expression
+    (identifier)
+    (integer_literal)
+    (integer_literal)
+    (integer_literal))
+  (index_expression
+    (identifier)
+    (integer_literal)
+    (operator)))
+
+
+==============================
+type parameterized expressions
+==============================
+
+Vector{Int}
+Vector{<:Number}
+$(usertype){T}
+
+
+---
+
+(source_file
+  (parametrized_type_expression
+    (identifier)
+    (identifier))
+  (parametrized_type_expression
+    (identifier)
+    (subtype_clause (identifier)))
+  (parametrized_type_expression
+    (interpolation_expression (parenthesized_expression (identifier)))
+    (identifier)))
+
+
+==============================
+function call expressions
+==============================
+
+f()
+g("hi", 2)
+h(d...)
+
+f(e; f = g)
+g(arg; kwarg)
+
 new{typeof(xs)}(xs)
 
 ---
@@ -45,13 +125,20 @@ new{typeof(xs)}(xs)
   (call_expression (identifier) (argument_list))
   (call_expression (identifier) (argument_list (string_literal) (integer_literal)))
   (call_expression (identifier) (argument_list (spread_expression (identifier))))
-  (call_expression (identifier) (argument_list (identifier) (named_argument (identifier) (identifier))))
-  (call_expression (identifier) (argument_list (identifier) (identifier)))
+
   (call_expression
-    (parameterized_identifier
+    (identifier)
+    (argument_list
       (identifier)
-      (type_argument_list
-        (call_expression (identifier) (argument_list (identifier)))))
+      (named_argument (identifier) (identifier))))
+  (call_expression
+    (identifier)
+    (argument_list (identifier) (identifier)))
+
+  (call_expression
+    (parametrized_type_expression
+      (identifier)
+      (call_expression (identifier) (argument_list (identifier))))
     (argument_list (identifier))))
 
 
@@ -77,56 +164,133 @@ end
         (identifier)
         (argument_list (identifier) (identifier))))))
 
-=====================
-Fields and subscripts
-=====================
 
-(a[1].b().c).d
+==============================
+macro expressions
+==============================
 
----
+@enum(Light, red, yellow, green)
 
-(source_file
-  (field_expression
-    (parenthesized_expression (field_expression
-      (call_expression
-        (field_expression
-          (subscript_expression (identifier) (integer_literal))
-          (identifier))
-        (argument_list))
-      (identifier)))
-    (identifier)))
+joinpath(@__DIR__, "grammar.js")
 
-=================
-Macro calls
-=================
-
-@assert x == y
 @assert x == y "a message"
 
-@. a
+@. a * x + b
 
 @testset "a" begin
   b = c
 end
 
+@macroexpand @async accept(socket)
+
 ---
 
 (source_file
-  (macro_expression
+  (macrocall_expression
     (macro_identifier (identifier))
-    (macro_argument_list
-      (binary_expression (identifier) (operator) (identifier))))
-  (macro_expression
+    (argument_list (identifier) (identifier) (identifier) (identifier)))
+
+  (call_expression
+    (identifier)
+    (argument_list
+      (macrocall_expression (macro_identifier (identifier)))
+      (string_literal)))
+
+  (macrocall_expression
     (macro_identifier (identifier))
     (macro_argument_list
       (binary_expression (identifier) (operator) (identifier))
       (string_literal)))
-  (macro_expression (macro_identifier (operator)) (macro_argument_list (identifier)))
-  (macro_expression
+
+  (macrocall_expression
+    (macro_identifier (operator))
+    (macro_argument_list
+      (binary_expression
+        (binary_expression (identifier) (operator) (identifier))
+        (operator)
+        (identifier))))
+
+  (macrocall_expression
     (macro_identifier (identifier))
     (macro_argument_list
       (string_literal)
-      (compound_statement (assignment_expression (identifier) (operator) (identifier))))))
+      (compound_statement (assignment_expression (identifier) (operator) (identifier)))))
+
+  (macrocall_expression
+    (macro_identifier (identifier))
+    (macro_argument_list
+      (macrocall_expression
+        (macro_identifier (identifier))
+        (macro_argument_list
+          (call_expression (identifier) (argument_list (identifier))))))))
+
+
+==============================
+quote expressions
+==============================
+
+:foo
+:const
+
+:(x; y)
+:(x, y)
+:[x, y, z]
+
+
+---
+(source_file
+  (quote_expression (identifier))
+  (quote_expression (identifier))
+
+  (quote_expression
+    (parenthesized_expression
+      (identifier)
+      (identifier)))
+  (quote_expression
+    (tuple_expression
+      (identifier)
+      (identifier)))
+  (quote_expression
+    (array_expression
+      (identifier)
+      (identifier)
+      (identifier))))
+
+
+==============================
+interpolation expressions
+==============================
+
+$foo
+$obj.field
+$(obj.field)
+$f(x)
+$f[1, 2]
+
+---
+
+(source_file
+  (interpolation_expression
+    (identifier))
+  (field_expression
+    (interpolation_expression
+      (identifier))
+    (identifier))
+  (interpolation_expression
+    (parenthesized_expression
+      (field_expression
+        (identifier)
+        (identifier))))
+  (call_expression
+    (interpolation_expression
+      (identifier))
+    (argument_list
+      (identifier)))
+  (index_expression
+    (interpolation_expression
+      (identifier))
+    (integer_literal)
+    (integer_literal)))
 
 
 ===========================

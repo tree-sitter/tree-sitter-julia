@@ -1,15 +1,9 @@
-examples/Flux.jl/test/cuda/cuda.jl
 examples/Flux.jl/src/losses/utils.jl
 examples/Flux.jl/src/layers/conv.jl
 examples/Flux.jl/src/layers/basic.jl
-examples/Flux.jl/src/layers/recurrent.jl
 examples/Flux.jl/src/optimise/optimisers.jl
-examples/Flux.jl/src/utils.jl
 examples/Flux.jl/src/cuda/cudnn.jl
 examples/Flux.jl/src/cuda/curnn.jl
-examples/Flux.jl/src/functor.jl
-examples/Flux.jl/src/onehot.jl
-examples/Flux.jl/src/data/Data.jl
 examples/Flux.jl/src/zeros.jl
 examples/Gadfly.jl/test/testscripts/timeseries_month.jl
 examples/Gadfly.jl/test/testscripts/contour.jl
@@ -23,7 +17,6 @@ examples/Gadfly.jl/test/testscripts/unitful_color.jl
 examples/Gadfly.jl/test/runtests.jl
 examples/Gadfly.jl/test/regen-precompiles.jl
 examples/Gadfly.jl/test/compare_examples.jl
-examples/Gadfly.jl/src/guide/keys.jl
 examples/Gadfly.jl/src/statistics.jl
 examples/Gadfly.jl/src/dataframes.jl
 examples/Gadfly.jl/src/scale/scales.jl
@@ -49,7 +42,6 @@ examples/Gadfly.jl/src/aesthetics.jl
 examples/Gadfly.jl/src/misc.jl
 examples/Gadfly.jl/src/color_misc.jl
 examples/Gadfly.jl/src/guide.jl
-examples/Gadfly.jl/src/theme.jl
 examples/Mocha.jl/tools/image-classifier.jl
 examples/Mocha.jl/test/layers/power.jl
 examples/Mocha.jl/test/layers/softmax.jl
@@ -69,7 +61,6 @@ examples/Mocha.jl/test/layers/concat.jl
 examples/Mocha.jl/test/layers/convolution.jl
 examples/Mocha.jl/test/utils/ref-count.jl
 examples/Mocha.jl/examples/mnist/mnist-demo.jl
-examples/Mocha.jl/examples/test-wasserstein.jl
 examples/Mocha.jl/examples/cifar10/convert.jl
 examples/Mocha.jl/benchmarks/parallel-loop/parallel-pool-module.jl
 examples/Mocha.jl/src/parameter.jl
@@ -145,13 +136,11 @@ examples/Mocha.jl/src/compatibility.jl
 examples/Mocha.jl/src/backend.jl
 examples/Mocha.jl/src/data-transformers.jl
 examples/IJulia.jl/test/comm.jl
-examples/IJulia.jl/deps/kspec.jl
 examples/IJulia.jl/deps/build.jl
 examples/IJulia.jl/src/init.jl
 examples/IJulia.jl/src/stdio.jl
 examples/IJulia.jl/src/magics.jl
 examples/IJulia.jl/src/comm_manager.jl
 examples/IJulia.jl/src/execute_request.jl
-examples/IJulia.jl/src/display.jl
 examples/IJulia.jl/src/handlers.jl
 examples/IJulia.jl/src/IJulia.jl
