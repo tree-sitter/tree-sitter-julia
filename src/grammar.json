@@ -2617,13 +2617,27 @@
                   "type": "SEQ",
                   "members": [
                     {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "named_field"
-                      },
-                      "named": true,
-                      "value": "named_argument"
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "implicit_named_field"
+                          },
+                          "named": true,
+                          "value": "implicit_named_argument"
+                        },
+                        {
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "named_field"
+                          },
+                          "named": true,
+                          "value": "named_argument"
+                        }
+                      ]
                     },
                     {
                       "type": "REPEAT",
@@ -2635,13 +2649,27 @@
                             "value": ","
                           },
                           {
-                            "type": "ALIAS",
-                            "content": {
-                              "type": "SYMBOL",
-                              "name": "named_field"
-                            },
-                            "named": true,
-                            "value": "named_argument"
+                            "type": "CHOICE",
+                            "members": [
+                              {
+                                "type": "ALIAS",
+                                "content": {
+                                  "type": "SYMBOL",
+                                  "name": "implicit_named_field"
+                                },
+                                "named": true,
+                                "value": "implicit_named_argument"
+                              },
+                              {
+                                "type": "ALIAS",
+                                "content": {
+                                  "type": "SYMBOL",
+                                  "name": "named_field"
+                                },
+                                "named": true,
+                                "value": "named_argument"
+                              }
+                            ]
                           }
                         ]
                       }
@@ -2823,6 +2851,19 @@
         {
           "type": "SYMBOL",
           "name": "_expression"
+        }
+      ]
+    },
+    "implicit_named_field": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "field_expression"
         }
       ]
     },
@@ -3386,15 +3427,97 @@
               "type": "SEQ",
               "members": [
                 {
+                  "type": "SYMBOL",
+                  "name": "_expression"
+                },
+                {
+                  "type": "REPEAT1",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "_expression"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": ","
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "named_field"
+                },
+                {
+                  "type": "REPEAT1",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "named_field"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": ","
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": ";"
+                },
+                {
                   "type": "CHOICE",
                   "members": [
                     {
                       "type": "SYMBOL",
-                      "name": "_expression"
+                      "name": "named_field"
                     },
                     {
                       "type": "SYMBOL",
-                      "name": "named_field"
+                      "name": "implicit_named_field"
                     }
                   ]
                 },
@@ -3412,11 +3535,11 @@
                         "members": [
                           {
                             "type": "SYMBOL",
-                            "name": "_expression"
+                            "name": "named_field"
                           },
                           {
                             "type": "SYMBOL",
-                            "name": "named_field"
+                            "name": "implicit_named_field"
                           }
                         ]
                       }
@@ -7310,6 +7433,10 @@
     [
       "optional_parameter",
       "named_field"
+    ],
+    [
+      "keyword_parameters",
+      "implicit_named_field"
     ],
     [
       "_primary_expression",
