@@ -286,10 +286,6 @@
           "named": true
         },
         {
-          "type": "implicit_named_argument",
-          "named": true
-        },
-        {
           "type": "named_argument",
           "named": true
         }
@@ -1219,44 +1215,6 @@
         },
         {
           "type": "short_function_definition",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "implicit_named_argument",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "field_expression",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "implicit_named_field",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "field_expression",
-          "named": true
-        },
-        {
-          "type": "identifier",
           "named": true
         }
       ]
@@ -2315,10 +2273,6 @@
       "types": [
         {
           "type": "_expression",
-          "named": true
-        },
-        {
-          "type": "implicit_named_field",
           "named": true
         },
         {

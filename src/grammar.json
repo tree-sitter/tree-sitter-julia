@@ -2620,13 +2620,8 @@
                       "type": "CHOICE",
                       "members": [
                         {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "SYMBOL",
-                            "name": "implicit_named_field"
-                          },
-                          "named": true,
-                          "value": "implicit_named_argument"
+                          "type": "SYMBOL",
+                          "name": "_implicit_named_field"
                         },
                         {
                           "type": "ALIAS",
@@ -2652,13 +2647,8 @@
                             "type": "CHOICE",
                             "members": [
                               {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "SYMBOL",
-                                  "name": "implicit_named_field"
-                                },
-                                "named": true,
-                                "value": "implicit_named_argument"
+                                "type": "SYMBOL",
+                                "name": "_implicit_named_field"
                               },
                               {
                                 "type": "ALIAS",
@@ -2854,7 +2844,7 @@
         }
       ]
     },
-    "implicit_named_field": {
+    "_implicit_named_field": {
       "type": "CHOICE",
       "members": [
         {
@@ -3509,42 +3499,47 @@
                   "value": ";"
                 },
                 {
-                  "type": "CHOICE",
+                  "type": "SEQ",
                   "members": [
                     {
-                      "type": "SYMBOL",
-                      "name": "named_field"
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "named_field"
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "_implicit_named_field"
+                        }
+                      ]
                     },
                     {
-                      "type": "SYMBOL",
-                      "name": "implicit_named_field"
-                    }
-                  ]
-                },
-                {
-                  "type": "REPEAT1",
-                  "content": {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "STRING",
-                        "value": ","
-                      },
-                      {
-                        "type": "CHOICE",
+                      "type": "REPEAT",
+                      "content": {
+                        "type": "SEQ",
                         "members": [
                           {
-                            "type": "SYMBOL",
-                            "name": "named_field"
+                            "type": "STRING",
+                            "value": ","
                           },
                           {
-                            "type": "SYMBOL",
-                            "name": "implicit_named_field"
+                            "type": "CHOICE",
+                            "members": [
+                              {
+                                "type": "SYMBOL",
+                                "name": "named_field"
+                              },
+                              {
+                                "type": "SYMBOL",
+                                "name": "_implicit_named_field"
+                              }
+                            ]
                           }
                         ]
                       }
-                    ]
-                  }
+                    }
+                  ]
                 },
                 {
                   "type": "CHOICE",
@@ -7436,7 +7431,7 @@
     ],
     [
       "keyword_parameters",
-      "implicit_named_field"
+      "_implicit_named_field"
     ],
     [
       "_primary_expression",

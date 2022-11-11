@@ -111,7 +111,7 @@ grammar({
     [$._primary_expression, $.named_field, $.optional_parameter],
     [$._primary_expression, $.named_field],
     [$.optional_parameter, $.named_field],
-    [$.keyword_parameters, $.implicit_named_field],
+    [$.keyword_parameters, $._implicit_named_field],
 
     [$._primary_expression, $.scoped_identifier],
   ],
@@ -601,7 +601,7 @@ grammar({
       optional(seq(
         ';',
         sep1(',', choice(
-            alias($.implicit_named_field, $.implicit_named_argument),
+            $._implicit_named_field,
             alias($.named_field, $.named_argument),
           )
         )
@@ -633,7 +633,7 @@ grammar({
       $._expression
     ),
 
-    implicit_named_field: $ => choice(
+    _implicit_named_field: $ => choice(
       $.identifier,
       $.field_expression,
     ),
@@ -711,18 +711,19 @@ grammar({
           repeat1(seq(',', $._expression)),
           optional(',')
         ),
+       // named tuple with named fields
         seq(
           $.named_field,
           repeat1(seq(',', $.named_field)),
           optional(',')
-        ), // named tuple with named fields
+        ),
         ';', // empty named tuple
+        // named tuple with leading semicolon and implicit fields
         seq(
           ';',
-          choice($.named_field, $.implicit_named_field),
-          repeat1(seq(',', choice($.named_field, $.implicit_named_field))),
-          optional(',')
-        ) // named tuple with leading semicolon and implicit fields
+          sep1(',', choice($.named_field, $._implicit_named_field)),
+          optional(','),
+        ),
       ),
       ')'
     ),
