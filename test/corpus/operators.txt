@@ -4,45 +4,44 @@ assignment operators
 
 a = b
 a .. b = a * b
-c &= d ÷= e
 tup = 1, 2, 3
 car, cdr... = list
+c &= d ÷= e
 
 ---
 (source_file
-  (assignment_expression
+  (assignment
     (identifier)
     (operator)
     (identifier))
 
-  (assignment_expression
+  (assignment
     (binary_expression (identifier) (operator) (identifier))
     (operator)
     (binary_expression (identifier) (operator) (identifier)))
 
-  (assignment_expression
+  (assignment
     (identifier)
     (operator)
-    (assignment_expression
-      (identifier)
-      (operator)
-      (identifier)))
-
-  (assignment_expression
-    (identifier)
-    (operator)
-    (bare_tuple_expression
+    (bare_tuple
       (integer_literal)
       (integer_literal)
       (integer_literal)))
 
-  (assignment_expression
-    (bare_tuple_expression
+  (assignment
+    (bare_tuple
       (identifier)
       (spread_expression (identifier)))
     (operator)
-    (identifier)))
+    (identifier))
 
+  (compound_assignment_expression
+    (identifier)
+    (operator)
+    (compound_assignment_expression
+      (identifier)
+      (operator)
+      (identifier))))
 
 ==============================
 binary operators
@@ -98,7 +97,7 @@ a & b | c
     (identifier))
 
   ; LA
-  (assignment_expression
+  (assignment
     (identifier)
     (operator)
     (binary_expression
@@ -227,7 +226,7 @@ x = batch_size == 1 ?
 ---
 
 (source_file
-  (assignment_expression
+  (assignment
     (identifier)
     (operator)
     (ternary_expression
@@ -247,11 +246,11 @@ foo(^, ÷, -)
 
 ---
 (source_file
-  (assignment_expression
+  (assignment
     (identifier)
     (operator)
     (operator))
-  (assignment_expression
+  (assignment
     (operator)
     (operator)
     (operator))

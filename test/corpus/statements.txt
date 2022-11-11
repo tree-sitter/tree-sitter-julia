@@ -38,8 +38,8 @@ end
 (source_file
   (quote_statement)
   (quote_statement
-    (assignment_expression (identifier) (operator) (integer_literal))
-    (assignment_expression (identifier) (operator) (integer_literal))
+    (assignment (identifier) (operator) (integer_literal))
+    (assignment (identifier) (operator) (integer_literal))
     (binary_expression (identifier) (operator) (identifier))))
 
 
@@ -59,9 +59,9 @@ end
 (source_file
   (let_statement)
   (let_statement
-    (variable_declaration (identifier) (identifier))
-    (variable_declaration (identifier))
-    (variable_declaration (identifier) (identifier))
+    (let_binding (identifier) (identifier))
+    (let_binding (identifier))
+    (let_binding (identifier) (identifier))
     (identifier)))
 
 
@@ -242,21 +242,7 @@ return a, b, c
   (return_statement)
   (return_statement (identifier))
   (return_statement (binary_expression (identifier) (operator) (identifier)))
-  (return_statement (bare_tuple_expression (identifier) (identifier) (identifier))))
-
-
-===============================
-Const statements
-===============================
-
-const x, y = 5
-
----
-
-(source_file
-  (const_statement
-    (variable_declaration (identifier))
-    (variable_declaration (identifier) (integer_literal))))
+  (return_statement (bare_tuple (identifier) (identifier) (identifier))))
 
 
 ==============================
@@ -319,3 +305,57 @@ import LinearAlgebra as la
   ;; Alias
   (import_statement (import_alias (identifier) (identifier))))
 
+
+===============================
+const declarations
+===============================
+
+const x = 5
+const y, z = 1, 2
+
+---
+
+(source_file
+  (const_declaration
+    (assignment (identifier) (operator) (integer_literal)))
+  (const_declaration
+    (assignment
+    (bare_tuple (identifier) (identifier))
+    (operator)
+    (bare_tuple (integer_literal) (integer_literal)))))
+
+
+===============================
+local declarations
+===============================
+
+local x
+local y, z = 1, 2
+
+---
+
+(source_file
+  (local_declaration (identifier))
+  (local_declaration
+    (assignment
+    (bare_tuple (identifier) (identifier))
+    (operator)
+    (bare_tuple (integer_literal) (integer_literal)))))
+
+
+===============================
+global declarations
+===============================
+
+global X
+global Y, Z = 11, 42
+
+---
+
+(source_file
+  (global_declaration (identifier))
+  (global_declaration
+    (assignment
+    (bare_tuple (identifier) (identifier))
+    (operator)
+    (bare_tuple (integer_literal) (integer_literal)))))
