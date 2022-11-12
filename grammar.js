@@ -220,6 +220,7 @@ grammar({
         $.identifier,
         $.operator,
         $.scoped_identifier,
+        seq('(', alias($.typed_parameter, $.function_object), ')'),
       )),
       field('type_parameters', optional($.type_parameter_list)),
       $._immediate_paren,
@@ -237,6 +238,7 @@ grammar({
         $.identifier,
         $.type_parameter_list,
       ),
+      optional($.subtype_clause),
     ),
 
     macro_definition: $ => seq(
@@ -257,7 +259,8 @@ grammar({
         $.identifier,
         $.slurp_parameter,
         $.optional_parameter,
-        $.typed_parameter
+        $.typed_parameter,
+        $.tuple_expression,
       )),
       optional($.keyword_parameters),
       ')'
@@ -287,7 +290,8 @@ grammar({
     typed_parameter: $ => seq(
       optional(field('parameter', $.identifier)),
       '::',
-      field('type', $._primary_expression)
+      field('type', $._primary_expression),
+      optional($.where_clause),
     ),
 
     type_parameter_list: $ => seq(
