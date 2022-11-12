@@ -452,6 +452,14 @@
           "named": true
         },
         {
+          "type": "prefixed_command_literal",
+          "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
+          "named": true
+        },
+        {
           "type": "quote_expression",
           "named": true
         },
@@ -531,6 +539,14 @@
           "named": true
         },
         {
+          "type": "prefixed_command_literal",
+          "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
+          "named": true
+        },
+        {
           "type": "quote_expression",
           "named": true
         },
@@ -592,7 +608,19 @@
       "required": true,
       "types": [
         {
+          "type": "array_comprehension_expression",
+          "named": true
+        },
+        {
+          "type": "array_expression",
+          "named": true
+        },
+        {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "generator_expression",
           "named": true
         },
         {
@@ -604,7 +632,23 @@
           "named": true
         },
         {
+          "type": "matrix_expression",
+          "named": true
+        },
+        {
           "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "prefixed_command_literal",
+          "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
+          "named": true
+        },
+        {
+          "type": "tuple_expression",
           "named": true
         }
       ]
@@ -725,6 +769,10 @@
           },
           {
             "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "prefixed_command_literal",
             "named": true
           },
           {
@@ -929,6 +977,14 @@
             "named": true
           },
           {
+            "type": "prefixed_command_literal",
+            "named": true
+          },
+          {
+            "type": "prefixed_string_literal",
+            "named": true
+          },
+          {
             "type": "quote_expression",
             "named": true
           },
@@ -1120,6 +1176,10 @@
           },
           {
             "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "prefixed_command_literal",
             "named": true
           },
           {
@@ -1395,6 +1455,14 @@
           },
           {
             "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "prefixed_command_literal",
+            "named": true
+          },
+          {
+            "type": "prefixed_string_literal",
             "named": true
           },
           {
@@ -1859,6 +1927,14 @@
             "named": true
           },
           {
+            "type": "prefixed_command_literal",
+            "named": true
+          },
+          {
+            "type": "prefixed_string_literal",
+            "named": true
+          },
+          {
             "type": "quote_expression",
             "named": true
           },
@@ -2253,6 +2329,10 @@
             "named": true
           },
           {
+            "type": "prefixed_command_literal",
+            "named": true
+          },
+          {
             "type": "prefixed_string_literal",
             "named": true
           },
@@ -2625,6 +2705,10 @@
           },
           {
             "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "prefixed_command_literal",
             "named": true
           },
           {

@@ -297,10 +297,9 @@ $f[1, 2]
 Coefficient expressions
 ===========================
 
-2x^2 - 3x + 1
-1.5x^2 - .5x + 1
-2^2x
+2x^2 - .3x + 1
 2(x-1)^2 - 3(x-1) + 1
+5u"kg"
 
 ---
 
@@ -312,23 +311,9 @@ Coefficient expressions
         (operator)
         (integer_literal))
       (operator)
-      (coefficient_expression (integer_literal) (identifier)))
-    (operator)
-    (integer_literal))
-  (binary_expression
-    (binary_expression
-      (binary_expression
-        (coefficient_expression (float_literal) (identifier))
-        (operator)
-        (integer_literal))
-      (operator)
       (coefficient_expression (float_literal) (identifier)))
     (operator)
     (integer_literal))
-  (binary_expression
-    (integer_literal)
-    (operator)
-    (coefficient_expression (integer_literal) (identifier)))
   (binary_expression
     (binary_expression
       (binary_expression
@@ -342,7 +327,10 @@ Coefficient expressions
         (integer_literal)
         (parenthesized_expression (binary_expression (identifier) (operator) (integer_literal)))))
     (operator)
-    (integer_literal)))
+    (integer_literal))
+  (coefficient_expression
+    (integer_literal)
+    (prefixed_string_literal (identifier))))
 
 =================
 Tuples
