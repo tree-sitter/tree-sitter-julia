@@ -36,6 +36,7 @@ a()
 b("hi", 2)
 c(d...)
 d(e; f = g)
+h(i; j)
 new{typeof(xs)}(xs)
 
 ---
@@ -45,6 +46,7 @@ new{typeof(xs)}(xs)
   (call_expression (identifier) (argument_list (string_literal) (integer_literal)))
   (call_expression (identifier) (argument_list (spread_expression (identifier))))
   (call_expression (identifier) (argument_list (identifier) (named_argument (identifier) (identifier))))
+  (call_expression (identifier) (argument_list (identifier) (identifier)))
   (call_expression
     (parameterized_identifier
       (identifier)
@@ -202,6 +204,11 @@ Named tuples
 (a = 1)
 (a = 1,)
 (a = 1, b = 2)
+(;)
+(; a)
+(; a = 1)
+(; a = 1, b = 2)
+(; a, foo.b)
 
 ---
 
@@ -212,7 +219,18 @@ Named tuples
     (named_field (identifier) (integer_literal)))
   (tuple_expression
     (named_field (identifier) (integer_literal))
-    (named_field (identifier) (integer_literal))))
+    (named_field (identifier) (integer_literal)))
+  (tuple_expression)
+  (tuple_expression
+    (identifier))
+  (tuple_expression
+    (named_field (identifier) (integer_literal)))
+  (tuple_expression
+    (named_field (identifier) (integer_literal))
+    (named_field (identifier) (integer_literal)))
+  (tuple_expression
+    (identifier)
+    (field_expression (identifier) (identifier))))
 
 =================
 Arrays
