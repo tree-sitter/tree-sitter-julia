@@ -1,7 +1,6 @@
 examples/Flux.jl/src/losses/utils.jl
 examples/Flux.jl/src/layers/conv.jl
 examples/Flux.jl/src/layers/basic.jl
-examples/Flux.jl/src/optimise/optimisers.jl
 examples/Flux.jl/src/cuda/cudnn.jl
 examples/Flux.jl/src/cuda/curnn.jl
 examples/Flux.jl/src/zeros.jl
@@ -28,13 +27,9 @@ examples/Gadfly.jl/src/bincount.jl
 examples/Gadfly.jl/src/poetry.jl
 examples/Gadfly.jl/src/ticks.jl
 examples/Gadfly.jl/src/geom/segment.jl
-examples/Gadfly.jl/src/geom/errorbar.jl
 examples/Gadfly.jl/src/geom/hexbin.jl
 examples/Gadfly.jl/src/geom/bar.jl
-examples/Gadfly.jl/src/geom/ribbon.jl
-examples/Gadfly.jl/src/geom/polygon.jl
 examples/Gadfly.jl/src/geom/subplot.jl
-examples/Gadfly.jl/src/geom/line.jl
 examples/Gadfly.jl/src/geom/rectbin.jl
 examples/Gadfly.jl/src/geom/boxplot.jl
 examples/Gadfly.jl/src/aesthetics.jl

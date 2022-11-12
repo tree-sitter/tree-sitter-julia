@@ -226,10 +226,7 @@ grammar({
       field('parameters', $.parameter_list),
       optional(seq(
         '::',
-        field('return_type', choice(
-          $._primary_expression,
-          $.prefixed_string_literal,
-        )),
+        field('return_type', $._primary_expression),
       )),
       optional($.where_clause),
     ),
@@ -290,7 +287,7 @@ grammar({
     typed_parameter: $ => seq(
       optional(field('parameter', $.identifier)),
       '::',
-      field('type', choice($._primary_expression, $.prefixed_string_literal)),
+      field('type', $._primary_expression)
     ),
 
     type_parameter_list: $ => seq(
@@ -306,10 +303,7 @@ grammar({
     constrained_type_parameter: $ => seq(
       field('type', $.identifier),
       '<:',
-      field('supertype', choice(
-        $._primary_expression,
-        $.prefixed_string_literal
-      )),
+      field('supertype', $._primary_expression),
     ),
 
 
@@ -504,6 +498,8 @@ grammar({
       $.index_expression,
       $.interpolation_expression,
       $.quote_expression,
+      $.prefixed_command_literal,
+      $.prefixed_string_literal,
     ),
 
     // Quotables are primary expressions that can be quoted without additional
@@ -676,7 +672,7 @@ grammar({
     typed_expression: $ => prec(PREC.decl, seq(
       $._expression,
       choice('::', '<:'),
-      choice($.identifier, $.parametrized_type_expression) // FIXME
+      choice($._primary_expression)
     )),
 
     bare_tuple_expression: $ => prec(-1, seq(
@@ -799,8 +795,9 @@ grammar({
         $.float_literal,
       ),
       choice(
-        $.parenthesized_expression,
-        $.identifier
+        $._quotable,
+        $.prefixed_command_literal,
+        $.prefixed_string_literal,
       )
     )),
 
@@ -877,8 +874,6 @@ grammar({
       $.character_literal,
       $.string_literal,
       $.command_literal,
-      $.prefixed_string_literal,
-      $.prefixed_command_literal,
     ),
 
     true: $ => 'true',
@@ -927,7 +922,7 @@ grammar({
         $.escape_sequence,
         /[^'\\]/,
       ),
-      "'",
+      token.immediate("'"),
     ),
 
     string_literal: $ => seq(
@@ -960,7 +955,7 @@ grammar({
       '$',
       choice(
         $.identifier,
-        seq('(', $._expression, ')'),
+        seq(token.immediate('('), $._expression, ')'),
       ),
     ),
 
