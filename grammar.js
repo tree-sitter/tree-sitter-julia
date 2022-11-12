@@ -98,22 +98,20 @@ grammar({
   ],
 
   conflicts: $ => [
-    [$._primary_expression, $._function_signature],
-    [$._primary_expression, $.parameter_list],
-    [$._primary_expression, $.slurp_parameter],
-    [$._primary_expression, $.typed_parameter],
-
-    [$._primary_expression, $.type_parameter_list],
-    [$._primary_expression, $.constrained_type_parameter],
+    [$._quotable, $._function_signature],
+    [$._quotable, $.parameter_list],
+    [$._quotable, $.slurp_parameter],
+    [$._quotable, $.typed_parameter],
 
     [$.parameter_list, $.argument_list],
+    [$.keyword_parameters, $.argument_list],
 
-    [$._primary_expression, $.named_field, $.optional_parameter],
-    [$._primary_expression, $.named_field],
+    [$._quotable, $.named_field, $.optional_parameter],
+    [$._quotable, $.named_field],
     [$.optional_parameter, $.named_field],
     [$.keyword_parameters, $._implicit_named_field],
 
-    [$._primary_expression, $.scoped_identifier],
+    [$._quotable, $.scoped_identifier],
   ],
 
   supertypes: $ => [
@@ -478,92 +476,68 @@ grammar({
     // Expressions
 
     _expression: $ => choice(
-      $._statement,
       $._definition,
+      $._statement,
+      $._literal,
+      $._primary_expression,
+      $.operator,
       $.typed_expression,
       $.pair_expression,
       alias(':', $.operator),
-      $.macro_expression,
+      $.macrocall_expression,
       $.unary_expression,
       $.binary_expression,
       $.ternary_expression,
-      $.generator_expression,
       $.function_expression,
       $.coefficient_expression,
       $.spread_expression,
       $.range_expression,
-      $.quote_expression,
-      $.interpolation_expression,
-      $._primary_expression,
-      $._literal,
-      $.operator,
     ),
 
+    // Primary expressions can be called, indexed, accessed, and type parametrized.
     _primary_expression: $ => choice(
-      $.identifier,
-      $.array_expression,
-      $.array_comprehension_expression,
-      $.matrix_expression,
-      $.call_expression,
-      $.field_expression,
-      $.parenthesized_expression,
-      $.subscript_expression,
-      $.parameterized_identifier,
-      $.tuple_expression,
+      $._quotable,
       $.broadcast_call_expression,
+      $.call_expression,
+      $.parametrized_type_expression,
+      $.field_expression,
+      $.index_expression,
+      $.interpolation_expression,
+      $.quote_expression,
     ),
 
-    bare_tuple_expression: $ => prec(-1, seq(
-      $._expression,
-      repeat1(prec(-1, seq(',', $._expression)))
-    )),
-
-    operator: $ => choice(
-      $._comparison_operator,
-      $._dotty_operator,
-      $._plus_operator,
-      $._times_operator,
-      $._rational_operator,
-      $._bitshift_operator,
-      $._power_operator,
-      $._unary_operator,
+    // Quotables are primary expressions that can be quoted without additional
+    // parentheses.
+    _quotable: $ => choice(
+      $.identifier,
+      $.array_comprehension_expression,
+      $.array_expression,
+      $.generator_expression,
+      $.matrix_expression,
+      $.parenthesized_expression,
+      $.tuple_expression,
     ),
-
-    parenthesized_expression: $ => prec(1, seq(
-      '(', choice($._block, $.spread_expression), ')'
-    )),
 
     field_expression: $ => prec(PREC.dot, seq(
-      $._primary_expression,
+      field('value', $._primary_expression),
       token.immediate('.'),
       $.identifier
     )),
 
-    subscript_expression: $ => seq(
-      choice(
-        $._primary_expression,
-        $._literal,
-      ),
+    index_expression: $ => seq(
+      field('value', $._primary_expression),
       token.immediate('['),
       sep(',', $._expression),
       optional(','),
       ']'
     ),
 
-    typed_expression: $ => prec(PREC.decl, seq(
-      $._expression,
-      choice('::', '<:'),
-      choice($.identifier, $.parameterized_identifier)
-    )),
 
-    parameterized_identifier: $ => seq(
-      choice($.identifier, $.field_expression),
-      $.type_argument_list
-    ),
-
-    type_argument_list: $ => seq(
+    parametrized_type_expression: $ => seq(
+      field('value', $._primary_expression),
       '{',
-      sep1(',', choice($._expression)),
+      sep(',', choice($._expression, $.subtype_clause)),
+      optional(','),
       '}'
     ),
 
@@ -582,7 +556,7 @@ grammar({
       optional($.do_clause)
     )),
 
-    macro_expression: $ => prec.right(seq(
+    macrocall_expression: $ => prec.right(seq(
       $.macro_identifier,
       optional(choice(
         seq($._immediate_paren, $.argument_list),
@@ -602,6 +576,7 @@ grammar({
         ';',
         sep1(',', choice(
             $._implicit_named_field,
+            $.spread_expression,
             alias($.named_field, $.named_argument),
           )
         )
@@ -698,6 +673,17 @@ grammar({
       $._expression
     )),
 
+    typed_expression: $ => prec(PREC.decl, seq(
+      $._expression,
+      choice('::', '<:'),
+      choice($.identifier, $.parametrized_type_expression) // FIXME
+    )),
+
+    bare_tuple_expression: $ => prec(-1, seq(
+      $._expression,
+      repeat1(prec(-1, seq(',', $._expression)))
+    )),
+
     tuple_expression: $ => seq(
       '(',
       choice(
@@ -728,9 +714,16 @@ grammar({
       ')'
     ),
 
+    parenthesized_expression: $ => seq(
+      '(',
+      sep1(';', choice($._expression, $.assignment_expression)),
+      optional(';'),
+      ')'
+    ),
+
     array_expression: $ => seq(
       '[',
-      sep(',', $._expression),
+      sep(',', choice($._expression, $.assignment_expression)),
       optional(','),
       ']'
     ),
@@ -811,15 +804,9 @@ grammar({
       )
     )),
 
-    quote_expression: $ => prec.left(PREC.colon_quote, seq(
-      ':',
-      $._expression
-    )),
+    quote_expression: $ => prec.left(PREC.colon_quote, seq(':', $._quotable)),
 
-    interpolation_expression: $ => prec.left(PREC.colon_quote, seq(
-      '$',
-      $._expression
-    )),
+    interpolation_expression: $ => prec.left(PREC.colon_quote, seq('$', $._quotable)),
 
     // Tokens
 
@@ -845,6 +832,7 @@ grammar({
         '{', '}',
         '&',
         '$',
+        '@',
         ASSIGN_OPERATORS,
         ARROW_OPERATORS,
         COMPARISON_OPERATORS,
@@ -867,6 +855,17 @@ grammar({
       const rest = `[^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`
       return new RegExp(start + rest)
     },
+
+    operator: $ => choice(
+      $._comparison_operator,
+      $._dotty_operator,
+      $._plus_operator,
+      $._times_operator,
+      $._rational_operator,
+      $._bitshift_operator,
+      $._power_operator,
+      $._unary_operator,
+    ),
 
     // Literals
 

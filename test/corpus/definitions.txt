@@ -129,7 +129,7 @@ end
     (subtype_clause (identifier))
     (typed_expression
       (identifier)
-      (parameterized_identifier (identifier) (type_argument_list (identifier))))))
+      (parametrized_type_expression (identifier) (identifier)))))
 
 
 ==============================
@@ -294,7 +294,7 @@ end
   (function_definition
     parameters: (parameter_list
                   (typed_parameter
-                    type: (parameterized_identifier (identifier) (type_argument_list (identifier))))
+                    type: (parametrized_type_expression value: (identifier) (identifier)))
                   (optional_parameter
                     (typed_parameter
                       parameter: (identifier)
@@ -343,8 +343,8 @@ end
                   (identifier)
                   (typed_parameter
                     parameter: (identifier)
-                    type: (field_expression (identifier) (identifier))))
-    return_type: (field_expression (identifier) (identifier))
+                    type: (field_expression value: (identifier) (identifier))))
+    return_type: (field_expression value: (identifier) (identifier))
     (call_expression
       (identifier)
       (argument_list
