@@ -496,6 +496,28 @@
               {
                 "type": "SYMBOL",
                 "name": "scoped_identifier"
+              },
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "("
+                  },
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "typed_parameter"
+                    },
+                    "named": true,
+                    "value": "function_object"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": ")"
+                  }
+                ]
               }
             ]
           }
@@ -586,6 +608,18 @@
               "name": "type_parameter_list"
             }
           ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "subtype_clause"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
@@ -674,6 +708,10 @@
                     {
                       "type": "SYMBOL",
                       "name": "typed_parameter"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "tuple_expression"
                     }
                   ]
                 },
@@ -704,6 +742,10 @@
                           {
                             "type": "SYMBOL",
                             "name": "typed_parameter"
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "tuple_expression"
                           }
                         ]
                       }
@@ -881,6 +923,18 @@
             "type": "SYMBOL",
             "name": "_primary_expression"
           }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "where_clause"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
