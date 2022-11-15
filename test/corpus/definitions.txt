@@ -160,6 +160,9 @@ function fix2(f, x)
     end
 end
 
+function (foo::Foo)()
+end
+
 ---
 
 (source_file
@@ -205,7 +208,14 @@ end
         parameters: (parameter_list (identifier))
         (call_expression
           (identifier)
-          (argument_list (identifier) (identifier)))))))
+          (argument_list (identifier) (identifier))))))
+
+  ;; Function Objects
+  (function_definition
+    name: (function_object
+            parameter: (identifier)
+            type: (identifier))
+    parameters: (parameter_list)))
 
 
 ==============================
@@ -273,6 +283,10 @@ end
 
 function bar(f, xs::Foo.Bar)::Foo.Bar
     map(f, xs)
+end
+
+function swap((x, y))
+    (y, x)
 end
 
 
@@ -349,7 +363,14 @@ end
       (identifier)
       (argument_list
         (identifier)
-        (identifier)))))
+        (identifier))))
+
+  ;; Tuple parameters
+  (function_definition
+    name: (identifier)
+    parameters: (parameter_list (tuple_expression (identifier) (identifier)))
+    (tuple_expression (identifier) (identifier))))
+
 
 
 ==================================================
@@ -366,6 +387,10 @@ end
 f(n::N) where {N <: Integer} = n
 
 Foo{T}(x::T) where {T} = x
+
+function norm(p::Point{T} where T<:Real)
+    norm2(p)
+end
 
 Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m, kwargs)
 
@@ -421,6 +446,21 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
     (where_clause
       (type_parameter_list (identifier)))
     (identifier))
+
+  ;; `where` clauses in parameters
+  (function_definition
+    name: (identifier)
+    parameters: (parameter_list
+                  (typed_parameter
+                    parameter: (identifier)
+                    type: (parametrized_type_expression
+                            value: (identifier)
+                            (identifier))
+                    (where_clause
+                      (identifier)
+                      (subtype_clause
+                        (identifier)))))
+    (call_expression (identifier) (argument_list (identifier))))
 
   ;; Almost everything at once
   (short_function_definition

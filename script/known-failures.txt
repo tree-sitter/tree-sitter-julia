@@ -1,7 +1,4 @@
 examples/Flux.jl/src/losses/utils.jl
-examples/Flux.jl/src/layers/conv.jl
-examples/Flux.jl/src/layers/basic.jl
-examples/Flux.jl/src/cuda/cudnn.jl
 examples/Flux.jl/src/cuda/curnn.jl
 examples/Flux.jl/src/zeros.jl
 examples/Gadfly.jl/test/testscripts/timeseries_month.jl
@@ -17,14 +14,11 @@ examples/Gadfly.jl/test/runtests.jl
 examples/Gadfly.jl/test/regen-precompiles.jl
 examples/Gadfly.jl/test/compare_examples.jl
 examples/Gadfly.jl/src/statistics.jl
-examples/Gadfly.jl/src/dataframes.jl
-examples/Gadfly.jl/src/scale/scales.jl
 examples/Gadfly.jl/src/data.jl
 examples/Gadfly.jl/src/Gadfly.jl
 examples/Gadfly.jl/src/varset.jl
 examples/Gadfly.jl/src/scale.jl
 examples/Gadfly.jl/src/bincount.jl
-examples/Gadfly.jl/src/poetry.jl
 examples/Gadfly.jl/src/ticks.jl
 examples/Gadfly.jl/src/geom/segment.jl
 examples/Gadfly.jl/src/geom/hexbin.jl
@@ -134,7 +128,6 @@ examples/IJulia.jl/deps/build.jl
 examples/IJulia.jl/src/init.jl
 examples/IJulia.jl/src/stdio.jl
 examples/IJulia.jl/src/magics.jl
-examples/IJulia.jl/src/comm_manager.jl
 examples/IJulia.jl/src/execute_request.jl
 examples/IJulia.jl/src/handlers.jl
 examples/IJulia.jl/src/IJulia.jl
