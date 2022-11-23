@@ -730,8 +730,10 @@ grammar({
 
     matrix_expression: $ => prec(-1, seq(
       '[',
-      sep(';', $.matrix_row),
+      optional('\n'),
+      sep(choice(';', '\n'), $.matrix_row),
       optional(';'),
+      optional('\n'),
       ']'
     )),
 

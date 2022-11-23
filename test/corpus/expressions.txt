@@ -404,11 +404,23 @@ Matrices
 [1 2]
 [1 2; 3 4]
 [1 2; 3 4;]
+[1 2
+3 4]
+[
+    1 2
+    3 4
+]
 
 ---
 
 (source_file
   (matrix_expression
+    (matrix_row (integer_literal) (integer_literal)))
+  (matrix_expression
+    (matrix_row (integer_literal) (integer_literal))
+    (matrix_row (integer_literal) (integer_literal)))
+  (matrix_expression
+    (matrix_row (integer_literal) (integer_literal))
     (matrix_row (integer_literal) (integer_literal)))
   (matrix_expression
     (matrix_row (integer_literal) (integer_literal))
