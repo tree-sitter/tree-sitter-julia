@@ -29,15 +29,19 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "assignment_expression"
+                  "name": "_declaration"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "assignment"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "bare_tuple"
                 },
                 {
                   "type": "SYMBOL",
                   "name": "short_function_definition"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "bare_tuple_expression"
                 }
               ]
             },
@@ -59,15 +63,19 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "assignment_expression"
+                        "name": "_declaration"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "assignment"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "bare_tuple"
                       },
                       {
                         "type": "SYMBOL",
                         "name": "short_function_definition"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "bare_tuple_expression"
                       }
                     ]
                   }
@@ -1072,10 +1080,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "const_statement"
-        },
-        {
-          "type": "SYMBOL",
           "name": "export_statement"
         },
         {
@@ -1149,7 +1153,7 @@
               "members": [
                 {
                   "type": "SYMBOL",
-                  "name": "variable_declaration"
+                  "name": "let_binding"
                 },
                 {
                   "type": "REPEAT",
@@ -1162,7 +1166,7 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "variable_declaration"
+                        "name": "let_binding"
                       }
                     ]
                   }
@@ -1195,6 +1199,40 @@
           "value": "end"
         }
       ]
+    },
+    "let_binding": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "identifier"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "="
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_expression"
+                  }
+                ]
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          }
+        ]
+      }
     },
     "if_statement": {
       "type": "SEQ",
@@ -1598,79 +1636,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "bare_tuple_expression"
-                  }
-                ]
-              },
-              {
-                "type": "BLANK"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    "const_statement": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "const"
-        },
-        {
-          "type": "PREC_RIGHT",
-          "value": 0,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "variable_declaration"
-              },
-              {
-                "type": "REPEAT",
-                "content": {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ","
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "variable_declaration"
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      ]
-    },
-    "variable_declaration": {
-      "type": "PREC_RIGHT",
-      "value": 0,
-      "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "SYMBOL",
-            "name": "identifier"
-          },
-          {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": "="
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "_expression"
+                    "name": "bare_tuple"
                   }
                 ]
               },
@@ -2005,6 +1971,10 @@
         {
           "type": "SYMBOL",
           "name": "macrocall_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "compound_assignment_expression"
         },
         {
           "type": "SYMBOL",
@@ -2447,8 +2417,21 @@
           "type": "PREC",
           "value": -1,
           "content": {
-            "type": "SYMBOL",
-            "name": "_expression"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "named_field"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "short_function_definition"
+              }
+            ]
           }
         }
       }
@@ -2800,59 +2783,28 @@
         ]
       }
     },
-    "assignment_expression": {
+    "compound_assignment_expression": {
       "type": "PREC_RIGHT",
       "value": 10,
       "content": {
         "type": "SEQ",
         "members": [
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "bare_tuple_expression"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_primary_expression"
           },
           {
             "type": "ALIAS",
             "content": {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "_assign_operator"
-                },
-                {
-                  "type": "STRING",
-                  "value": "="
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "_assign_operator"
             },
             "named": true,
             "value": "operator"
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "assignment_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "bare_tuple_expression"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_expression"
           }
         ]
       }
@@ -3330,39 +3282,6 @@
         ]
       }
     },
-    "bare_tuple_expression": {
-      "type": "PREC",
-      "value": -1,
-      "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "SYMBOL",
-            "name": "_expression"
-          },
-          {
-            "type": "REPEAT1",
-            "content": {
-              "type": "PREC",
-              "value": -1,
-              "content": {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": ","
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "_expression"
-                  }
-                ]
-              }
-            }
-          }
-        ]
-      }
-    },
     "tuple_expression": {
       "type": "SEQ",
       "members": [
@@ -3576,7 +3495,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "assignment_expression"
+                  "name": "assignment"
                 }
               ]
             },
@@ -3598,7 +3517,7 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "assignment_expression"
+                        "name": "assignment"
                       }
                     ]
                   }
@@ -3639,17 +3558,8 @@
               "type": "SEQ",
               "members": [
                 {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SYMBOL",
-                      "name": "_expression"
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "assignment_expression"
-                    }
-                  ]
+                  "type": "SYMBOL",
+                  "name": "_expression"
                 },
                 {
                   "type": "REPEAT",
@@ -3661,17 +3571,8 @@
                         "value": ","
                       },
                       {
-                        "type": "CHOICE",
-                        "members": [
-                          {
-                            "type": "SYMBOL",
-                            "name": "_expression"
-                          },
-                          {
-                            "type": "SYMBOL",
-                            "name": "assignment_expression"
-                          }
-                        ]
+                        "type": "SYMBOL",
+                        "name": "_expression"
                       }
                     ]
                   }
@@ -3959,7 +3860,11 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "assignment_expression"
+                "name": "assignment"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "bare_tuple"
               }
             ]
           }
@@ -4042,8 +3947,35 @@
             "value": ":"
           },
           {
-            "type": "SYMBOL",
-            "name": "_quotable"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_quotable"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "global"
+                    },
+                    {
+                      "type": "STRING",
+                      "value": "local"
+                    },
+                    {
+                      "type": "STRING",
+                      "value": "end"
+                    }
+                  ]
+                },
+                "named": true,
+                "value": "identifier"
+              }
+            ]
           }
         ]
       }
@@ -4061,6 +3993,240 @@
           {
             "type": "SYMBOL",
             "name": "_quotable"
+          }
+        ]
+      }
+    },
+    "assignment": {
+      "type": "PREC_RIGHT",
+      "value": 10,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_quotable"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "field_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "index_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "interpolation_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "typed_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "operator"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "prefixed_command_literal"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "prefixed_string_literal"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "binary_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "unary_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "bare_tuple"
+              }
+            ]
+          },
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "."
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "="
+                    }
+                  ]
+                }
+              ]
+            },
+            "named": true,
+            "value": "operator"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "assignment"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "bare_tuple"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "_declaration": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "const_declaration"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "local_declaration"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "global_declaration"
+        }
+      ]
+    },
+    "const_declaration": {
+      "type": "PREC_RIGHT",
+      "value": -2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "const"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "assignment"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "identifier"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "global_declaration": {
+      "type": "PREC_RIGHT",
+      "value": -2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "global"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "assignment"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "identifier"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "local_declaration": {
+      "type": "PREC_RIGHT",
+      "value": -2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "local"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "assignment"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "identifier"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "bare_tuple": {
+      "type": "PREC",
+      "value": -1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "_expression"
+          },
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "PREC",
+              "value": -1,
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": ","
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_expression"
+                  }
+                ]
+              }
+            }
           }
         ]
       }
@@ -7513,23 +7679,7 @@
     ],
     [
       "_quotable",
-      "parameter_list"
-    ],
-    [
-      "_quotable",
-      "slurp_parameter"
-    ],
-    [
-      "_quotable",
-      "typed_parameter"
-    ],
-    [
-      "parameter_list",
-      "argument_list"
-    ],
-    [
-      "keyword_parameters",
-      "argument_list"
+      "scoped_identifier"
     ],
     [
       "_quotable",
@@ -7545,12 +7695,32 @@
       "named_field"
     ],
     [
-      "keyword_parameters",
-      "_implicit_named_field"
+      "_quotable",
+      "parameter_list"
     ],
     [
       "_quotable",
-      "scoped_identifier"
+      "typed_parameter"
+    ],
+    [
+      "_quotable",
+      "slurp_parameter"
+    ],
+    [
+      "parameter_list",
+      "argument_list"
+    ],
+    [
+      "keyword_parameters",
+      "tuple_expression"
+    ],
+    [
+      "keyword_parameters",
+      "argument_list"
+    ],
+    [
+      "keyword_parameters",
+      "_implicit_named_field"
     ]
   ],
   "precedences": [],
@@ -7602,9 +7772,10 @@
     "_statement"
   ],
   "supertypes": [
+    "_declaration",
+    "_definition",
     "_expression",
-    "_statement",
-    "_definition"
+    "_statement"
   ]
 }
 

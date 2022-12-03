@@ -214,7 +214,7 @@ end
     (macro_identifier (identifier))
     (macro_argument_list
       (string_literal)
-      (compound_statement (assignment_expression (identifier) (operator) (identifier)))))
+      (compound_statement (assignment (identifier) (operator) (identifier)))))
 
   (macrocall_expression
     (macro_identifier (identifier))
@@ -366,7 +366,7 @@ Named tuples
 
 (source_file
   (parenthesized_expression
-    (assignment_expression (identifier) (operator) (integer_literal)))
+    (assignment (identifier) (operator) (integer_literal)))
   (tuple_expression
     (named_field (identifier) (integer_literal)))
   (tuple_expression
@@ -449,7 +449,7 @@ x -> x^2
     (parameter_list)
     (parenthesized_expression
       (call_expression (identifier) (argument_list (float_literal)))
-      (assignment_expression (identifier) (operator) (integer_literal))
+      (compound_assignment_expression (identifier) (operator) (integer_literal))
       (identifier))))
 
 ============================
