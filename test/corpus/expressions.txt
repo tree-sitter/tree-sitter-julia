@@ -367,20 +367,20 @@ Named tuples
 (source_file
   (parenthesized_expression
     (assignment (identifier) (operator) (integer_literal)))
-  (tuple_expression
+  (named_tuple_expression
     (named_field (identifier) (integer_literal)))
-  (tuple_expression
+  (named_tuple_expression
     (named_field (identifier) (integer_literal))
     (named_field (identifier) (integer_literal)))
-  (tuple_expression)
-  (tuple_expression
+  (named_tuple_expression)
+  (named_tuple_expression
     (identifier))
-  (tuple_expression
+  (named_tuple_expression
     (named_field (identifier) (integer_literal)))
-  (tuple_expression
+  (named_tuple_expression
     (named_field (identifier) (integer_literal))
     (named_field (identifier) (integer_literal)))
-  (tuple_expression
+  (named_tuple_expression
     (identifier)
     (field_expression (identifier) (identifier))))
 
