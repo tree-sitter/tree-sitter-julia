@@ -85,6 +85,7 @@ module.exports = grammar({
   externals: $ => [
     $.block_comment,
     $._immediate_paren,
+    $._immediate_bracket,
 
     $._string_start,
     $._command_start,
@@ -511,8 +512,8 @@ module.exports = grammar({
     // parentheses.
     _quotable: $ => choice(
       $.identifier,
-      $.array_comprehension_expression,
-      $.array_expression,
+      $.comprehension_expression,
+      $.vector_expression,
       $.generator_expression,
       $.matrix_expression,
       $.parenthesized_expression,
@@ -528,10 +529,8 @@ module.exports = grammar({
 
     index_expression: $ => seq(
       field('value', $._primary_expression),
-      token.immediate('['),
-      sep(',', $._expression),
-      optional(','),
-      ']'
+      $._immediate_bracket,
+      $.vector_expression,
     ),
 
 
@@ -713,7 +712,7 @@ module.exports = grammar({
       $._comprehension_clause,
     ),
 
-    array_expression: $ => seq(
+    vector_expression: $ => seq(
       '[',
       sep(',', $._expression),
       optional(','),
@@ -729,7 +728,7 @@ module.exports = grammar({
 
     matrix_row: $ => repeat1(prec(-1, $._expression)),
 
-    array_comprehension_expression: $ => seq(
+    comprehension_expression: $ => seq(
       '[',
       $._expression,
       $._comprehension_clause,

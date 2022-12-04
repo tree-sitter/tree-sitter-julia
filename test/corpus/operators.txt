@@ -186,7 +186,7 @@ unary operators
   (unary_expression (operator) (identifier))
   (unary_expression (operator) (identifier))
   (unary_expression (operator) (integer_literal))
-  (unary_expression (array_expression (identifier) (identifier)) (operator))
+  (unary_expression (vector_expression (identifier) (identifier)) (operator))
   (binary_expression
     (unary_expression (operator) (identifier))
     (operator)
@@ -212,7 +212,7 @@ a .* b .+ c
     (identifier))
   (unary_expression
     (operator)
-    (array_expression (identifier))))
+    (vector_expression (identifier))))
 
 
 ==============================
