@@ -530,7 +530,12 @@ module.exports = grammar({
     index_expression: $ => seq(
       field('value', $._primary_expression),
       $._immediate_bracket,
-      $.vector_expression,
+      // There's no way to distinguish between typed arrays and index_expression
+      choice(
+        $.comprehension_expression,
+        $.matrix_expression,
+        $.vector_expression,
+      ),
     ),
 
 
@@ -719,29 +724,41 @@ module.exports = grammar({
       ']'
     ),
 
-    matrix_expression: $ => prec(-1, seq(
+    matrix_expression: $ => seq(
       '[',
-      sep(';', $.matrix_row),
-      optional(';'),
+      choice(
+        /;+/,
+        seq($.matrix_row, $._terminator),
+        seq(
+          sep1($._terminator, $.matrix_row),
+          optional($._terminator),
+        ),
+      ),
       ']'
-    )),
+    ),
 
     matrix_row: $ => repeat1(prec(-1, $._expression)),
 
     comprehension_expression: $ => seq(
       '[',
       $._expression,
+      optional('\n'),
       $._comprehension_clause,
+      optional('\n'),
       ']'
     ),
 
-    _comprehension_clause: $ => seq(
+    _comprehension_clause: $ => prec.right(seq(
       $.for_clause,
-      repeat(choice(
-        $.for_clause,
-        $.if_clause
-      ))
-    ),
+      repeat(seq(
+        optional('\n'),
+        choice(
+          $.for_clause,
+          $.if_clause,
+        ),
+      )),
+      optional('\n'),
+    )),
 
     if_clause: $ => seq(
       'if',
@@ -1039,7 +1056,7 @@ module.exports = grammar({
 
     _assign_operator: $ => token(choice(':=', '~', '$=', addDots(ASSIGN_OPERATORS))),
 
-    _terminator: $ => choice('\n', ';'),
+    _terminator: $ => choice(/;+/, '\n'),
 
     line_comment: $ => token(seq('#', /.*/))
   }
