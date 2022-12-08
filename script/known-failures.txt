@@ -1,4 +1,3 @@
-examples/Flux.jl/test/layers/conv.jl
 examples/Flux.jl/src/losses/utils.jl
 examples/Flux.jl/src/cuda/curnn.jl
 examples/Flux.jl/src/zeros.jl
@@ -10,19 +9,11 @@ examples/Gadfly.jl/src/statistics.jl
 examples/Gadfly.jl/src/Gadfly.jl
 examples/Gadfly.jl/src/varset.jl
 examples/Gadfly.jl/src/scale.jl
-examples/Gadfly.jl/src/geom/segment.jl
-examples/Gadfly.jl/src/geom/bar.jl
-examples/Gadfly.jl/src/geom/subplot.jl
-examples/Gadfly.jl/src/geom/rectbin.jl
-examples/Gadfly.jl/src/geom/boxplot.jl
 examples/Gadfly.jl/src/aesthetics.jl
-examples/Gadfly.jl/src/color_misc.jl
-examples/Gadfly.jl/src/guide.jl
 examples/Mocha.jl/tools/image-classifier.jl
 examples/Mocha.jl/test/layers/inner-product.jl
 examples/Mocha.jl/test/layers/pooling.jl
 examples/Mocha.jl/test/layers/gaussian-kl-loss.jl
-examples/Mocha.jl/test/cuda/padded-copy.jl
 examples/Mocha.jl/test/utils/ref-count.jl
 examples/Mocha.jl/examples/mnist/mnist-demo.jl
 examples/Mocha.jl/benchmarks/parallel-loop/parallel-pool-module.jl

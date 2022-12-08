@@ -642,7 +642,7 @@ module.exports = grammar({
         [prec.left, PREC.rational, $._rational_operator],
         [prec.left, PREC.bitshift, $._bitshift_operator],
         [prec.left, PREC.times, $._times_operator],
-        [prec.left, PREC.plus, choice('+', $._plus_operator)],
+        [prec.left, PREC.plus, choice('+', '-', $._plus_operator)],
         [prec.left, PREC.colon_range, $._dotty_operator],
         [prec.right, PREC.arrow, $._arrow_operator],
         [prec.right, PREC.pipe_left, '<|'],
