@@ -284,7 +284,7 @@ module.exports = grammar({
     ),
 
     optional_parameter: $ => seq(
-      choice($.identifier, $.typed_parameter),
+      choice($.identifier, $.typed_parameter, $.tuple_expression),
       '=',
       $._expression
     ),
@@ -295,7 +295,7 @@ module.exports = grammar({
     ),
 
     typed_parameter: $ => seq(
-      optional(field('parameter', $.identifier)),
+      optional(field('parameter', choice($.identifier, $.tuple_expression))),
       '::',
       field('type', $._primary_expression),
       optional($.where_clause),
@@ -604,7 +604,8 @@ module.exports = grammar({
         $.identifier,
         $.slurp_parameter,
         parenthesize($.optional_parameter),
-        $.typed_parameter
+        $.typed_parameter,
+        $.tuple_expression,
       )),
       $._terminator,
     ),
@@ -823,7 +824,9 @@ module.exports = grammar({
     assignment: $ => prec.right(PREC.assign, seq(
       // LHS
       choice(
-        $._quotable,
+        $.identifier,
+        $.tuple_expression,
+        $.named_tuple_expression,
         // No function calls. Those are parsed as short_function_definition
         $.field_expression,
         $.index_expression,
