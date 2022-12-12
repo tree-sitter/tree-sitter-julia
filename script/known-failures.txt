@@ -1,4 +1,3 @@
-examples/Flux.jl/src/losses/utils.jl
 examples/Gadfly.jl/test/testscripts/timeseries_month.jl
 examples/Gadfly.jl/test/testscripts/contour.jl
 examples/Gadfly.jl/test/testscripts/gridstack_empty_args.jl
@@ -8,12 +7,10 @@ examples/Gadfly.jl/test/testscripts/timeseries_year_3.jl
 examples/Gadfly.jl/test/testscripts/unitful_geoms.jl
 examples/Gadfly.jl/test/testscripts/timeseries_year_1.jl
 examples/Gadfly.jl/test/testscripts/unitful_color.jl
-examples/Gadfly.jl/test/regen-precompiles.jl
 examples/Gadfly.jl/test/compare_examples.jl
 examples/Gadfly.jl/src/statistics.jl
 examples/Gadfly.jl/src/data.jl
 examples/Gadfly.jl/src/Gadfly.jl
-examples/Gadfly.jl/src/varset.jl
 examples/Gadfly.jl/src/scale.jl
 examples/Gadfly.jl/src/bincount.jl
 examples/Gadfly.jl/src/ticks.jl
@@ -40,7 +37,6 @@ examples/Mocha.jl/test/layers/concat.jl
 examples/Mocha.jl/test/layers/convolution.jl
 examples/Mocha.jl/test/utils/ref-count.jl
 examples/Mocha.jl/examples/mnist/mnist-demo.jl
-examples/Mocha.jl/benchmarks/parallel-loop/parallel-pool-module.jl
 examples/Mocha.jl/src/parameter.jl
 examples/Mocha.jl/src/constraints.jl
 examples/Mocha.jl/src/layers/accuracy.jl
@@ -109,11 +105,8 @@ examples/Mocha.jl/src/coffee/validation-performance.jl
 examples/Mocha.jl/src/native.jl
 examples/Mocha.jl/src/solvers.jl
 examples/Mocha.jl/src/exception.jl
-examples/Mocha.jl/src/compatibility.jl
 examples/Mocha.jl/src/backend.jl
 examples/Mocha.jl/src/data-transformers.jl
-examples/IJulia.jl/test/comm.jl
 examples/IJulia.jl/src/init.jl
 examples/IJulia.jl/src/stdio.jl
 examples/IJulia.jl/src/magics.jl
-examples/IJulia.jl/src/execute_request.jl

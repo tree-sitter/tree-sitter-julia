@@ -25,7 +25,7 @@ const PREC = [
 }, {});
 
 const ASSIGN_OPERATORS = `
-  = += -= *= /= //= \\= ^= ÷= %= <<= >>= >>>= |= &= ⊻= ≔ ⩴ ≕
+  += -= *= /= //= \\= ^= ÷= %= <<= >>= >>>= |= &= ⊻= ≔ ⩴ ≕
 `;
 
 const ARROW_OPERATORS = `
@@ -217,10 +217,14 @@ module.exports = grammar({
       'end'
     ),
 
-    short_function_definition: $ => prec(PREC.assign, seq(
+    short_function_definition: $ => prec.right(PREC.assign, seq(
       $._function_signature,
       '=',
-      $._expression,
+      choice(
+        $._expression,
+        $.assignment,
+        $.bare_tuple,
+      ),
     )),
 
     _function_signature: $ => seq(
@@ -270,6 +274,7 @@ module.exports = grammar({
         $.typed_parameter,
         $.tuple_expression,
         $.interpolation_expression,
+        alias($._closed_macrocall_expression, $.macrocall_expression),
       )),
       optional(','),
       optional($.keyword_parameters),
@@ -501,6 +506,7 @@ module.exports = grammar({
       $._quotable,
       $.broadcast_call_expression,
       $.call_expression,
+      alias($._closed_macrocall_expression, $.macrocall_expression),
       $.parametrized_type_expression,
       $.field_expression,
       $.index_expression,
@@ -564,17 +570,30 @@ module.exports = grammar({
       optional($.do_clause)
     )),
 
-    macrocall_expression: $ => prec.right(seq(
+    _closed_macrocall_expression: $ => prec(PREC.call, seq(
+      optional(seq(
+        $._primary_expression,
+        token.immediate('.'),
+      )),
       $.macro_identifier,
-      optional(choice(
-        seq($._immediate_paren, $.argument_list),
-        $.macro_argument_list
-      ))
+      $._immediate_paren,
+      choice($.argument_list, $.generator_expression),
+      optional($.do_clause)
     )),
 
-    macro_argument_list: $ => prec(-1, repeat1(prec(-1, choice(
+    macrocall_expression: $ => prec.right(seq(
+      optional(seq(
+        $._primary_expression,
+        token.immediate('.'),
+      )),
+      $.macro_identifier,
+      optional($.macro_argument_list),
+    )),
+
+    macro_argument_list: $ => prec.left(repeat1(prec(-2, choice(
       $._expression,
-      $.named_field,
+      $.assignment,
+      $.bare_tuple,
       $.short_function_definition,
     )))),
 
@@ -816,6 +835,7 @@ module.exports = grammar({
         // No function calls. Those are parsed as short_function_definition
         $.field_expression,
         $.index_expression,
+        $.parametrized_type_expression,
         $.interpolation_expression,
         $.typed_expression,
         $.operator,
@@ -846,6 +866,7 @@ module.exports = grammar({
       choice(
         $.assignment,
         $.identifier,
+        $.typed_parameter,
       ),
     )),
 
@@ -853,7 +874,9 @@ module.exports = grammar({
       'global',
       choice(
         $.assignment,
+        $.bare_tuple,
         $.identifier,
+        $.typed_parameter,
       ),
     )),
 
@@ -861,7 +884,9 @@ module.exports = grammar({
       'local',
       choice(
         $.assignment,
+        $.bare_tuple,
         $.identifier,
+        $.typed_parameter,
       ),
     )),
 
@@ -877,7 +902,7 @@ module.exports = grammar({
       $.identifier,
       $.operator,
       $.scoped_identifier,
-      alias('.', $.operator)
+      alias(token.immediate('.'), $.operator)
     )),
 
     scoped_identifier: $ => seq(
