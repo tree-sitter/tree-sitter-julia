@@ -8,8 +8,7 @@ const PREC = [
   'comparison',
   'pipe_left',
   'pipe_right',
-  'colon_quote',
-  'colon_range',
+  'colon',
   'plus',
   'times',
   'rational',
@@ -51,7 +50,7 @@ const COMPARISON_OPERATORS = `
   ⫹ ⫺ ⊢ ⊣ ⟂
 `;
 
-const DOTTY_OPERATORS = '… ⁝ ⋮ ⋱ ⋰ ⋯';
+const ELLIPSIS_OPERATORS = '… ⁝ ⋮ ⋱ ⋰ ⋯';
 
 const PLUS_OPERATORS = `
   + - | ⊕ ⊖ ⊞ ⊟ ++ ∪ ∨ ⊔ ± ∓ ∔ ∸ ≂ ≏ ⊎ ⊻ ⊽ ⋎ ⋓ ⧺ ⧻ ⨈
@@ -485,7 +484,6 @@ module.exports = grammar({
       $._primary_expression,
       $.operator,
       $.typed_expression,
-      $.pair_expression,
       alias(':', $.operator),
       $.macrocall_expression,
       $.compound_assignment_expression,
@@ -494,7 +492,7 @@ module.exports = grammar({
       $.ternary_expression,
       $.function_expression,
       $.coefficient_expression,
-      $.spread_expression,
+      $.splat_expression,
       $.range_expression,
     ),
 
@@ -530,6 +528,7 @@ module.exports = grammar({
       choice(
         $.identifier,
         $.interpolation_expression,
+        $.quote_expression,
       ),
     )),
 
@@ -588,7 +587,7 @@ module.exports = grammar({
         ';',
         sep1(',', choice(
           $._implicit_named_field,
-          $.spread_expression,
+          $.splat_expression,
           alias($.named_field, $.named_argument),
         ))
       )),
@@ -624,7 +623,7 @@ module.exports = grammar({
       $.field_expression,
     ),
 
-    spread_expression: $ => prec(PREC.dot, seq($._expression, '...')),
+    splat_expression: $ => prec(PREC.dot, seq($._expression, '...')),
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(
       $._primary_expression,
@@ -633,7 +632,7 @@ module.exports = grammar({
     )),
 
     unary_expression: $ => choice(
-      prec(PREC.prefix, seq(
+      prec.right(PREC.prefix, seq(
         alias($._unary_operator, $.operator),
         $._expression,
       )),
@@ -646,14 +645,15 @@ module.exports = grammar({
         [prec.left, PREC.rational, $._rational_operator],
         [prec.left, PREC.bitshift, $._bitshift_operator],
         [prec.left, PREC.times, $._times_operator],
-        [prec.left, PREC.plus, choice('+', $._plus_operator)],
-        [prec.left, PREC.colon_range, $._dotty_operator],
+        [prec.left, PREC.plus, choice('+', '-', $._plus_operator)],
+        [prec.left, PREC.colon, $._ellipsis_operator],
         [prec.right, PREC.arrow, $._arrow_operator],
-        [prec.right, PREC.pipe_left, '<|'],
-        [prec.left, PREC.pipe_right, '|>'],
+        [prec.right, PREC.pipe_left, $._pipe_left_operator],
+        [prec.left, PREC.pipe_right, $._pipe_right_operator],
         [prec.left, PREC.comparison, choice('in', 'isa', $._comparison_operator)],
         [prec.left, PREC.lazy_or, '||'],
         [prec.left, PREC.lazy_and, '&&'],
+        [prec.right, PREC.pair, $._pair_operator],
       ];
 
       return choice(...table.map(([fn, prec, op]) => fn(prec, seq(
@@ -668,12 +668,6 @@ module.exports = grammar({
       '?',
       $._expression,
       ':',
-      $._expression
-    )),
-
-    pair_expression: $ => prec.right(PREC.pair, seq(
-      $._expression,
-      '=>',
       $._expression
     )),
 
@@ -781,9 +775,9 @@ module.exports = grammar({
       )
     )),
 
-    range_expression: $ => prec.left(PREC.colon_range, seq(
+    range_expression: $ => prec.left(PREC.colon, seq(
       $._expression,
-      ':',
+      token.immediate(':'),
       $._expression
     )),
 
@@ -799,15 +793,18 @@ module.exports = grammar({
       )
     )),
 
-    quote_expression: $ => prec.left(PREC.colon_quote, seq(
+    quote_expression: $ => prec.right(PREC.prefix, seq(
       ':',
       choice(
         $._quotable,
-        alias(choice('global', 'local', 'end'), $.identifier),
+        $.operator,
+        alias(choice('+', '-'), $.operator), // unary-and-binary operators
+        parenthesize('='),
+        alias(token.immediate(choice('global', 'local', 'end')), $.identifier),
       ),
     )),
 
-    interpolation_expression: $ => prec.left(PREC.colon_quote, seq(
+    interpolation_expression: $ => prec.right(PREC.prefix, seq(
       '$',
       $._quotable,
     )),
@@ -886,7 +883,11 @@ module.exports = grammar({
     scoped_identifier: $ => seq(
       choice($.identifier, $.scoped_identifier),
       token.immediate('.'),
-      $.identifier,
+      choice(
+        $.identifier,
+        $.interpolation_expression,
+        $.quote_expression,
+      ),
     ),
 
     identifier: $ => {
@@ -902,7 +903,7 @@ module.exports = grammar({
         ASSIGN_OPERATORS,
         ARROW_OPERATORS,
         COMPARISON_OPERATORS,
-        DOTTY_OPERATORS,
+        ELLIPSIS_OPERATORS,
         PLUS_OPERATORS,
         TIMES_OPERATORS,
         BITSHIFT_OPERATORS,
@@ -923,8 +924,11 @@ module.exports = grammar({
     },
 
     operator: $ => choice(
+      $._pair_operator,
       $._comparison_operator,
-      $._dotty_operator,
+      $._pipe_left_operator,
+      $._pipe_right_operator,
+      $._ellipsis_operator,
       $._plus_operator,
       $._times_operator,
       $._rational_operator,
@@ -1040,13 +1044,19 @@ module.exports = grammar({
 
     _plus_operator: $ => token(addDots(PLUS_OPERATORS)),
 
-    _dotty_operator: $ => token(choice('..', addDots(DOTTY_OPERATORS))),
+    _ellipsis_operator: $ => token(choice('..', addDots(ELLIPSIS_OPERATORS))),
+
+    _pipe_right_operator: $ => token(addDots('<|')),
+
+    _pipe_left_operator: $ => token(addDots('|>')),
 
     _comparison_operator: $ => token(choice('<:', '>:', addDots(COMPARISON_OPERATORS))),
 
     _arrow_operator: $ => token(choice('<--', '-->', '<-->', addDots(ARROW_OPERATORS))),
 
     _assign_operator: $ => token(choice(':=', '~', '$=', addDots(ASSIGN_OPERATORS))),
+
+    _pair_operator: $ => token(addDots('=>')),
 
     _terminator: $ => choice('\n', ';'),
 
