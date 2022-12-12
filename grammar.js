@@ -114,6 +114,7 @@ module.exports = grammar({
     [$._quotable, $.parameter_list],
     [$._quotable, $.typed_parameter],
     [$._quotable, $.slurp_parameter],
+    [$._quotable, $.optional_parameter],
     [$.parameter_list, $.argument_list],
 
     [$.keyword_parameters, $.tuple_expression],
@@ -228,7 +229,7 @@ module.exports = grammar({
         $.identifier,
         $.operator,
         $.scoped_identifier,
-        seq('(', alias($.typed_parameter, $.function_object), ')'),
+        parenthesize(alias($.typed_parameter, $.function_object)),
       )),
       field('type_parameters', optional($.type_parameter_list)),
       $._immediate_paren,
@@ -261,8 +262,7 @@ module.exports = grammar({
       'end'
     ),
 
-    parameter_list: $ => seq(
-      '(',
+    parameter_list: $ => parenthesize(
       sep(',', choice(
         $.identifier,
         $.slurp_parameter,
@@ -270,8 +270,8 @@ module.exports = grammar({
         $.typed_parameter,
         $.tuple_expression,
       )),
+      optional(','),
       optional($.keyword_parameters),
-      ')'
     ),
 
     keyword_parameters: $ => seq(
@@ -280,12 +280,13 @@ module.exports = grammar({
         $.identifier,
         $.slurp_parameter,
         $.optional_parameter,
-        $.typed_parameter
-      ))
+        $.typed_parameter,
+      )),
+      optional(','),
     ),
 
     optional_parameter: $ => seq(
-      choice($.identifier, $.typed_parameter),
+      choice($.identifier, $.typed_parameter, $.tuple_expression),
       '=',
       $._expression
     ),
@@ -296,7 +297,7 @@ module.exports = grammar({
     ),
 
     typed_parameter: $ => seq(
-      optional(field('parameter', $.identifier)),
+      optional(field('parameter', choice($.identifier, $.tuple_expression))),
       '::',
       field('type', $._primary_expression),
       optional($.where_clause),
@@ -573,8 +574,7 @@ module.exports = grammar({
       $.short_function_definition,
     )))),
 
-    argument_list: $ => seq(
-      '(',
+    argument_list: $ => parenthesize(
       sep(',', choice(
         $._expression,
         alias($.named_field, $.named_argument)
@@ -588,7 +588,6 @@ module.exports = grammar({
         ))
       )),
       optional(','),
-      ')'
     ),
 
     do_clause: $ => seq(
@@ -602,8 +601,9 @@ module.exports = grammar({
       sep(',', choice(
         $.identifier,
         $.slurp_parameter,
-        seq('(', $.optional_parameter, ')'),
-        $.typed_parameter
+        parenthesize($.optional_parameter),
+        $.typed_parameter,
+        $.tuple_expression,
       )),
       $._terminator,
     ),
@@ -678,8 +678,7 @@ module.exports = grammar({
       choice($._primary_expression)
     )),
 
-    tuple_expression: $ => seq(
-      '(',
+    tuple_expression: $ => parenthesize(
       choice(
         optional(','),
         seq(
@@ -705,14 +704,11 @@ module.exports = grammar({
           optional(','),
         ),
       ),
-      ')'
     ),
 
-    parenthesized_expression: $ => seq(
-      '(',
+    parenthesized_expression: $ => parenthesize(
       sep1(';', choice($._expression, $.assignment)),
       optional(';'),
-      ')'
     ),
 
     array_expression: $ => seq(
@@ -731,11 +727,9 @@ module.exports = grammar({
 
     matrix_row: $ => repeat1(prec(-1, $._expression)),
 
-    generator_expression: $ => seq(
-      '(',
+    generator_expression: $ => parenthesize(
       $._expression,
       $._comprehension_clause,
-      ')'
     ),
 
     array_comprehension_expression: $ => seq(
@@ -1025,7 +1019,7 @@ module.exports = grammar({
       '$',
       choice(
         $.identifier,
-        seq(token.immediate('('), $._expression, ')'),
+        seq($._immediate_paren, parenthesize($._expression)),
       ),
     ),
 
@@ -1064,10 +1058,14 @@ function sep1(separator, rule) {
 }
 
 function addDots(operatorString) {
-  const operators = operatorString.trim().split(/\s+/)
-  return seq(optional('.'), choice(...operators))
+  const operators = operatorString.trim().split(/\s+/);
+  return seq(optional('.'), choice(...operators));
 }
 
 function numeral(range) {
-  return RegExp(`[${range}]|([${range}][${range}_]*[${range}])`)
+  return RegExp(`[${range}]|([${range}][${range}_]*[${range}])`);
+}
+
+function parenthesize(...rules) {
+  return seq('(', ...rules, ')');
 }
