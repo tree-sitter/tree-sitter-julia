@@ -97,7 +97,6 @@ examples/Mocha.jl/src/cuda/cublas.jl
 examples/Mocha.jl/src/cuda/blob.jl
 examples/Mocha.jl/src/cuda/cudnn.jl
 examples/Mocha.jl/src/cuda/cuda.jl
-examples/Mocha.jl/src/cuda/utils/math.jl
 examples/Mocha.jl/src/cuda/backend.jl
 examples/Mocha.jl/src/solvers/adadelta.jl
 examples/Mocha.jl/src/solvers/policies.jl

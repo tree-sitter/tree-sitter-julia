@@ -107,6 +107,9 @@ module.exports = grammar({
     [$._quotable, $._function_signature],
     [$._quotable, $.scoped_identifier],
 
+    [$._primary_expression, $._function_signature],
+    [$._primary_expression, $.parameter_list],
+
     [$._quotable, $.named_field, $.optional_parameter],
     [$._quotable, $.named_field],
     [$.optional_parameter, $.named_field],
@@ -116,9 +119,6 @@ module.exports = grammar({
     [$._quotable, $.slurp_parameter],
     [$._quotable, $.optional_parameter],
     [$.parameter_list, $.argument_list],
-
-    [$.keyword_parameters, $.tuple_expression],
-    [$.keyword_parameters, $.argument_list],
     [$.keyword_parameters, $._implicit_named_field],
   ],
 
@@ -161,7 +161,7 @@ module.exports = grammar({
 
     module_definition: $ => seq(
       choice('module', 'baremodule'),
-      field('name', $.identifier),
+      field('name', choice($.identifier, $.interpolation_expression)),
       optional($._terminator),
       optional($._block),
       'end'
@@ -170,7 +170,7 @@ module.exports = grammar({
     abstract_definition: $ => seq(
       'abstract',
       'type',
-      field('name', $.identifier),
+      field('name', choice($.identifier, $.interpolation_expression)),
       field('type_parameters', optional($.type_parameter_list)),
       optional($.subtype_clause),
       'end'
@@ -179,7 +179,7 @@ module.exports = grammar({
     primitive_definition: $ => seq(
       'primitive',
       'type',
-      field('name', $.identifier),
+      field('name', choice($.identifier, $.interpolation_expression)),
       field('type_parameters', optional($.type_parameter_list)),
       optional($.subtype_clause),
       alias(numeral('0-9'), $.integer_literal),
@@ -189,7 +189,7 @@ module.exports = grammar({
     struct_definition: $ => seq(
       optional('mutable'),
       'struct',
-      field('name', $.identifier),
+      field('name', choice($.identifier, $.interpolation_expression)),
       field('type_parameters', optional($.type_parameter_list)),
       optional($.subtype_clause),
       optional($._terminator),
@@ -230,6 +230,7 @@ module.exports = grammar({
         $.operator,
         $.scoped_identifier,
         parenthesize(alias($.typed_parameter, $.function_object)),
+        $.interpolation_expression,
       )),
       field('type_parameters', optional($.type_parameter_list)),
       $._immediate_paren,
@@ -269,6 +270,7 @@ module.exports = grammar({
         $.optional_parameter,
         $.typed_parameter,
         $.tuple_expression,
+        $.interpolation_expression,
       )),
       optional(','),
       optional($.keyword_parameters),
@@ -525,7 +527,10 @@ module.exports = grammar({
     field_expression: $ => prec(PREC.dot, seq(
       field('value', $._primary_expression),
       token.immediate('.'),
-      $.identifier
+      choice(
+        $.identifier,
+        $.interpolation_expression,
+      ),
     )),
 
     index_expression: $ => seq(
@@ -1033,7 +1038,7 @@ module.exports = grammar({
 
     _times_operator: $ => token(addDots(TIMES_OPERATORS)),
 
-    _plus_operator: $ => token(choice('$', addDots(PLUS_OPERATORS))),
+    _plus_operator: $ => token(addDots(PLUS_OPERATORS)),
 
     _dotty_operator: $ => token(choice('..', addDots(DOTTY_OPERATORS))),
 

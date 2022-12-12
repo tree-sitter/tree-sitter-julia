@@ -267,6 +267,14 @@ $(obj.field)
 $f(x)
 $f[1, 2]
 
+# Similar definitions in Gadfly/src/varset.jl
+mutable struct $(name)
+  $(vars...)
+end
+function $(name)($(parameters_expr))
+    $(name)($(parsed_vars...))
+end
+
 ---
 
 (source_file
@@ -290,7 +298,25 @@ $f[1, 2]
     (interpolation_expression
       (identifier))
     (integer_literal)
-    (integer_literal)))
+    (integer_literal))
+  (line_comment)
+  (struct_definition
+    (interpolation_expression
+      (parenthesized_expression (identifier)))
+    (interpolation_expression
+      (parenthesized_expression (spread_expression (identifier)))))
+  (function_definition
+    (interpolation_expression
+      (parenthesized_expression (identifier)))
+    (parameter_list
+      (interpolation_expression
+        (parenthesized_expression (identifier))))
+    (call_expression
+      (interpolation_expression
+        (parenthesized_expression (identifier)))
+      (argument_list
+        (interpolation_expression
+          (parenthesized_expression (spread_expression (identifier))))))))
 
 
 ===========================
