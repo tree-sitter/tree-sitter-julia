@@ -84,6 +84,7 @@ module.exports = grammar({
   externals: $ => [
     $.block_comment,
     $._immediate_paren,
+    $._immediate_bracket,
 
     $._string_start,
     $._command_start,
@@ -119,6 +120,8 @@ module.exports = grammar({
     [$._quotable, $.optional_parameter],
     [$.parameter_list, $.argument_list],
     [$.keyword_parameters, $._implicit_named_field],
+
+    [$.matrix_row, $.comprehension_expression],
   ],
 
   supertypes: $ => [
@@ -520,8 +523,8 @@ module.exports = grammar({
     // parentheses.
     _quotable: $ => choice(
       $.identifier,
-      $.array_comprehension_expression,
-      $.array_expression,
+      $.comprehension_expression,
+      $.vector_expression,
       $.generator_expression,
       $.matrix_expression,
       $.parenthesized_expression,
@@ -540,10 +543,12 @@ module.exports = grammar({
 
     index_expression: $ => seq(
       field('value', $._primary_expression),
-      token.immediate('['),
-      sep(',', $._expression),
-      optional(','),
-      ']'
+      $._immediate_bracket,
+      choice(
+        $.comprehension_expression,
+        $.matrix_expression,
+        $.vector_expression,
+      ),
     ),
 
 
@@ -729,7 +734,7 @@ module.exports = grammar({
       optional(';'),
     ),
 
-    array_expression: $ => seq(
+    vector_expression: $ => seq(
       '[',
       sep(',', $._expression),
       optional(','),
@@ -738,8 +743,12 @@ module.exports = grammar({
 
     matrix_expression: $ => prec(-1, seq(
       '[',
-      sep(';', $.matrix_row),
-      optional(';'),
+      choice(
+        // Must allow newlines even if there's already a semicolon.
+        seq($.matrix_row, $._terminator, optional('\n')),
+        sep1(seq($._terminator, optional('\n')), $.matrix_row),
+      ),
+      optional($._terminator),
       ']'
     )),
 
@@ -750,19 +759,25 @@ module.exports = grammar({
       $._comprehension_clause,
     ),
 
-    array_comprehension_expression: $ => seq(
+    comprehension_expression: $ => prec(-1, seq(
       '[',
-      $._expression,
+      choice(
+        $._expression,
+        $.assignment,
+      ),
+      optional($._terminator),
       $._comprehension_clause,
       ']'
-    ),
+    )),
 
     _comprehension_clause: $ => seq(
       $.for_clause,
-      repeat(choice(
+      optional('\n'),
+      sep(optional('\n'), choice(
         $.for_clause,
         $.if_clause
-      ))
+      )),
+      optional('\n'),
     ),
 
     if_clause: $ => seq(
@@ -1083,7 +1098,7 @@ module.exports = grammar({
 
     _pair_operator: $ => token(addDots('=>')),
 
-    _terminator: $ => choice('\n', ';'),
+    _terminator: $ => choice('\n', /;+/),
 
     line_comment: $ => token(seq('#', /.*/))
   }

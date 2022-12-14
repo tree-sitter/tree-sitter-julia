@@ -187,7 +187,7 @@ end
   (for_statement
     (for_binding
       (identifier)
-      (array_expression (integer_literal) (integer_literal) (integer_literal)))
+      (vector_expression (integer_literal) (integer_literal) (integer_literal)))
     (call_expression (identifier) (argument_list (identifier))))
 
   (for_statement
