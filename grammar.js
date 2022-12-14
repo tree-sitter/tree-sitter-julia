@@ -958,9 +958,9 @@ module.exports = grammar({
         .replace(/\\/g, '\\\\')
         .replace(/!/g, '');
 
-      const start = "[_\\p{L}\\p{Nl}∇]"
-      const rest = `[^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`
-      return new RegExp(start + rest)
+      const start = "[_\\p{XID_Start}∇\\p{Emoji}&&[^0-9#*]]";
+      const rest = `[^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`;
+      return new RegExp(start + rest);
     },
 
     operator: $ => choice(
