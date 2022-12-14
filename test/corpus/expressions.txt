@@ -11,10 +11,14 @@ x′
 logŷ
 ϵ
 ŷ
+🙋
+🦀
 
 ---
 
 (source_file
+  (identifier)
+  (identifier)
   (identifier)
   (identifier)
   (identifier)
@@ -37,6 +41,8 @@ bar.x.y.z
 
 (a[1].b().c).d
 
+Base.:+
+
 ---
 
 (source_file
@@ -56,11 +62,16 @@ bar.x.y.z
       (field_expression
         (call_expression
           (field_expression
-            (index_expression (identifier) (integer_literal))
+            (index_expression (identifier) (vector_expression (integer_literal)))
             (identifier))
           (argument_list))
         (identifier)))
-    (identifier)))
+    (identifier))
+
+  (field_expression
+    (identifier)
+    (quote_expression
+      (operator))))
 
 
 ==============================
@@ -74,13 +85,15 @@ a[1, :]
 (source_file
   (index_expression
     (identifier)
-    (integer_literal)
-    (integer_literal)
-    (integer_literal))
+    (vector_expression
+      (integer_literal)
+      (integer_literal)
+      (integer_literal)))
   (index_expression
     (identifier)
-    (integer_literal)
-    (operator)))
+    (vector_expression
+      (integer_literal)
+      (operator))))
 
 
 ==============================
@@ -124,7 +137,7 @@ new{typeof(xs)}(xs)
 (source_file
   (call_expression (identifier) (argument_list))
   (call_expression (identifier) (argument_list (string_literal) (integer_literal)))
-  (call_expression (identifier) (argument_list (spread_expression (identifier))))
+  (call_expression (identifier) (argument_list (splat_expression (identifier))))
 
   (call_expression
     (identifier)
@@ -183,6 +196,12 @@ end
 
 @macroexpand @async accept(socket)
 
+@Meta.dump 1, 2
+Meta.@dump x = 1
+
+f(@nospecialize(x)) = x
+
+
 ---
 
 (source_file
@@ -222,7 +241,26 @@ end
       (macrocall_expression
         (macro_identifier (identifier))
         (macro_argument_list
-          (call_expression (identifier) (argument_list (identifier))))))))
+          (call_expression (identifier) (argument_list (identifier)))))))
+
+  (macrocall_expression
+    (macro_identifier (scoped_identifier (identifier) (identifier)))
+    (macro_argument_list
+      (bare_tuple (integer_literal) (integer_literal))))
+
+  (macrocall_expression
+    (identifier)
+    (macro_identifier (identifier))
+    (macro_argument_list
+      (assignment (identifier) (operator) (integer_literal))))
+
+  (short_function_definition
+    (identifier)
+    (parameter_list
+      (macrocall_expression
+        (macro_identifier (identifier))
+        (argument_list (identifier))))
+    (identifier)))
 
 
 ==============================
@@ -251,7 +289,7 @@ quote expressions
       (identifier)
       (identifier)))
   (quote_expression
-    (array_expression
+    (vector_expression
       (identifier)
       (identifier)
       (identifier))))
@@ -266,6 +304,14 @@ $obj.field
 $(obj.field)
 $f(x)
 $f[1, 2]
+
+# Similar definitions in Gadfly/src/varset.jl
+mutable struct $(name)
+  $(vars...)
+end
+function $(name)($(parameters_expr))
+    $(name)($(parsed_vars...))
+end
 
 ---
 
@@ -289,8 +335,27 @@ $f[1, 2]
   (index_expression
     (interpolation_expression
       (identifier))
-    (integer_literal)
-    (integer_literal)))
+    (vector_expression
+      (integer_literal)
+      (integer_literal)))
+  (line_comment)
+  (struct_definition
+    (interpolation_expression
+      (parenthesized_expression (identifier)))
+    (interpolation_expression
+      (parenthesized_expression (splat_expression (identifier)))))
+  (function_definition
+    (interpolation_expression
+      (parenthesized_expression (identifier)))
+    (parameter_list
+      (interpolation_expression
+        (parenthesized_expression (identifier))))
+    (call_expression
+      (interpolation_expression
+        (parenthesized_expression (identifier)))
+      (argument_list
+        (interpolation_expression
+          (parenthesized_expression (splat_expression (identifier))))))))
 
 
 ===========================
@@ -332,91 +397,6 @@ Coefficient expressions
     (integer_literal)
     (prefixed_string_literal (identifier))))
 
-=================
-Tuples
-=================
-
-()
-(1)
-(1,)
-(2,3,4,)
-
----
-
-(source_file
-  (tuple_expression)
-  (parenthesized_expression (integer_literal))
-  (tuple_expression (integer_literal))
-  (tuple_expression (integer_literal) (integer_literal) (integer_literal)))
-
-=================
-Named tuples
-=================
-
-(a = 1)
-(a = 1,)
-(a = 1, b = 2)
-(;)
-(; a)
-(; a = 1)
-(; a = 1, b = 2)
-(; a, foo.b)
-
----
-
-(source_file
-  (parenthesized_expression
-    (assignment (identifier) (operator) (integer_literal)))
-  (tuple_expression
-    (named_field (identifier) (integer_literal)))
-  (tuple_expression
-    (named_field (identifier) (integer_literal))
-    (named_field (identifier) (integer_literal)))
-  (tuple_expression)
-  (tuple_expression
-    (identifier))
-  (tuple_expression
-    (named_field (identifier) (integer_literal)))
-  (tuple_expression
-    (named_field (identifier) (integer_literal))
-    (named_field (identifier) (integer_literal)))
-  (tuple_expression
-    (identifier)
-    (field_expression (identifier) (identifier))))
-
-=================
-Arrays
-=================
-
-[]
-[1, 2,]
-
----
-
-(source_file
-  (array_expression)
-  (array_expression (integer_literal) (integer_literal)))
-
-=================
-Matrices
-=================
-
-[1 2]
-[1 2; 3 4]
-[1 2; 3 4;]
-
----
-
-(source_file
-  (matrix_expression
-    (matrix_row (integer_literal) (integer_literal)))
-  (matrix_expression
-    (matrix_row (integer_literal) (integer_literal))
-    (matrix_row (integer_literal) (integer_literal)))
-  (matrix_expression
-    (matrix_row (integer_literal) (integer_literal))
-    (matrix_row (integer_literal) (integer_literal))))
-
 
 ====================
 Function expressions
@@ -452,23 +432,3 @@ x -> x^2
       (compound_assignment_expression (identifier) (operator) (integer_literal))
       (identifier))))
 
-============================
-Generator expressions
-============================
-
-(b(c, e) for c in d, e = 5 if e)
-[b(c, e) for c in d for e in f]
-
----
-
-(source_file
-  (generator_expression
-    (call_expression (identifier) (argument_list (identifier) (identifier)))
-    (for_clause
-      (for_binding (identifier) (identifier))
-      (for_binding (identifier) (integer_literal)))
-    (if_clause (identifier)))
-  (array_comprehension_expression
-    (call_expression (identifier) (argument_list (identifier) (identifier)))
-    (for_clause (for_binding (identifier) (identifier)))
-    (for_clause (for_binding (identifier) (identifier)))))

@@ -285,11 +285,6 @@ function bar(f, xs::Foo.Bar)::Foo.Bar
     map(f, xs)
 end
 
-function swap((x, y))
-    (y, x)
-end
-
-
 ---
 
 (source_file
@@ -363,14 +358,53 @@ end
       (identifier)
       (argument_list
         (identifier)
-        (identifier))))
+        (identifier)))))
 
-  ;; Tuple parameters
+
+==================================================
+function definition tuple parameters
+==================================================
+
+function swap((x, y))
+    (y, x)
+end
+
+function f((x, y)=(1,2))
+    (x, y)
+end
+
+function car((x, y)::Tuple{T, T}) where T
+    x
+end
+
+
+---
+(source_file
   (function_definition
     name: (identifier)
     parameters: (parameter_list (tuple_expression (identifier) (identifier)))
-    (tuple_expression (identifier) (identifier))))
+    (tuple_expression (identifier) (identifier)))
 
+
+  (function_definition
+    name: (identifier)
+    parameters: (parameter_list
+                  (optional_parameter
+                    (tuple_expression (identifier) (identifier))
+                    (tuple_expression (integer_literal) (integer_literal))))
+    (tuple_expression (identifier) (identifier)))
+
+  (function_definition
+    name: (identifier)
+    parameters: (parameter_list
+                  (typed_parameter
+                    parameter: (tuple_expression (identifier) (identifier))
+                    type: (parametrized_type_expression
+                            value: (identifier)
+                            (identifier)
+                            (identifier))))
+    (where_clause (identifier))
+    (identifier)))
 
 
 ==================================================
