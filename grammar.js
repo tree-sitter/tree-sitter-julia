@@ -483,26 +483,113 @@ module.exports = grammar({
       )))
     ),
 
-    // Expressions
 
-    _expression: $ => choice(
-      $._definition,
-      $._statement,
-      $._literal,
-      $._primary_expression,
-      $.operator,
-      $.typed_expression,
-      alias(':', $.operator),
-      $.macrocall_expression,
-      $.compound_assignment_expression,
-      $.unary_expression,
-      $.binary_expression,
-      $.ternary_expression,
-      $.function_expression,
-      $.coefficient_expression,
-      $.splat_expression,
-      $.range_expression,
+    // Quotables are expressions that can be quoted without additional parentheses.
+    _quotable: $ => choice(
+      $.identifier,
+      $.comprehension_expression,
+      $.matrix_expression,
+      $.vector_expression,
+      $.generator_expression,
+      $.parenthesized_expression,
+      $.tuple_expression,
     ),
+
+    comprehension_expression: $ => prec(-1, seq(
+      '[',
+      choice(
+        $._expression,
+        $.assignment,
+      ),
+      optional($._terminator),
+      $._comprehension_clause,
+      ']'
+    )),
+
+    _comprehension_clause: $ => seq(
+      $.for_clause,
+      optional('\n'),
+      sep(optional('\n'), choice(
+        $.for_clause,
+        $.if_clause
+      )),
+      optional('\n'),
+    ),
+
+    if_clause: $ => seq(
+      'if',
+      $._expression
+    ),
+
+    for_clause: $ => seq(
+      'for',
+      sep1(',', $.for_binding)
+    ),
+
+    for_binding: $ => seq(
+      choice($.identifier, $.tuple_expression),
+      choice('in', '=', '∈'),
+      $._expression
+    ),
+
+    matrix_expression: $ => prec(-1, seq(
+      '[',
+      choice(
+        // Must allow newlines even if there's already a semicolon.
+        seq($.matrix_row, $._terminator, optional('\n')),
+        sep1(seq($._terminator, optional('\n')), $.matrix_row),
+      ),
+      optional($._terminator),
+      ']'
+    )),
+
+    matrix_row: $ => repeat1(prec(-1, $._expression)),
+
+    vector_expression: $ => seq(
+      '[',
+      sep(',', $._expression),
+      optional(','),
+      ']'
+    ),
+
+    generator_expression: $ => parenthesize(
+      $._expression,
+      $._comprehension_clause,
+    ),
+
+    parenthesized_expression: $ => parenthesize(
+      sep1(';', choice($._expression, $.assignment)),
+      optional(';'),
+    ),
+
+    tuple_expression: $ => parenthesize(
+      choice(
+        optional(','),
+        seq(
+          choice($._expression, $.named_field),
+          ','
+        ),
+        seq(
+          $._expression,
+          repeat1(seq(',', $._expression)),
+          optional(',')
+        ),
+        // named tuple with explicit fields
+        seq(
+          $.named_field,
+          repeat1(seq(',', $.named_field)),
+          optional(',')
+        ),
+        ';', // empty named tuple
+        // named tuple with leading semicolon and implicit fields
+        seq(
+          ';',
+          sep1(',', choice($.named_field, $._implicit_named_field)),
+          optional(','),
+        ),
+      ),
+    ),
+
 
     // Primary expressions can be called, indexed, accessed, and type parametrized.
     _primary_expression: $ => choice(
@@ -517,18 +604,6 @@ module.exports = grammar({
       $.quote_expression,
       $.prefixed_command_literal,
       $.prefixed_string_literal,
-    ),
-
-    // Quotables are primary expressions that can be quoted without additional
-    // parentheses.
-    _quotable: $ => choice(
-      $.identifier,
-      $.comprehension_expression,
-      $.vector_expression,
-      $.generator_expression,
-      $.matrix_expression,
-      $.parenthesized_expression,
-      $.tuple_expression,
     ),
 
     field_expression: $ => prec(PREC.dot, seq(
@@ -550,7 +625,6 @@ module.exports = grammar({
         $.vector_expression,
       ),
     ),
-
 
     parametrized_type_expression: $ => seq(
       field('value', $._primary_expression),
@@ -647,13 +721,44 @@ module.exports = grammar({
       $.field_expression,
     ),
 
-    splat_expression: $ => prec(PREC.dot, seq($._expression, '...')),
-
-    compound_assignment_expression: $ => prec.right(PREC.assign, seq(
-      $._primary_expression,
-      alias($._assign_operator, $.operator),
-      $._expression,
+    interpolation_expression: $ => prec.right(PREC.prefix, seq(
+      '$',
+      $._quotable,
     )),
+
+    quote_expression: $ => prec.right(PREC.prefix, seq(
+      ':',
+      choice(
+        $._quotable,
+        $.operator,
+        alias(choice('+', '-'), $.operator), // unary-and-binary operators
+        parenthesize('='),
+        alias(token.immediate(choice('global', 'local', 'end')), $.identifier),
+      ),
+    )),
+
+
+    // Expressions
+
+    _expression: $ => choice(
+      // All previous rules are expressions
+      $._definition,
+      $._statement,
+      $._literal,
+      $._primary_expression,
+      $.macrocall_expression,
+      $.unary_expression,
+      $.binary_expression,
+      $.range_expression,
+      $.splat_expression,
+      $.ternary_expression,
+      $.typed_expression,
+      $.function_expression,
+      $.coefficient_expression,
+      $.compound_assignment_expression,
+      $.operator,
+      alias(':', $.operator),
+    ),
 
     unary_expression: $ => choice(
       prec.right(PREC.prefix, seq(
@@ -687,6 +792,14 @@ module.exports = grammar({
       ))));
     },
 
+    range_expression: $ => prec.left(PREC.colon, seq(
+      $._expression,
+      token.immediate(':'),
+      $._expression
+    )),
+
+    splat_expression: $ => prec(PREC.dot, seq($._expression, '...')),
+
     ternary_expression: $ => prec.right(PREC.conditional, seq(
       $._expression,
       '?',
@@ -701,101 +814,6 @@ module.exports = grammar({
       choice($._primary_expression)
     )),
 
-    tuple_expression: $ => parenthesize(
-      choice(
-        optional(','),
-        seq(
-          choice($._expression, $.named_field),
-          ','
-        ),
-        seq(
-          $._expression,
-          repeat1(seq(',', $._expression)),
-          optional(',')
-        ),
-        // named tuple with explicit fields
-        seq(
-          $.named_field,
-          repeat1(seq(',', $.named_field)),
-          optional(',')
-        ),
-        ';', // empty named tuple
-        // named tuple with leading semicolon and implicit fields
-        seq(
-          ';',
-          sep1(',', choice($.named_field, $._implicit_named_field)),
-          optional(','),
-        ),
-      ),
-    ),
-
-    parenthesized_expression: $ => parenthesize(
-      sep1(';', choice($._expression, $.assignment)),
-      optional(';'),
-    ),
-
-    vector_expression: $ => seq(
-      '[',
-      sep(',', $._expression),
-      optional(','),
-      ']'
-    ),
-
-    matrix_expression: $ => prec(-1, seq(
-      '[',
-      choice(
-        // Must allow newlines even if there's already a semicolon.
-        seq($.matrix_row, $._terminator, optional('\n')),
-        sep1(seq($._terminator, optional('\n')), $.matrix_row),
-      ),
-      optional($._terminator),
-      ']'
-    )),
-
-    matrix_row: $ => repeat1(prec(-1, $._expression)),
-
-    generator_expression: $ => parenthesize(
-      $._expression,
-      $._comprehension_clause,
-    ),
-
-    comprehension_expression: $ => prec(-1, seq(
-      '[',
-      choice(
-        $._expression,
-        $.assignment,
-      ),
-      optional($._terminator),
-      $._comprehension_clause,
-      ']'
-    )),
-
-    _comprehension_clause: $ => seq(
-      $.for_clause,
-      optional('\n'),
-      sep(optional('\n'), choice(
-        $.for_clause,
-        $.if_clause
-      )),
-      optional('\n'),
-    ),
-
-    if_clause: $ => seq(
-      'if',
-      $._expression
-    ),
-
-    for_clause: $ => seq(
-      'for',
-      sep1(',', $.for_binding)
-    ),
-
-    for_binding: $ => seq(
-      choice($.identifier, $.tuple_expression),
-      choice('in', '=', '∈'),
-      $._expression
-    ),
-
     function_expression: $ => prec.right(PREC.arrow, seq(
       choice(
         $.identifier,
@@ -807,12 +825,6 @@ module.exports = grammar({
         $.assignment,
         $.bare_tuple,
       )
-    )),
-
-    range_expression: $ => prec.left(PREC.colon, seq(
-      $._expression,
-      token.immediate(':'),
-      $._expression
     )),
 
     coefficient_expression: $ => prec(PREC.call, seq(
@@ -827,21 +839,14 @@ module.exports = grammar({
       )
     )),
 
-    quote_expression: $ => prec.right(PREC.prefix, seq(
-      ':',
-      choice(
-        $._quotable,
-        $.operator,
-        alias(choice('+', '-'), $.operator), // unary-and-binary operators
-        parenthesize('='),
-        alias(token.immediate(choice('global', 'local', 'end')), $.identifier),
-      ),
+    compound_assignment_expression: $ => prec.right(PREC.assign, seq(
+      $._primary_expression,
+      alias($._assign_operator, $.operator),
+      $._expression,
     )),
 
-    interpolation_expression: $ => prec.right(PREC.prefix, seq(
-      '$',
-      $._quotable,
-    )),
+
+    // Assignments and declarations
 
     assignment: $ => prec.right(PREC.assign, seq(
       // LHS
@@ -932,14 +937,14 @@ module.exports = grammar({
 
     identifier: $ => {
       const operators = [
+        '$',
+        '&',
         ',',
-        ';',
         ':',
+        ';',
+        '@',
         '(', ')',
         '{', '}',
-        '&',
-        '$',
-        '@',
         ASSIGN_OPERATORS,
         ARROW_OPERATORS,
         COMPARISON_OPERATORS,
