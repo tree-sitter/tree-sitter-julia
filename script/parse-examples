@@ -21,10 +21,10 @@ function fixture() {
   )
 }
 
-fixture https://github.com/FluxML/Flux.jl f3c9ab71bc4ec19bc95f0cd67ac63616254b65a3
-fixture https://github.com/pluskid/Mocha.jl 5e15b882d7dd615b0c5159bb6fde2cc040b2d8ee
-fixture https://github.com/JuliaLang/IJulia.jl ad459e8d46a908c6b923cafa79572a610e2869bb
-fixture https://github.com/GiovineItalia/Gadfly.jl f759d9c76b2a983eff314e307825cbcc7e2e5055
+fixture https://github.com/FluxML/Flux.jl 3518aa1dd1f0415ed0a13352f2327743f7284c8e # "0.13.9"
+fixture https://github.com/GiovineItalia/Gadfly.jl 0bec09d30eca618e10c64fe383024211629c0c65 # 1.3.4
+fixture https://github.com/JuliaLang/IJulia.jl 5ad43a3507d3bb427014efd09d8efe19279336e0 # "1.23.3"
+fixture https://github.com/fonsp/Pluto.jl 74dfb33d68ac2f6a4ebb5affec019669d154b1a9 # "0.19.18"
 
 all_examples=$(find "examples" -type f -name '*.jl')
 known_failures=$(cat script/known-failures.txt)
