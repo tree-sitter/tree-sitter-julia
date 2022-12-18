@@ -43,6 +43,8 @@ bar.x.y.z
 
 Base.:+
 
+df."a"
+
 ---
 
 (source_file
@@ -71,7 +73,11 @@ Base.:+
   (field_expression
     (identifier)
     (quote_expression
-      (operator))))
+      (operator)))
+
+  (field_expression
+    (identifier)
+    (string_literal)))
 
 
 ==============================
@@ -304,6 +310,7 @@ $obj.field
 $(obj.field)
 $f(x)
 $f[1, 2]
+$"foo"
 
 # Similar definitions in Gadfly/src/varset.jl
 mutable struct $(name)
@@ -338,6 +345,8 @@ end
     (vector_expression
       (integer_literal)
       (integer_literal)))
+  (interpolation_expression (string_literal))
+
   (line_comment)
   (struct_definition
     (interpolation_expression

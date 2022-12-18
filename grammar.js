@@ -70,6 +70,16 @@ const POWER_OPERATORS = `
   ^ ↑ ↓ ⇵ ⟰ ⟱ ⤈ ⤉ ⤊ ⤋ ⤒ ⤓ ⥉ ⥌ ⥍ ⥏ ⥑ ⥔ ⥕ ⥘ ⥙ ⥜ ⥝ ⥠ ⥡ ⥣ ⥥ ⥮ ⥯ ￪ ￬
 `;
 
+const ESCAPE_SEQUENCE = token(seq(
+  '\\',
+  choice(
+    /[^uUx0-7]/,
+    /[uU][0-9a-fA-F]{1,6}/, // unicode codepoints
+    /[0-7]{1,3}/,
+    /x[0-9a-fA-F]{2}/,
+  )
+));
+
 module.exports = grammar({
   name: 'julia',
 
@@ -613,6 +623,10 @@ module.exports = grammar({
         $.identifier,
         $.interpolation_expression,
         $.quote_expression,
+        $.command_literal,
+        $.string_literal,
+        $.prefixed_command_literal,
+        $.prefixed_string_literal,
       ),
     )),
 
@@ -723,16 +737,19 @@ module.exports = grammar({
 
     interpolation_expression: $ => prec.right(PREC.prefix, seq(
       '$',
-      $._quotable,
+      choice(
+        $._literal,
+        $._quotable,
+      ),
     )),
 
     quote_expression: $ => prec.right(PREC.prefix, seq(
       ':',
       choice(
+        $._literal,
         $._quotable,
         $.operator,
         alias(choice('+', '-'), $.operator), // unary-and-binary operators
-        parenthesize('='),
         alias(token.immediate(choice('global', 'local', 'end')), $.identifier),
       ),
     )),
@@ -985,8 +1002,7 @@ module.exports = grammar({
     // Literals
 
     _literal: $ => choice(
-      $.true,
-      $.false,
+      $.boolean_literal,
       $.integer_literal,
       $.float_literal,
       $.character_literal,
@@ -994,8 +1010,7 @@ module.exports = grammar({
       $.command_literal,
     ),
 
-    true: $ => 'true',
-    false: $ => 'false',
+    boolean_literal: $ => choice('true', 'false'),
 
     integer_literal: $ => choice(
       token(seq('0b', numeral('01'))),
@@ -1024,24 +1039,16 @@ module.exports = grammar({
       return token(choice(float, hex_float))
     },
 
-    escape_sequence: $ => token(seq(
-      '\\',
-      token.immediate(choice(
-        /[uU][0-9a-fA-F]{1,6}/, // unicode codepoints
-        /x[0-9a-fA-F]{2}/,
-        /["'`$\\abfnrtv]/,
-        /[0-7]{1,3}/,
-      )),
-    )),
+    escape_sequence: $ => ESCAPE_SEQUENCE,
 
-    character_literal: $ => seq(
+    character_literal: $ => token(seq(
       "'",
       choice(
-        $.escape_sequence,
         /[^'\\]/,
+        ESCAPE_SEQUENCE,
       ),
-      token.immediate("'"),
-    ),
+      "'"
+    )),
 
     string_literal: $ => seq(
       $._string_start,

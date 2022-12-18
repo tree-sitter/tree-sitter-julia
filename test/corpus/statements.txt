@@ -96,7 +96,7 @@ end
     (else_clause))
 
   (if_statement
-    (true)
+    (boolean_literal)
     (integer_literal)
     (else_clause
       (integer_literal)))
@@ -214,7 +214,7 @@ while a(); b(); end
 ---
 
 (source_file
-  (while_statement (true))
+  (while_statement (boolean_literal))
 
   (while_statement
     (binary_expression (identifier) (operator) (integer_literal))

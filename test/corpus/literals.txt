@@ -1,5 +1,5 @@
 ==============================
-true, false
+boolean literals
 ==============================
 
 true
@@ -8,8 +8,8 @@ false
 ---
 
 (source_file
-  (true)
-  (false))
+  (boolean_literal)
+  (boolean_literal))
 
 ==============================
 integer number literals
@@ -77,9 +77,9 @@ character literals
 (source_file
   (character_literal)
   (character_literal)
-  (character_literal (escape_sequence))
-  (character_literal (escape_sequence))
-  (character_literal (escape_sequence)))
+  (character_literal)
+  (character_literal)
+  (character_literal))
 
 
 ==============================
