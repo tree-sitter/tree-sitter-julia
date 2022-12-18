@@ -250,7 +250,7 @@ export statements
 ==============================
 
 export a
-export a, b, +, *
+export a, b, +, (*)
 export @macroMcAtface
 
 ---
@@ -273,7 +273,7 @@ using ..Foo, ..Bar
 
 import CSV, Chain, DataFrames
 
-import Base: show, @kwdef, +, *
+import Base: show, @kwdef, +, (*)
 
 import LinearAlgebra as la
 

@@ -111,14 +111,16 @@ module.exports = grammar({
   // - Short function definitions vs function calls
   // The femptolisp parser makes no distinction between these, but having the
   // distinction is better because it's easier to keep track of formal parameters.
-  //
-  // The other conflicts are there because `identifier` is a `_quotable`.
   conflicts: $ => [
     [$._quotable, $._function_signature],
     [$._quotable, $.scoped_identifier],
 
-    [$._primary_expression, $._function_signature],
-    [$._primary_expression, $.parameter_list],
+    [$._function_signature, $._primary_expression],
+    [$._function_signature, $.parameter_list, $._quotable],
+    [$._function_signature, $._expression],
+
+    [$.parameter_list, $._primary_expression],
+    [$.parameter_list, $.argument_list],
 
     [$._quotable, $.named_field, $.optional_parameter],
     [$._quotable, $.named_field],
@@ -128,7 +130,6 @@ module.exports = grammar({
     [$._quotable, $.typed_parameter],
     [$._quotable, $.slurp_parameter],
     [$._quotable, $.optional_parameter],
-    [$.parameter_list, $.argument_list],
     [$.keyword_parameters, $._implicit_named_field],
 
     [$.matrix_row, $.comprehension_expression],
@@ -245,6 +246,10 @@ module.exports = grammar({
         $.identifier,
         $.operator,
         $.scoped_identifier,
+        parenthesize(choice(
+          $.identifier,
+          $.operator,
+        )),
         parenthesize(alias($.typed_parameter, $.function_object)),
         $.interpolation_expression,
       )),
@@ -450,6 +455,7 @@ module.exports = grammar({
         $.identifier,
         $.macro_identifier,
         $.operator,
+        parenthesize(choice($.identifier, $.operator)),
       ))),
     ),
 
@@ -473,6 +479,7 @@ module.exports = grammar({
       $.identifier,
       $.scoped_identifier,
       $.relative_qualifier,
+      parenthesize(choice($.identifier, $.operator)),
     ),
 
     import_alias: $ => seq($._importable, 'as', $.identifier),
@@ -717,9 +724,13 @@ module.exports = grammar({
       sep(',', choice(
         $.identifier,
         $.slurp_parameter,
-        parenthesize($.optional_parameter),
         $.typed_parameter,
         $.tuple_expression,
+        parenthesize(choice(
+          $.identifier,
+          $.slurp_parameter,
+          $.typed_parameter,
+        )),
       )),
       $._terminator,
     ),
@@ -749,11 +760,16 @@ module.exports = grammar({
         $._literal,
         $._quotable,
         $.operator,
-        alias(choice('+', '-'), $.operator), // unary-and-binary operators
+        alias(choice(
+          '+', '-', // unary-and-binary operators
+          $._lazy_and,
+          $._lazy_or,
+          token.immediate(parenthesize(choice('->', '.', '::', ':=', '='))),
+          token.immediate(choice('->', '.')),
+        ), $.operator),
         alias(token.immediate(choice('global', 'local', 'end')), $.identifier),
       ),
     )),
-
 
     // Expressions
 
@@ -797,8 +813,8 @@ module.exports = grammar({
         [prec.right, PREC.pipe_left, $._pipe_left_operator],
         [prec.left, PREC.pipe_right, $._pipe_right_operator],
         [prec.left, PREC.comparison, choice('in', 'isa', $._comparison_operator)],
-        [prec.left, PREC.lazy_or, '||'],
-        [prec.left, PREC.lazy_and, '&&'],
+        [prec.left, PREC.lazy_or, $._lazy_or],
+        [prec.left, PREC.lazy_and, $._lazy_and],
         [prec.right, PREC.pair, $._pair_operator],
       ];
 
@@ -980,13 +996,18 @@ module.exports = grammar({
         .replace(/\\/g, '\\\\')
         .replace(/!/g, '');
 
-      const start = "[_\\p{XID_Start}∇\\p{Emoji}&&[^0-9#*]]";
+      // Some symbols in Sm and So unicode categories that are identifiers
+      const validMathSymbols = "∂∇∏∑°";
+
+      const start = `[_\\p{XID_Start}${validMathSymbols}\\p{Emoji}&&[^0-9#*]]`;
       const rest = `[^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`;
       return new RegExp(start + rest);
     },
 
     operator: $ => choice(
+      // assignment, && and || pseudo-operators cannot be used as identifiers
       $._pair_operator,
+      $._arrow_operator,
       $._comparison_operator,
       $._pipe_left_operator,
       $._pipe_right_operator,
@@ -1106,9 +1127,13 @@ module.exports = grammar({
 
     _arrow_operator: $ => token(choice('<--', '-->', '<-->', addDots(ARROW_OPERATORS))),
 
-    _assign_operator: $ => token(choice(':=', '~', '$=', addDots(ASSIGN_OPERATORS))),
+    _lazy_and: $ => token(addDots('&&')),
+
+    _lazy_or: $ => token(addDots('||')),
 
     _pair_operator: $ => token(addDots('=>')),
+
+    _assign_operator: $ => token(choice(':=', '~', '$=', addDots(ASSIGN_OPERATORS))),
 
     _terminator: $ => choice('\n', /;+/),
 

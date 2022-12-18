@@ -230,6 +230,8 @@ Base.foo(x) = x
 
 ⊗(x, y) = x * y
 
+(+)(x, y) = x + y
+
 ---
 
 (source_file
@@ -254,6 +256,14 @@ Base.foo(x) = x
       (argument_list
         (integer_literal)
         (identifier))))
+
+  (short_function_definition
+    name: (operator)
+    parameters: (parameter_list (identifier) (identifier))
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier)))
 
   (short_function_definition
     name: (operator)
