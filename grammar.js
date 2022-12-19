@@ -220,6 +220,7 @@ module.exports = grammar({
             $._function_signature,
             field('parameters', $.parameter_list),
           ),
+          optional($._terminator),
           optional($._block),
         ),
         // zero method functions
@@ -280,6 +281,7 @@ module.exports = grammar({
       )),
       $._immediate_paren,
       field('parameters', $.parameter_list),
+      optional($._terminator),
       optional($._block),
       'end'
     ),
@@ -334,6 +336,7 @@ module.exports = grammar({
         $.scoped_identifier,
         $.constrained_type_parameter
       )),
+      optional(','),
       '}'
     ),
 
@@ -361,9 +364,9 @@ module.exports = grammar({
       $.import_statement,
     ),
 
-    compound_statement: $ => seq('begin', optional($._block), 'end'),
+    compound_statement: $ => seq('begin', optional($._terminator), optional($._block), 'end'),
 
-    quote_statement: $ => seq('quote', optional($._block), 'end'),
+    quote_statement: $ => seq('quote', optional($._terminator), optional($._block), 'end'),
 
     let_statement: $ => seq(
       'let',
@@ -397,11 +400,13 @@ module.exports = grammar({
 
     else_clause: $ => seq(
       'else',
+      optional($._terminator),
       optional($._block)
     ),
 
     try_statement: $ => seq(
       'try',
+      optional($._terminator),
       optional($._block),
       optional($.catch_clause),
       optional($.finally_clause),
