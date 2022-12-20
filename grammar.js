@@ -130,7 +130,7 @@ module.exports = grammar({
     [$._quotable, $.typed_parameter],
     [$._quotable, $.slurp_parameter],
     [$._quotable, $.optional_parameter],
-    [$.keyword_parameters, $._implicit_named_field],
+    [$._quotable, $.keyword_parameters],
 
     [$.matrix_row, $.comprehension_expression],
   ],
@@ -584,33 +584,27 @@ module.exports = grammar({
       optional(';'),
     ),
 
-    tuple_expression: $ => parenthesize(
+    tuple_expression: $ => parenthesize(optional(
       choice(
-        optional(','),
+        // Singleton requires comma
         seq(
           choice($._expression, $.named_field),
           ','
         ),
         seq(
-          $._expression,
-          repeat1(seq(',', $._expression)),
+          choice($._expression, $.named_field),
+          repeat1(seq(',', choice($._expression, $.named_field))),
           optional(',')
         ),
-        // named tuple with explicit fields
-        seq(
-          $.named_field,
-          repeat1(seq(',', $.named_field)),
-          optional(',')
-        ),
-        ';', // empty named tuple
-        // named tuple with leading semicolon and implicit fields
+        ';', // Empty NamedTuple
+        // NamedTuple with leading semicolon
         seq(
           ';',
-          sep1(',', choice($.named_field, $._implicit_named_field)),
+          sep1(',', choice($._expression, $.named_field)),
           optional(','),
         ),
       ),
-    ),
+    )),
 
 
     // Primary expressions can be called, indexed, accessed, and type parametrized.
@@ -709,11 +703,10 @@ module.exports = grammar({
       )),
       optional(seq(
         ';',
-        sep1(',', choice(
-          $._implicit_named_field,
-          $.splat_expression,
+        sep(',', choice(
+          $._expression,
           alias($.named_field, $.named_argument),
-        ))
+        )),
       )),
       optional(','),
     ),
@@ -744,11 +737,6 @@ module.exports = grammar({
       $.identifier,
       '=',
       $._expression
-    ),
-
-    _implicit_named_field: $ => choice(
-      $.identifier,
-      $.field_expression,
     ),
 
     interpolation_expression: $ => prec.right(PREC.prefix, seq(
