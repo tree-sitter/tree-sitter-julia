@@ -112,26 +112,30 @@ module.exports = grammar({
   // The femptolisp parser makes no distinction between these, but having the
   // distinction is better because it's easier to keep track of formal parameters.
   conflicts: $ => [
-    [$._quotable, $._function_signature],
-    [$._quotable, $.scoped_identifier],
-
+    [$._function_signature, $._quotable],
     [$._function_signature, $._primary_expression],
     [$._function_signature, $.parameter_list, $._quotable],
     [$._function_signature, $._expression],
-
-    [$.parameter_list, $._primary_expression],
-    [$.parameter_list, $.argument_list],
 
     [$._quotable, $.named_field, $.optional_parameter],
     [$._quotable, $.named_field],
     [$.optional_parameter, $.named_field],
 
-    [$._quotable, $.parameter_list],
     [$._quotable, $.typed_parameter],
     [$._quotable, $.slurp_parameter],
     [$._quotable, $.optional_parameter],
     [$._quotable, $.keyword_parameters],
 
+    [$.parameter_list, $._quotable],
+    [$.parameter_list, $._primary_expression],
+    [$.parameter_list, $.argument_list],
+
+    // // interpolations
+    [$._primary_expression, $.typed_parameter],
+    [$._primary_expression, $.keyword_parameters],
+    [$._primary_expression, $.named_field],
+
+    // Comprehensions with newlines
     [$.matrix_row, $.comprehension_expression],
   ],
 
@@ -246,7 +250,7 @@ module.exports = grammar({
       field('name', choice(
         $.identifier,
         $.operator,
-        $.scoped_identifier,
+        $.field_expression,
         parenthesize(choice(
           $.identifier,
           $.operator,
@@ -277,7 +281,8 @@ module.exports = grammar({
       'macro',
       field('name', choice(
         $.identifier,
-        $.operator
+        $.operator,
+        $.interpolation_expression,
       )),
       $._immediate_paren,
       field('parameters', $.parameter_list),
@@ -307,6 +312,7 @@ module.exports = grammar({
         $.slurp_parameter,
         $.optional_parameter,
         $.typed_parameter,
+        $.interpolation_expression,
       )),
       optional(','),
     ),
@@ -323,7 +329,11 @@ module.exports = grammar({
     ),
 
     typed_parameter: $ => seq(
-      optional(field('parameter', choice($.identifier, $.tuple_expression))),
+      optional(field('parameter', choice(
+        $.identifier,
+        $.tuple_expression,
+        $.interpolation_expression,
+      ))),
       '::',
       field('type', $._primary_expression),
       optional($.where_clause),
@@ -460,6 +470,7 @@ module.exports = grammar({
         $.macro_identifier,
         $.operator,
         parenthesize(choice($.identifier, $.operator)),
+        $.interpolation_expression,
       ))),
     ),
 
@@ -484,6 +495,7 @@ module.exports = grammar({
       $.scoped_identifier,
       $.relative_qualifier,
       parenthesize(choice($.identifier, $.operator)),
+      $.interpolation_expression,
     ),
 
     import_alias: $ => seq($._importable, 'as', $.identifier),
@@ -548,7 +560,12 @@ module.exports = grammar({
     ),
 
     for_binding: $ => seq(
-      choice($.identifier, $.tuple_expression, $.typed_parameter),
+      choice(
+        $.identifier,
+        $.tuple_expression,
+        $.typed_parameter,
+        $.interpolation_expression,
+      ),
       choice('in', '=', '∈'),
       $._expression
     ),
@@ -744,7 +761,10 @@ module.exports = grammar({
     ),
 
     named_field: $ => seq(
-      $.identifier,
+      choice(
+        $.identifier,
+        $.interpolation_expression,
+      ),
       '=',
       choice(
         $._expression,

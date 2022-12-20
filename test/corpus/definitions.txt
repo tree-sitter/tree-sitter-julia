@@ -179,7 +179,7 @@ end
     (identifier))
 
   (function_definition
-    name: (scoped_identifier (identifier) (identifier))
+    name: (field_expression value: (identifier) (identifier))
     parameters: (parameter_list
                   (typed_parameter
                     parameter: (identifier)
@@ -244,7 +244,7 @@ Base.foo(x) = x
       (integer_literal)))
 
   (short_function_definition
-    name: (scoped_identifier (identifier) (identifier))
+    name: (field_expression value: (identifier) (identifier))
     parameters: (parameter_list (identifier))
     (identifier))
 
@@ -508,8 +508,8 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
 
   ;; Almost everything at once
   (short_function_definition
-    name: (scoped_identifier
-      (identifier)
+    name: (field_expression
+      value: (identifier)
       (identifier))
     parameters: (parameter_list
       (typed_parameter
