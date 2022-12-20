@@ -174,19 +174,19 @@ Dict(b => c, d => e)
 unary operators
 ==============================
 
+[a, b]'
 +a
 -b
 √9
-[a, b]'
 !p === !(p)
 1 ++ +2
 
 ---
 (source_file
+  (adjoint_expression (vector_expression (identifier) (identifier)))
   (unary_expression (operator) (identifier))
   (unary_expression (operator) (identifier))
   (unary_expression (operator) (integer_literal))
-  (unary_expression (vector_expression (identifier) (identifier)) (operator))
   (binary_expression
     (unary_expression (operator) (identifier))
     (operator)

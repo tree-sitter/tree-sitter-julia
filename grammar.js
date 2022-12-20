@@ -821,6 +821,7 @@ module.exports = grammar({
       $._literal,
       $._primary_expression,
       $.macrocall_expression,
+      $.adjoint_expression,
       $.unary_expression,
       $.binary_expression,
       $.range_expression,
@@ -834,13 +835,15 @@ module.exports = grammar({
       alias(':', $.operator),
     ),
 
-    unary_expression: $ => choice(
-      prec.right(PREC.prefix, seq(
-        alias($._unary_operator, $.operator),
-        $._expression,
-      )),
-      prec(PREC.postfix, seq($._expression, alias("'", $.operator))),
-    ),
+    adjoint_expression: $ => prec(PREC.postfix, seq(
+      $._expression,
+      token.immediate("'"),
+    )),
+
+    unary_expression: $ => prec.right(PREC.prefix, seq(
+      alias($._unary_operator, $.operator),
+      $._expression,
+    )),
 
     binary_expression: $ => {
       const table = [
@@ -905,6 +908,7 @@ module.exports = grammar({
       choice(
         alias(numeral('0-9'), $.integer_literal),
         $.float_literal,
+        $.adjoint_expression,
       ),
       choice(
         $._quotable,

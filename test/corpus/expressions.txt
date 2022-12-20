@@ -390,6 +390,7 @@ Coefficient expressions
 2x^2 - .3x + 1
 2(x-1)^2 - 3(x-1) + 1
 5u"kg"
+x'x
 
 ---
 
@@ -420,7 +421,10 @@ Coefficient expressions
     (integer_literal))
   (coefficient_expression
     (integer_literal)
-    (prefixed_string_literal (identifier))))
+    (prefixed_string_literal (identifier)))
+  (coefficient_expression
+    (adjoint_expression (identifier))
+    (identifier)))
 
 
 ====================
