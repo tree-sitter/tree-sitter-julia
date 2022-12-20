@@ -103,26 +103,35 @@ a[1, :]
 
 
 ==============================
-type parameterized expressions
+type parametrized expressions
 ==============================
 
 Vector{Int}
 Vector{<:Number}
 $(usertype){T}
 
+{:x} ~ normal(0, 1)
 
 ---
 
 (source_file
   (parametrized_type_expression
     (identifier)
-    (identifier))
+    (curly_expression (identifier)))
   (parametrized_type_expression
     (identifier)
-    (subtype_clause (identifier)))
+    (curly_expression (subtype_clause (identifier))))
   (parametrized_type_expression
     (interpolation_expression (parenthesized_expression (identifier)))
-    (identifier)))
+    (curly_expression (identifier)))
+
+  ; Gen.jl example
+  (compound_assignment_expression
+    (curly_expression (quote_expression (identifier)))
+    (operator)
+    (call_expression
+      (identifier)
+      (argument_list (integer_literal) (integer_literal)))))
 
 
 ==============================
@@ -157,7 +166,8 @@ new{typeof(xs)}(xs)
   (call_expression
     (parametrized_type_expression
       (identifier)
-      (call_expression (identifier) (argument_list (identifier))))
+      (curly_expression
+        (call_expression (identifier) (argument_list (identifier)))))
     (argument_list (identifier))))
 
 

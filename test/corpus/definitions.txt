@@ -129,7 +129,9 @@ end
     (subtype_clause (identifier))
     (typed_expression
       (identifier)
-      (parametrized_type_expression (identifier) (identifier)))))
+      (parametrized_type_expression
+        (identifier)
+        (curly_expression (identifier))))))
 
 
 ==============================
@@ -313,7 +315,8 @@ end
   (function_definition
     parameters: (parameter_list
                   (typed_parameter
-                    type: (parametrized_type_expression value: (identifier) (identifier)))
+                    type: (parametrized_type_expression (identifier)
+                                                        (curly_expression (identifier))))
                   (optional_parameter
                     (typed_parameter
                       parameter: (identifier)
@@ -410,9 +413,8 @@ end
                   (typed_parameter
                     parameter: (tuple_expression (identifier) (identifier))
                     type: (parametrized_type_expression
-                            value: (identifier)
                             (identifier)
-                            (identifier))))
+                            (curly_expression (identifier) (identifier)))))
     (where_clause (identifier))
     (identifier)))
 
@@ -482,7 +484,7 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
   ;; Short function with type parameters
   (short_function_definition
     name: (identifier)
-    type_parameters: (type_parameter_list (identifier))
+    (type_parameter_list (identifier))
     parameters: (parameter_list
                   (typed_parameter
                     parameter: (identifier)
@@ -498,8 +500,8 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                   (typed_parameter
                     parameter: (identifier)
                     type: (parametrized_type_expression
-                            value: (identifier)
-                            (identifier))
+                            (identifier)
+                            (curly_expression (identifier)))
                     (where_clause
                       (identifier)
                       (subtype_clause

@@ -95,6 +95,7 @@ module.exports = grammar({
     $.block_comment,
     $._immediate_paren,
     $._immediate_bracket,
+    $._immediate_brace,
 
     $._string_start,
     $._command_start,
@@ -188,7 +189,7 @@ module.exports = grammar({
       'abstract',
       'type',
       field('name', choice($.identifier, $.interpolation_expression)),
-      field('type_parameters', optional($.type_parameter_list)),
+      optional(seq($._immediate_brace, $.type_parameter_list)),
       optional($.subtype_clause),
       'end'
     ),
@@ -197,7 +198,7 @@ module.exports = grammar({
       'primitive',
       'type',
       field('name', choice($.identifier, $.interpolation_expression)),
-      field('type_parameters', optional($.type_parameter_list)),
+      optional(seq($._immediate_brace, $.type_parameter_list)),
       optional($.subtype_clause),
       alias(numeral('0-9'), $.integer_literal),
       'end'
@@ -207,7 +208,7 @@ module.exports = grammar({
       optional('mutable'),
       'struct',
       field('name', choice($.identifier, $.interpolation_expression)),
-      field('type_parameters', optional($.type_parameter_list)),
+      optional(seq($._immediate_brace, $.type_parameter_list)),
       optional($.subtype_clause),
       optional($._terminator),
       optional($._block),
@@ -258,7 +259,7 @@ module.exports = grammar({
         parenthesize(alias($.typed_parameter, $.function_object)),
         $.interpolation_expression,
       )),
-      field('type_parameters', optional($.type_parameter_list)),
+      optional(seq($._immediate_brace, $.type_parameter_list)),
       $._immediate_paren,
       field('parameters', $.parameter_list),
       optional(seq(
@@ -520,6 +521,7 @@ module.exports = grammar({
     // Quotables are expressions that can be quoted without additional parentheses.
     _quotable: $ => choice(
       $.identifier,
+      $.curly_expression, // Only valid inside macros
       $.comprehension_expression,
       $.matrix_expression,
       $.vector_expression,
@@ -633,6 +635,17 @@ module.exports = grammar({
       ),
     )),
 
+    curly_expression: $ => seq(
+      '{',
+      sep(',', choice(
+        $._expression,
+        $.subtype_clause,
+        alias($.named_field, $.assignment),
+      )),
+      optional(','),
+      '}'
+    ),
+
 
     // Primary expressions can be called, indexed, accessed, and type parametrized.
     _primary_expression: $ => choice(
@@ -664,7 +677,7 @@ module.exports = grammar({
     )),
 
     index_expression: $ => seq(
-      field('value', $._primary_expression),
+      $._primary_expression,
       $._immediate_bracket,
       choice(
         $.comprehension_expression,
@@ -674,11 +687,9 @@ module.exports = grammar({
     ),
 
     parametrized_type_expression: $ => seq(
-      field('value', $._primary_expression),
-      '{',
-      sep(',', choice($._expression, $.subtype_clause)),
-      optional(','),
-      '}'
+      $._primary_expression,
+      $._immediate_brace,
+      $.curly_expression,
     ),
 
     call_expression: $ => prec(PREC.call, seq(
