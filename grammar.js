@@ -223,7 +223,11 @@ module.exports = grammar({
         seq(
           choice(
             $._function_signature,
-            field('parameters', $.parameter_list),
+            // Anonymous function
+            seq(
+              field('parameters', $.parameter_list),
+              repeat($.where_clause),
+            ),
           ),
           optional($._terminator),
           optional($._block),
@@ -266,7 +270,7 @@ module.exports = grammar({
         '::',
         field('return_type', $._primary_expression),
       )),
-      optional($.where_clause),
+      repeat($.where_clause),
     ),
 
     where_clause: $ => seq(

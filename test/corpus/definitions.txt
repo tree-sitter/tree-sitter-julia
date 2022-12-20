@@ -430,7 +430,7 @@ function f(n::N) where {N <: Integer}
     n
 end
 
-f(n::N) where {N <: Integer} = n
+f(n::N, m::M) where {N <: Number} where {M <: Integer} = n^m
 
 Foo{T}(x::T) where {T} = x
 
@@ -472,14 +472,24 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
     parameters: (parameter_list
                   (typed_parameter
                     parameter: (identifier)
+                    type: (identifier))
+                  (typed_parameter
+                    parameter: (identifier)
                     type: (identifier)))
     (where_clause
       (type_parameter_list
         (constrained_type_parameter
           type: (identifier)
           supertype: (identifier))))
-    (identifier))
-
+    (where_clause
+      (type_parameter_list
+        (constrained_type_parameter
+          type: (identifier)
+          supertype: (identifier))))
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier)))
 
   ;; Short function with type parameters
   (short_function_definition
