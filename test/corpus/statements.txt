@@ -60,7 +60,7 @@ end
   (let_statement)
   (let_statement
     (let_binding (identifier) (identifier))
-    (let_binding (identifier))
+    (identifier)
     (let_binding (identifier) (identifier))
     (identifier)))
 

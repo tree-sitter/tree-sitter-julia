@@ -370,16 +370,14 @@ module.exports = grammar({
 
     let_statement: $ => seq(
       'let',
-      sep(',', $.let_binding),
+      sep(',', choice(
+        $.identifier,
+        alias($.named_field, $.let_binding),
+      )),
       $._terminator,
       optional($._block),
       'end'
     ),
-
-    let_binding: $ => prec.right(seq(
-      $.identifier,
-      optional(seq('=', $._expression))
-    )),
 
     if_statement: $ => seq(
       'if',
@@ -450,6 +448,7 @@ module.exports = grammar({
       'return',
       optional(choice(
         $._expression,
+        $.assignment,
         $.bare_tuple,
       ))
     )),
@@ -549,7 +548,7 @@ module.exports = grammar({
     ),
 
     for_binding: $ => seq(
-      choice($.identifier, $.tuple_expression),
+      choice($.identifier, $.tuple_expression, $.typed_parameter),
       choice('in', '=', '∈'),
       $._expression
     ),
@@ -565,11 +564,17 @@ module.exports = grammar({
       ']'
     )),
 
-    matrix_row: $ => repeat1(prec(-1, $._expression)),
+    matrix_row: $ => repeat1(prec(-1, choice(
+      $._expression,
+      alias($.named_field, $.assignment), // JuMP.jl
+    ))),
 
     vector_expression: $ => seq(
       '[',
-      sep(',', $._expression),
+      sep(',', choice(
+      $._expression,
+      alias($.named_field, $.assignment), // JuMP.jl
+      )),
       optional(','),
       ']'
     ),
@@ -580,7 +585,12 @@ module.exports = grammar({
     ),
 
     parenthesized_expression: $ => parenthesize(
-      sep1(';', choice($._expression, $.assignment)),
+      sep1(';', choice(
+        $._declaration,
+        $._expression,
+        $.assignment,
+        $.short_function_definition,
+      )),
       optional(';'),
     ),
 
@@ -736,7 +746,10 @@ module.exports = grammar({
     named_field: $ => seq(
       $.identifier,
       '=',
-      $._expression
+      choice(
+        $._expression,
+        $.named_field,
+      ),
     ),
 
     interpolation_expression: $ => prec.right(PREC.prefix, seq(
@@ -883,6 +896,7 @@ module.exports = grammar({
         $.index_expression,
         $.parametrized_type_expression,
         $.interpolation_expression,
+        $.quote_expression,
         $.typed_expression,
         $.operator,
 
@@ -893,7 +907,7 @@ module.exports = grammar({
         $.unary_expression,
         $.bare_tuple
       ),
-      alias(addDots('='), $.operator),
+      alias('=', $.operator),
       choice(
         $._expression,
         $.assignment,
@@ -1094,7 +1108,10 @@ module.exports = grammar({
       '$',
       choice(
         $.identifier,
-        seq($._immediate_paren, parenthesize($._expression)),
+        seq($._immediate_paren, parenthesize(choice(
+          $._expression,
+          alias($.named_field, $.assignment),
+        ))),
       ),
     ),
 
@@ -1126,7 +1143,7 @@ module.exports = grammar({
 
     _pair_operator: $ => token(addDots('=>')),
 
-    _assign_operator: $ => token(choice(':=', '~', '$=', addDots(ASSIGN_OPERATORS))),
+    _assign_operator: $ => token(choice(':=', '~', '$=', '.=', addDots(ASSIGN_OPERATORS))),
 
     _terminator: $ => choice('\n', /;+/),
 
