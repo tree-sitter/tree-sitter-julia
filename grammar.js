@@ -205,7 +205,7 @@ module.exports = grammar({
       'abstract',
       'type',
       field('name', choice($.identifier, $.interpolation_expression)),
-      optional(seq($._immediate_brace, $.type_parameter_list)),
+      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
       optional($.subtype_clause),
       'end'
     ),
@@ -214,7 +214,7 @@ module.exports = grammar({
       'primitive',
       'type',
       field('name', choice($.identifier, $.interpolation_expression)),
-      optional(seq($._immediate_brace, $.type_parameter_list)),
+      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
       optional($.subtype_clause),
       $.integer_literal,
       'end'
@@ -224,7 +224,7 @@ module.exports = grammar({
       optional('mutable'),
       'struct',
       field('name', choice($.identifier, $.interpolation_expression)),
-      optional(seq($._immediate_brace, $.type_parameter_list)),
+      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
       optional($.subtype_clause),
       optional($._terminator),
       optional($._block),
@@ -279,7 +279,7 @@ module.exports = grammar({
         parenthesize(alias($.typed_parameter, $.function_object)),
         $.interpolation_expression,
       )),
-      optional(seq($._immediate_brace, $.type_parameter_list)),
+      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
       $._immediate_paren,
       field('parameters', $.parameter_list),
       optional(seq(
@@ -291,10 +291,7 @@ module.exports = grammar({
 
     where_clause: $ => seq(
       'where',
-      choice(
-        $.identifier,
-        $.type_parameter_list,
-      ),
+      $._primary_expression,
       optional($.subtype_clause),
     ),
 
@@ -359,24 +356,6 @@ module.exports = grammar({
       field('type', $._primary_expression),
       optional($.where_clause),
     ),
-
-    type_parameter_list: $ => seq(
-      '{',
-      sep1(',', choice(
-        $.identifier,
-        $.scoped_identifier,
-        $.constrained_type_parameter
-      )),
-      optional(','),
-      '}'
-    ),
-
-    constrained_type_parameter: $ => seq(
-      field('type', $.identifier),
-      '<:',
-      field('supertype', $._primary_expression),
-    ),
-
 
     // Statements
 

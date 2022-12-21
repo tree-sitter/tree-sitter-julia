@@ -118,7 +118,7 @@ end
   ;; Parametric subtypes
   (struct_definition
     (identifier)
-    (type_parameter_list (constrained_type_parameter (identifier) (identifier)))
+    (type_parameter_list (typed_expression (identifier) (identifier)))
     (subtype_clause (identifier))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
@@ -460,10 +460,10 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                     parameter: (identifier)
                     type: (identifier)))
     (where_clause
-      (type_parameter_list
-        (constrained_type_parameter
-          type: (identifier)
-          supertype: (identifier))))
+      (curly_expression
+        (typed_expression
+          (identifier)
+          (identifier))))
     (identifier))
 
   ;; Short function `where`
@@ -477,15 +477,15 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                     parameter: (identifier)
                     type: (identifier)))
     (where_clause
-      (type_parameter_list
-        (constrained_type_parameter
-          type: (identifier)
-          supertype: (identifier))))
+      (curly_expression
+        (typed_expression
+          (identifier)
+          (identifier))))
     (where_clause
-      (type_parameter_list
-        (constrained_type_parameter
-          type: (identifier)
-          supertype: (identifier))))
+      (curly_expression
+        (typed_expression
+          (identifier)
+          (identifier))))
     (binary_expression
       (identifier)
       (operator)
@@ -500,7 +500,7 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                     parameter: (identifier)
                     type: (identifier)))
     (where_clause
-      (type_parameter_list (identifier)))
+      (curly_expression (identifier)))
     (identifier))
 
   ;; `where` clauses in parameters
