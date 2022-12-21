@@ -833,6 +833,7 @@ module.exports = grammar({
       $.compound_assignment_expression,
       $.operator,
       alias(':', $.operator),
+      prec(-1, alias('begin', $.identifier)),
     ),
 
     adjoint_expression: $ => prec(PREC.postfix, seq(
