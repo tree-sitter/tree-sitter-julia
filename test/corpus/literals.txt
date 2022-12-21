@@ -112,7 +112,7 @@ band = "Interpol"
   (string_literal
     (string_interpolation (identifier)))
   (string_literal
-    (string_interpolation (coefficient_expression (integer_literal) (identifier))))
+    (string_interpolation (juxtaposition_expression (integer_literal) (identifier))))
   (string_literal
     (string_interpolation
       (string_literal

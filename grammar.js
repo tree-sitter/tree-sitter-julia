@@ -151,6 +151,9 @@ module.exports = grammar({
 
     // Comprehensions with newlines
     [$.matrix_row, $.comprehension_expression],
+
+    [$.juxtaposition_expression, $._literal],
+    [$.juxtaposition_expression, $._expression], // adjoint
   ],
 
   supertypes: $ => [
@@ -213,7 +216,7 @@ module.exports = grammar({
       field('name', choice($.identifier, $.interpolation_expression)),
       optional(seq($._immediate_brace, $.type_parameter_list)),
       optional($.subtype_clause),
-      alias(numeral('0-9'), $.integer_literal),
+      $.integer_literal,
       'end'
     ),
 
@@ -843,7 +846,7 @@ module.exports = grammar({
       $.ternary_expression,
       $.typed_expression,
       $.function_expression,
-      $.coefficient_expression,
+      $.juxtaposition_expression,
       $.compound_assignment_expression,
       $.operator,
       alias(':', $.operator),
@@ -919,18 +922,14 @@ module.exports = grammar({
       )
     )),
 
-    coefficient_expression: $ => prec(PREC.call, seq(
+    juxtaposition_expression: $ => seq(
       choice(
-        alias(numeral('0-9'), $.integer_literal),
+        $.integer_literal,
         $.float_literal,
         $.adjoint_expression,
       ),
-      choice(
-        $._quotable,
-        $.prefixed_command_literal,
-        $.prefixed_string_literal,
-      )
-    )),
+      $._primary_expression,
+    ),
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(
       $._primary_expression,
