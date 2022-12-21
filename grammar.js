@@ -24,6 +24,11 @@ const PREC = [
   return result;
 }, {});
 
+const PREC_TUP = -1;
+const PREC_ARR = PREC_TUP; // Arrays cannot contain bare_tuples
+const PREC_DECL = PREC_TUP - 1; // _declarations can contain bare_tuples
+const PREC_MACROARG = PREC_DECL - 1; // macro_argument_list can contain _declarations
+
 const ASSIGN_OPERATORS = `
   += -= *= /= //= \\= ^= ÷= %= <<= >>= >>>= |= &= ⊻= ≔ ⩴ ≕
 `;
@@ -467,7 +472,7 @@ module.exports = grammar({
 
     continue_statement: $ => 'continue',
 
-    return_statement: $ => prec.right(-2, seq(
+    return_statement: $ => prec.right(PREC_DECL, seq(
       'return',
       optional(choice(
         $._expression,
@@ -542,7 +547,7 @@ module.exports = grammar({
       $.tuple_expression,
     ),
 
-    comprehension_expression: $ => prec(-1, seq(
+    comprehension_expression: $ => prec(PREC_ARR, seq(
       '[',
       choice(
         $._expression,
@@ -584,7 +589,7 @@ module.exports = grammar({
       $._expression
     ),
 
-    matrix_expression: $ => prec(-1, seq(
+    matrix_expression: $ => prec(PREC_ARR, seq(
       '[',
       choice(
         // Must allow newlines even if there's already a semicolon.
@@ -595,7 +600,7 @@ module.exports = grammar({
       ']'
     )),
 
-    matrix_row: $ => repeat1(prec(-1, choice(
+    matrix_row: $ => repeat1(prec(PREC_ARR, choice(
       $._expression,
       alias($.named_field, $.assignment), // JuMP.jl
     ))),
@@ -739,8 +744,9 @@ module.exports = grammar({
       optional($.macro_argument_list),
     )),
 
-    macro_argument_list: $ => prec.left(repeat1(prec(-2, choice(
+    macro_argument_list: $ => prec.left(repeat1(prec(PREC_MACROARG, choice(
       $._expression,
+      $._declaration,
       $.assignment,
       $.bare_tuple,
       $.short_function_definition,
@@ -969,38 +975,38 @@ module.exports = grammar({
       $.global_declaration,
     ),
 
-    const_declaration: $ => prec.right(-2, seq(
+    const_declaration: $ => prec.right(PREC_DECL, seq(
       'const',
       choice(
         $.assignment,
         $.identifier,
-        $.typed_parameter,
+        $.typed_expression,
       ),
     )),
 
-    global_declaration: $ => prec.right(-2, seq(
+    global_declaration: $ => prec.right(PREC_DECL, seq(
       'global',
       choice(
         $.assignment,
         $.bare_tuple,
         $.identifier,
-        $.typed_parameter,
+        $.typed_expression,
       ),
     )),
 
-    local_declaration: $ => prec.right(-2, seq(
+    local_declaration: $ => prec.right(PREC_DECL, seq(
       'local',
       choice(
         $.assignment,
         $.bare_tuple,
         $.identifier,
-        $.typed_parameter,
+        $.typed_expression,
       ),
     )),
 
-    bare_tuple: $ => prec(-1, seq(
+    bare_tuple: $ => prec(PREC_TUP, seq(
       $._expression,
-      repeat1(prec(-1, seq(',', $._expression)))
+      repeat1(prec(PREC_TUP, seq(',', $._expression)))
     )),
 
 
