@@ -67,6 +67,9 @@ vector array collections
 [x,]
 [1, 2]
 
+# Check unary-and-binary-operators
+[x.-y, 2]
+
 ---
 
 (source_file
@@ -74,7 +77,14 @@ vector array collections
   (line_comment)
   (vector_expression (identifier))
   (vector_expression (identifier))
-  (vector_expression (integer_literal) (integer_literal)))
+  (vector_expression (integer_literal) (integer_literal))
+  (line_comment)
+  (vector_expression
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier))
+    (integer_literal)))
 
 
 ==============================

@@ -70,6 +70,14 @@ const POWER_OPERATORS = `
   ^ ↑ ↓ ⇵ ⟰ ⟱ ⤈ ⤉ ⤊ ⤋ ⤒ ⤓ ⥉ ⥌ ⥍ ⥏ ⥑ ⥔ ⥕ ⥘ ⥙ ⥜ ⥝ ⥠ ⥡ ⥣ ⥥ ⥮ ⥯ ￪ ￬
 `;
 
+const BINARY_AND_UNARY_PLUS_OPERATOR = token(addDots('+ - ± ∓'));
+
+const LAZY_AND = token(addDots('&&'));
+
+const LAZY_OR = token(addDots('||'));
+
+const SYNTACTIC_OPERATOR = token(choice('$', '->', '.', '...'));
+
 const ESCAPE_SEQUENCE = token(seq(
   '\\',
   choice(
@@ -801,13 +809,13 @@ module.exports = grammar({
         $._literal,
         $._quotable,
         $.operator,
-        alias(choice(
-          '+', '-', // unary-and-binary operators
-          $._lazy_and,
-          $._lazy_or,
-          token.immediate(parenthesize(choice('->', '.', '::', ':=', '='))),
-          token.immediate(choice('->', '.')),
-        ), $.operator),
+        alias(token.immediate(choice(
+          BINARY_AND_UNARY_PLUS_OPERATOR,
+          LAZY_AND,
+          LAZY_OR,
+          SYNTACTIC_OPERATOR,
+          parenthesize(choice(SYNTACTIC_OPERATOR, '::', ':=', '=')),
+        )), $.operator),
         alias(token.immediate(choice('global', 'local', 'end')), $.identifier),
       ),
     )),
@@ -852,14 +860,14 @@ module.exports = grammar({
         [prec.left, PREC.rational, $._rational_operator],
         [prec.left, PREC.bitshift, $._bitshift_operator],
         [prec.left, PREC.times, $._times_operator],
-        [prec.left, PREC.plus, choice('+', '-', $._plus_operator)],
+        [prec.left, PREC.plus, choice(BINARY_AND_UNARY_PLUS_OPERATOR, $._plus_operator)],
         [prec.left, PREC.colon, $._ellipsis_operator],
         [prec.right, PREC.arrow, $._arrow_operator],
         [prec.right, PREC.pipe_left, $._pipe_left_operator],
         [prec.left, PREC.pipe_right, $._pipe_right_operator],
         [prec.left, PREC.comparison, choice('in', 'isa', $._comparison_operator)],
-        [prec.left, PREC.lazy_or, $._lazy_or],
-        [prec.left, PREC.lazy_and, $._lazy_and],
+        [prec.left, PREC.lazy_or, LAZY_OR],
+        [prec.left, PREC.lazy_and, LAZY_AND],
         [prec.right, PREC.pair, $._pair_operator],
       ];
 
@@ -1179,9 +1187,6 @@ module.exports = grammar({
 
     _arrow_operator: $ => token(choice('<--', '-->', '<-->', addDots(ARROW_OPERATORS))),
 
-    _lazy_and: $ => token(addDots('&&')),
-
-    _lazy_or: $ => token(addDots('||')),
 
     _pair_operator: $ => token(addDots('=>')),
 

@@ -290,6 +290,9 @@ quote expressions
 :(x, y)
 :[x, y, z]
 
+:+
+:->
+:(::)
 
 ---
 (source_file
@@ -308,7 +311,12 @@ quote expressions
     (vector_expression
       (identifier)
       (identifier)
-      (identifier))))
+      (identifier)))
+  ; Operator
+  (quote_expression (operator))
+  ; Syntactic operators
+  (quote_expression (operator))
+  (quote_expression (operator)))
 
 
 ==============================
