@@ -318,6 +318,7 @@ module.exports = grammar({
         $.tuple_expression,
         $.interpolation_expression,
         alias($._closed_macrocall_expression, $.macrocall_expression),
+        $.call_expression, // Gen.jl
       )),
       optional(','),
       optional($.keyword_parameters),
