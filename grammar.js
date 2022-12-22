@@ -1046,7 +1046,7 @@ module.exports = grammar({
     },
 
     operator: $ => choice(
-      // assignment, && and || pseudo-operators cannot be used as identifiers
+      // NOTE: Syntactic operators (&&, +=, etc) cannot be used as identifiers.
       $._pair_operator,
       $._arrow_operator,
       $._comparison_operator,
