@@ -44,21 +44,13 @@ c &= d ÷= e
       (identifier))))
 
 ==============================
-binary operators
+binary arithmetic operators
 ==============================
 
 a + b
 a ++ 1 × b ⥌ 2 → c
-a:(a // b)
-
-a |>
-b
-
+a // b
 x = A \ (v × w)
-
-a & b | c
-(x >>> 16, x >>> 8, x) .& 0xff
-
 
 ---
 (source_file
@@ -81,22 +73,13 @@ a & b | c
     (operator)
     (identifier))
 
-  ; range/rational
-  (range_expression
-    (identifier)
-    (parenthesized_expression
-      (binary_expression
-        (identifier)
-        (operator)
-        (identifier))))
-
-  ; newline
+  ; Rational
   (binary_expression
     (identifier)
     (operator)
     (identifier))
 
-  ; LA
+  ; Linear algebra
   (assignment
     (identifier)
     (operator)
@@ -107,9 +90,27 @@ a & b | c
         (binary_expression
           (identifier)
           (operator)
-          (identifier)))))
+          (identifier))))))
 
-  ; bitwise
+
+==============================
+other binary operators
+==============================
+
+a & b | c
+(x >>> 16, x >>> 8, x) .& 0xff
+
+Dict(b => c, d => e)
+
+a |>
+b
+
+1..10
+(1:10...,)
+
+---
+(source_file
+  ; Bitwise
   (binary_expression
     (binary_expression (identifier) (operator) (identifier))
     (operator)
@@ -120,7 +121,31 @@ a & b | c
       (binary_expression (identifier) (operator) (integer_literal))
       (identifier))
     (operator)
-    (integer_literal)))
+    (integer_literal))
+
+  ; Pairs
+  (call_expression
+    (identifier)
+    (argument_list
+      (binary_expression (identifier) (operator) (identifier))
+      (binary_expression (identifier) (operator) (identifier))))
+
+  ; Pipes (and newline)
+  (binary_expression
+    (identifier)
+    (operator)
+    (identifier))
+
+  ; Ellipses
+  (binary_expression
+    (integer_literal)
+    (operator)
+    (integer_literal))
+  (tuple_expression
+    (splat_expression
+      (range_expression
+        (integer_literal)
+        (integer_literal)))))
 
 
 ==============================
@@ -154,20 +179,6 @@ x ≥ 0 ≥ z
       (integer_literal))
     (operator)
     (identifier)))
-
-==============================
-pair operator
-==============================
-
-Dict(b => c, d => e)
-
----
-(source_file
-  (call_expression
-    (identifier)
-    (argument_list
-      (binary_expression (identifier) (operator) (identifier))
-      (binary_expression (identifier) (operator) (identifier)))))
 
 
 ==============================

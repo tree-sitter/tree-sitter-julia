@@ -873,7 +873,7 @@ module.exports = grammar({
       $._expression
     )),
 
-    splat_expression: $ => prec(PREC.dot, seq($._expression, '...')),
+    splat_expression: $ => prec(PREC.colon, seq($._expression, '...')),
 
     ternary_expression: $ => prec.right(PREC.conditional, seq(
       $._expression,
