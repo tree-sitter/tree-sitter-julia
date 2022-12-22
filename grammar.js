@@ -580,6 +580,7 @@ module.exports = grammar({
         sep1(seq($._terminator, optional('\n')), $.matrix_row),
       ),
       optional($._terminator),
+      optional('\n'),
       ']'
     )),
 

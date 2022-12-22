@@ -100,6 +100,11 @@ matrix array collections
  2
  3
 ]
+[
+ a;
+ b;
+ c;
+]
 [1;; 2;; 3;;; 4;; 5;; 6;;]
 Int[1 2 3 4]
 
@@ -120,6 +125,10 @@ Int[1 2 3 4]
     (matrix_row (integer_literal))
     (matrix_row (integer_literal))
     (matrix_row (integer_literal)))
+  (matrix_expression
+    (matrix_row (identifier))
+    (matrix_row (identifier))
+    (matrix_row (identifier)))
   ; Yes. This is tecnically incorrect. `;;` concatenates along the 2nd dimension.
   (matrix_expression
     (matrix_row (integer_literal))
