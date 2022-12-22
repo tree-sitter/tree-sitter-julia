@@ -1083,21 +1083,36 @@ module.exports = grammar({
     float_literal: $ => {
       const dec = numeral('0-9');
       const hex = numeral('0-9a-fA-F');
-      const float = seq(
-        choice(
-          seq(dec, optional('.'), optional(dec)),
-          seq('.', dec),
-        ),
-        optional(/[eEf][+-]?\d+/), // the exponent doesn't allow underscores
-      )
-      const hex_float = seq(
+      const exponent = /[eEf][+-]?\d+/;
+      const hex_exponent = /p[+-]?\d+/;
+
+      const leading_period = token(seq(
+        '.',
+        dec,
+        optional(exponent),
+      ));
+
+      // This has to be split into two tokens to avoid conflicts with ellipsis
+      const trailing_period = seq(
+        dec,
+        token.immediate(seq(
+          '.',
+          optional(dec),
+          optional(exponent),
+        )),
+      );
+
+      const just_exponent = token(seq(dec, exponent));
+
+      const hex_float = token(seq(
         choice(
           seq('0x', hex, optional('.'), optional(hex)),
           seq('0x.', hex),
         ),
-        /p[+-]?\d+/, // hex floats must always have an exponent
-      )
-      return token(choice(float, hex_float))
+        hex_exponent,
+      ));
+
+      return choice(leading_period, trailing_period, just_exponent, hex_float);
     },
 
     escape_sequence: $ => ESCAPE_SEQUENCE,
