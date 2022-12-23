@@ -2,9 +2,9 @@ const PREC = [
   'assign',
   'pair',
   'conditional',
+  'arrow',
   'lazy_or',
   'lazy_and',
-  'arrow',
   'comparison',
   'pipe_left',
   'pipe_right',
@@ -13,12 +13,13 @@ const PREC = [
   'times',
   'rational',
   'bitshift',
-  'power',
-  'call',
-  'decl',
-  'dot',
-  'postfix',
+  'where',
   'prefix',
+  'postfix',
+  'power',
+  'decl',
+  'call',
+  'dot',
 ].reduce((result, name, index) => {
   result[name] = index + 10;
   return result;
@@ -844,6 +845,7 @@ module.exports = grammar({
       $.function_expression,
       $.juxtaposition_expression,
       $.compound_assignment_expression,
+      $.where_expression,
       $.operator,
       alias(':', $.operator),
       prec(-1, alias('begin', $.identifier)),
@@ -918,14 +920,14 @@ module.exports = grammar({
       )
     )),
 
-    juxtaposition_expression: $ => seq(
+    juxtaposition_expression: $ => prec.left(seq(
       choice(
         $.integer_literal,
         $.float_literal,
         $.adjoint_expression,
       ),
       $._primary_expression,
-    ),
+    )),
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(
       $._primary_expression,
@@ -933,6 +935,11 @@ module.exports = grammar({
       $._expression,
     )),
 
+    where_expression: $ => prec.left(PREC.where, seq(
+      $._expression,
+      'where',
+      $._expression,
+    )),
 
     // Assignments and declarations
 
@@ -1195,14 +1202,13 @@ module.exports = grammar({
 
     _ellipsis_operator: $ => token(choice('..', addDots(ELLIPSIS_OPERATORS))),
 
-    _pipe_right_operator: $ => token(addDots('<|')),
+    _pipe_left_operator: $ => token(addDots('<|')),
 
-    _pipe_left_operator: $ => token(addDots('|>')),
+    _pipe_right_operator: $ => token(addDots('|>')),
 
     _comparison_operator: $ => token(choice('<:', '>:', addDots(COMPARISON_OPERATORS))),
 
     _arrow_operator: $ => token(choice('<--', '-->', '<-->', addDots(ARROW_OPERATORS))),
-
 
     _pair_operator: $ => token(addDots('=>')),
 
