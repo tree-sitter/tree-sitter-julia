@@ -67,6 +67,9 @@ vector array collections
 [x,]
 [1, 2]
 
+# Check unary-and-binary-operators
+[x.-y, 2]
+
 ---
 
 (source_file
@@ -74,7 +77,14 @@ vector array collections
   (line_comment)
   (vector_expression (identifier))
   (vector_expression (identifier))
-  (vector_expression (integer_literal) (integer_literal)))
+  (vector_expression (integer_literal) (integer_literal))
+  (line_comment)
+  (vector_expression
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier))
+    (integer_literal)))
 
 
 ==============================
@@ -89,6 +99,11 @@ matrix array collections
 [1
  2
  3
+]
+[
+ a;
+ b;
+ c;
 ]
 [1;; 2;; 3;;; 4;; 5;; 6;;]
 Int[1 2 3 4]
@@ -110,6 +125,10 @@ Int[1 2 3 4]
     (matrix_row (integer_literal))
     (matrix_row (integer_literal))
     (matrix_row (integer_literal)))
+  (matrix_expression
+    (matrix_row (identifier))
+    (matrix_row (identifier))
+    (matrix_row (identifier)))
   ; Yes. This is tecnically incorrect. `;;` concatenates along the 2nd dimension.
   (matrix_expression
     (matrix_row (integer_literal))

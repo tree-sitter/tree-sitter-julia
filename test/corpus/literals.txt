@@ -1,5 +1,5 @@
 ==============================
-true, false
+boolean literals
 ==============================
 
 true
@@ -8,8 +8,8 @@ false
 ---
 
 (source_file
-  (true)
-  (false))
+  (boolean_literal)
+  (boolean_literal))
 
 ==============================
 integer number literals
@@ -38,10 +38,15 @@ float number literals
 0123456789.
 .0123456789
 0123456789.0123456789
+
 9e10
 9E-1
 9f10
 9f-1
+
+.1e10
+1.1e10
+1.e10
 
 0x0123456789_abcdef.ABCDEFp0
 0x0123456789_abcdef_ABCDEF.p-1
@@ -50,6 +55,9 @@ float number literals
 ----
 
 (source_file
+  (float_literal)
+  (float_literal)
+  (float_literal)
   (float_literal)
   (float_literal)
   (float_literal)
@@ -77,9 +85,9 @@ character literals
 (source_file
   (character_literal)
   (character_literal)
-  (character_literal (escape_sequence))
-  (character_literal (escape_sequence))
-  (character_literal (escape_sequence)))
+  (character_literal)
+  (character_literal)
+  (character_literal))
 
 
 ==============================
@@ -112,7 +120,7 @@ band = "Interpol"
   (string_literal
     (string_interpolation (identifier)))
   (string_literal
-    (string_interpolation (coefficient_expression (integer_literal) (identifier))))
+    (string_interpolation (juxtaposition_expression (integer_literal) (identifier))))
   (string_literal
     (string_interpolation
       (string_literal

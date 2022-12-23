@@ -118,7 +118,7 @@ end
   ;; Parametric subtypes
   (struct_definition
     (identifier)
-    (type_parameter_list (constrained_type_parameter (identifier) (identifier)))
+    (type_parameter_list (typed_expression (identifier) (identifier)))
     (subtype_clause (identifier))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
@@ -129,7 +129,9 @@ end
     (subtype_clause (identifier))
     (typed_expression
       (identifier)
-      (parametrized_type_expression (identifier) (identifier)))))
+      (parametrized_type_expression
+        (identifier)
+        (curly_expression (identifier))))))
 
 
 ==============================
@@ -179,7 +181,7 @@ end
     (identifier))
 
   (function_definition
-    name: (scoped_identifier (identifier) (identifier))
+    name: (field_expression value: (identifier) (identifier))
     parameters: (parameter_list
                   (typed_parameter
                     parameter: (identifier)
@@ -230,6 +232,8 @@ Base.foo(x) = x
 
 ⊗(x, y) = x * y
 
+(+)(x, y) = x + y
+
 ---
 
 (source_file
@@ -242,7 +246,7 @@ Base.foo(x) = x
       (integer_literal)))
 
   (short_function_definition
-    name: (scoped_identifier (identifier) (identifier))
+    name: (field_expression value: (identifier) (identifier))
     parameters: (parameter_list (identifier))
     (identifier))
 
@@ -254,6 +258,14 @@ Base.foo(x) = x
       (argument_list
         (integer_literal)
         (identifier))))
+
+  (short_function_definition
+    name: (operator)
+    parameters: (parameter_list (identifier) (identifier))
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier)))
 
   (short_function_definition
     name: (operator)
@@ -303,7 +315,8 @@ end
   (function_definition
     parameters: (parameter_list
                   (typed_parameter
-                    type: (parametrized_type_expression value: (identifier) (identifier)))
+                    type: (parametrized_type_expression (identifier)
+                                                        (curly_expression (identifier))))
                   (optional_parameter
                     (typed_parameter
                       parameter: (identifier)
@@ -400,9 +413,8 @@ end
                   (typed_parameter
                     parameter: (tuple_expression (identifier) (identifier))
                     type: (parametrized_type_expression
-                            value: (identifier)
                             (identifier)
-                            (identifier))))
+                            (curly_expression (identifier) (identifier)))))
     (where_clause (identifier))
     (identifier)))
 
@@ -418,7 +430,7 @@ function f(n::N) where {N <: Integer}
     n
 end
 
-f(n::N) where {N <: Integer} = n
+f(n::N, m::M) where {N <: Number} where {M <: Integer} = n^m
 
 Foo{T}(x::T) where {T} = x
 
@@ -448,10 +460,10 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                     parameter: (identifier)
                     type: (identifier)))
     (where_clause
-      (type_parameter_list
-        (constrained_type_parameter
-          type: (identifier)
-          supertype: (identifier))))
+      (curly_expression
+        (typed_expression
+          (identifier)
+          (identifier))))
     (identifier))
 
   ;; Short function `where`
@@ -460,25 +472,35 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
     parameters: (parameter_list
                   (typed_parameter
                     parameter: (identifier)
+                    type: (identifier))
+                  (typed_parameter
+                    parameter: (identifier)
                     type: (identifier)))
     (where_clause
-      (type_parameter_list
-        (constrained_type_parameter
-          type: (identifier)
-          supertype: (identifier))))
-    (identifier))
-
+      (curly_expression
+        (typed_expression
+          (identifier)
+          (identifier))))
+    (where_clause
+      (curly_expression
+        (typed_expression
+          (identifier)
+          (identifier))))
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier)))
 
   ;; Short function with type parameters
   (short_function_definition
     name: (identifier)
-    type_parameters: (type_parameter_list (identifier))
+    (type_parameter_list (identifier))
     parameters: (parameter_list
                   (typed_parameter
                     parameter: (identifier)
                     type: (identifier)))
     (where_clause
-      (type_parameter_list (identifier)))
+      (curly_expression (identifier)))
     (identifier))
 
   ;; `where` clauses in parameters
@@ -488,8 +510,8 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                   (typed_parameter
                     parameter: (identifier)
                     type: (parametrized_type_expression
-                            value: (identifier)
-                            (identifier))
+                            (identifier)
+                            (curly_expression (identifier)))
                     (where_clause
                       (identifier)
                       (subtype_clause
@@ -498,8 +520,8 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
 
   ;; Almost everything at once
   (short_function_definition
-    name: (scoped_identifier
-      (identifier)
+    name: (field_expression
+      value: (identifier)
       (identifier))
     parameters: (parameter_list
       (typed_parameter

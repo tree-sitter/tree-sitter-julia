@@ -60,7 +60,7 @@ end
   (let_statement)
   (let_statement
     (let_binding (identifier) (identifier))
-    (let_binding (identifier))
+    (identifier)
     (let_binding (identifier) (identifier))
     (identifier)))
 
@@ -96,7 +96,7 @@ end
     (else_clause))
 
   (if_statement
-    (true)
+    (boolean_literal)
     (integer_literal)
     (else_clause
       (integer_literal)))
@@ -214,7 +214,7 @@ while a(); b(); end
 ---
 
 (source_file
-  (while_statement (true))
+  (while_statement (boolean_literal))
 
   (while_statement
     (binary_expression (identifier) (operator) (integer_literal))
@@ -250,7 +250,7 @@ export statements
 ==============================
 
 export a
-export a, b, +, *
+export a, b, +, (*)
 export @macroMcAtface
 
 ---
@@ -273,7 +273,7 @@ using ..Foo, ..Bar
 
 import CSV, Chain, DataFrames
 
-import Base: show, @kwdef, +, *
+import Base: show, @kwdef, +, (*)
 
 import LinearAlgebra as la
 
