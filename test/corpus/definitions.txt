@@ -41,7 +41,7 @@ abstract type T{S} <: U end
 
   (primitive_definition
     (identifier)
-    (subtype_clause (identifier))
+    (type_clause (identifier))
     (integer_literal))
 
   (primitive_definition
@@ -55,13 +55,13 @@ abstract type T{S} <: U end
 
   (abstract_definition
     (identifier)
-    (subtype_clause (identifier)))
+    (type_clause (identifier)))
 
   (abstract_definition
     (identifier)
     (type_parameter_list
       (identifier))
-    (subtype_clause (identifier))))
+    (type_clause (identifier))))
 
 
 ==============================
@@ -118,15 +118,16 @@ end
   ;; Parametric subtypes
   (struct_definition
     (identifier)
-    (type_parameter_list (typed_expression (identifier) (identifier)))
-    (subtype_clause (identifier))
+    (type_parameter_list
+      (binary_expression (identifier) (operator) (identifier)))
+    (type_clause (identifier))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
 
   ;; Parametric fields
   (struct_definition
     (identifier)
-    (subtype_clause (identifier))
+    (type_clause (identifier))
     (typed_expression
       (identifier)
       (parametrized_type_expression
@@ -461,8 +462,9 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                     type: (identifier)))
     (where_clause
       (curly_expression
-        (typed_expression
+        (binary_expression
           (identifier)
+          (operator)
           (identifier))))
     (identifier))
 
@@ -478,13 +480,15 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                     type: (identifier)))
     (where_clause
       (curly_expression
-        (typed_expression
+        (binary_expression
           (identifier)
+          (operator)
           (identifier))))
     (where_clause
       (curly_expression
-        (typed_expression
+        (binary_expression
           (identifier)
+          (operator)
           (identifier))))
     (binary_expression
       (identifier)
@@ -514,7 +518,7 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                             (curly_expression (identifier)))
                     (where_clause
                       (identifier)
-                      (subtype_clause
+                      (type_clause
                         (identifier)))))
     (call_expression (identifier) (argument_list (identifier))))
 

@@ -206,7 +206,7 @@ module.exports = grammar({
       'type',
       field('name', choice($.identifier, $.interpolation_expression)),
       optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-      optional($.subtype_clause),
+      optional($.type_clause),
       'end'
     ),
 
@@ -215,7 +215,7 @@ module.exports = grammar({
       'type',
       field('name', choice($.identifier, $.interpolation_expression)),
       optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-      optional($.subtype_clause),
+      optional($.type_clause),
       $.integer_literal,
       'end'
     ),
@@ -225,13 +225,16 @@ module.exports = grammar({
       'struct',
       field('name', choice($.identifier, $.interpolation_expression)),
       optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-      optional($.subtype_clause),
+      optional($.type_clause),
       optional($._terminator),
       optional($._block),
       'end'
     ),
 
-    subtype_clause: $ => seq('<:', $._expression),
+    type_clause: $ => seq(
+      choice('<:', '>:'),
+      $._primary_expression
+    ),
 
     function_definition: $ => seq(
       'function',
@@ -292,7 +295,7 @@ module.exports = grammar({
     where_clause: $ => seq(
       'where',
       $._primary_expression,
-      optional($.subtype_clause),
+      optional($.type_clause),
     ),
 
     macro_definition: $ => seq(
@@ -643,7 +646,7 @@ module.exports = grammar({
       '{',
       sep(',', choice(
         $._expression,
-        $.subtype_clause,
+        $.type_clause,
         alias($.named_field, $.assignment),
       )),
       optional(','),
@@ -898,7 +901,7 @@ module.exports = grammar({
 
     typed_expression: $ => prec(PREC.decl, seq(
       $._expression,
-      choice('::', '<:'),
+      '::',
       choice($._primary_expression)
     )),
 
