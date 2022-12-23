@@ -525,7 +525,6 @@ module.exports = grammar({
       $.comprehension_expression,
       $.matrix_expression,
       $.vector_expression,
-      $.generator_expression,
       $.parenthesized_expression,
       $.tuple_expression,
     ),
@@ -556,10 +555,10 @@ module.exports = grammar({
       $._expression
     ),
 
-    for_clause: $ => seq(
+    for_clause: $ => prec.right(seq(
       'for',
       sep1(',', $.for_binding)
-    ),
+    )),
 
     for_binding: $ => seq(
       choice(
@@ -611,6 +610,7 @@ module.exports = grammar({
         $.assignment,
         $.short_function_definition,
       )),
+      optional($._comprehension_clause),
       optional(';'),
     ),
 
@@ -624,7 +624,10 @@ module.exports = grammar({
         seq(
           choice($._expression, $.named_field),
           repeat1(seq(',', choice($._expression, $.named_field))),
-          optional(',')
+          optional(choice(
+            $._comprehension_clause,
+            ',',
+          )),
         ),
         ';', // Empty NamedTuple
         // NamedTuple with leading semicolon
@@ -696,7 +699,7 @@ module.exports = grammar({
     call_expression: $ => prec(PREC.call, seq(
       choice($._primary_expression, $.operator),
       $._immediate_paren,
-      choice($.argument_list, $.generator_expression),
+      $.argument_list,
       optional($.do_clause)
     )),
 
@@ -704,7 +707,7 @@ module.exports = grammar({
       $._primary_expression,
       token.immediate('.'),
       $._immediate_paren,
-      choice($.argument_list, $.generator_expression),
+      $.argument_list,
       optional($.do_clause)
     )),
 
@@ -715,7 +718,7 @@ module.exports = grammar({
       )),
       $.macro_identifier,
       $._immediate_paren,
-      choice($.argument_list, $.generator_expression),
+      $.argument_list,
       optional($.do_clause)
     )),
 
@@ -737,9 +740,18 @@ module.exports = grammar({
     )))),
 
     argument_list: $ => parenthesize(
-      sep(',', choice(
-        $._expression,
-        alias($.named_field, $.named_argument)
+      optional(choice(
+        seq(
+          sep1(',', choice(
+            $._expression,
+            alias($.named_field, $.named_argument)
+          )),
+          optional(seq(
+            ',',
+            optional(seq($._expression, $._comprehension_clause)),
+          )),
+        ),
+        seq($._expression, $._comprehension_clause),
       )),
       optional(seq(
         ';',

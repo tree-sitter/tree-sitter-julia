@@ -157,6 +157,8 @@ comprehension array collections
   if x > 0
 ]
 UInt[b(c, e) for c in d for e in f]
+
+f(1, 2, i for i in iter)
 (b(c, e) for c in d, e = 5 if e)
 
 ---
@@ -165,6 +167,7 @@ UInt[b(c, e) for c in d for e in f]
   (comprehension_expression
     (identifier)
     (for_clause (for_binding (identifier) (identifier))))
+
   (comprehension_expression
     (identifier)
     (for_clause (for_binding (identifier) (identifier)))
@@ -175,7 +178,15 @@ UInt[b(c, e) for c in d for e in f]
       (call_expression (identifier) (argument_list (identifier) (identifier)))
       (for_clause (for_binding (identifier) (identifier)))
       (for_clause (for_binding (identifier) (identifier)))))
-  (generator_expression
+
+  (call_expression
+    (identifier)
+    (argument_list
+      (integer_literal)
+      (integer_literal)
+      (identifier)
+      (for_clause (for_binding (identifier) (identifier)))))
+  (parenthesized_expression
     (call_expression (identifier) (argument_list (identifier) (identifier)))
     (for_clause
       (for_binding (identifier) (identifier))
