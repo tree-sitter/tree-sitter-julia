@@ -336,6 +336,7 @@ module.exports = grammar({
         $.optional_parameter,
         $.typed_parameter,
         $.interpolation_expression,
+        alias($._closed_macrocall_expression, $.macrocall_expression),
       )),
       optional(','),
     ),
