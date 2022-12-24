@@ -94,6 +94,34 @@ const ESCAPE_SEQUENCE = token(seq(
   )
 ));
 
+// Keywords that can be quoted. Some still fail depending on the context.
+const KEYWORDS = choice(
+  'baremodule',
+  'module',
+  'abstract',
+  'primitive',
+  'mutable',
+  'struct',
+  'quote',
+  'let',
+  'if',
+  'else',
+  'elseif',
+  'try',
+  'catch',
+  'finally',
+  'for',
+  'while',
+  'break',
+  'continue',
+  'using',
+  'import',
+  'const',
+  'global',
+  'local',
+  'end',
+);
+
 module.exports = grammar({
   name: 'julia',
 
@@ -203,8 +231,7 @@ module.exports = grammar({
     ),
 
     abstract_definition: $ => seq(
-      'abstract',
-      'type',
+      token(seq('abstract', /\s+/, 'type')),
       field('name', choice($.identifier, $.interpolation_expression)),
       optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
       optional($.type_clause),
@@ -212,8 +239,7 @@ module.exports = grammar({
     ),
 
     primitive_definition: $ => seq(
-      'primitive',
-      'type',
+      token(seq('primitive', /\s+/, 'type')),
       field('name', choice($.identifier, $.interpolation_expression)),
       optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
       optional($.type_clause),
@@ -821,9 +847,14 @@ module.exports = grammar({
           LAZY_AND,
           LAZY_OR,
           SYNTACTIC_OPERATOR,
-          parenthesize(choice(SYNTACTIC_OPERATOR, '::', ':=', '=')),
+          addDots(ASSIGN_OPERATORS),
+          parenthesize(choice(
+            '::', ':=', '.=', '=',
+            SYNTACTIC_OPERATOR,
+            addDots(ASSIGN_OPERATORS),
+          )),
         )), $.operator),
-        alias(token.immediate(choice('global', 'local', 'end')), $.identifier),
+        alias(token.immediate(KEYWORDS), $.identifier),
       ),
     )),
 
@@ -848,7 +879,7 @@ module.exports = grammar({
       $.compound_assignment_expression,
       $.where_expression,
       $.operator,
-      alias(':', $.operator),
+      prec(-1, alias(':', $.operator)),
       prec(-1, alias('begin', $.identifier)),
     ),
 
@@ -917,7 +948,8 @@ module.exports = grammar({
     function_expression: $ => prec.right(PREC.arrow, seq(
       choice(
         $.identifier,
-        $.parameter_list
+        $.parameter_list,
+        alias($.typed_expression, $.typed_parameter),
       ),
       '->',
       choice(
