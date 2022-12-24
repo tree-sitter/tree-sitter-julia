@@ -896,9 +896,15 @@ module.exports = grammar({
     ternary_expression: $ => prec.right(PREC.conditional, seq(
       $._expression,
       '?',
-      $._expression,
+      choice(
+        $._expression,
+        $.assignment,
+      ),
       ':',
-      $._expression
+      choice(
+        $._expression,
+        $.assignment,
+      ),
     )),
 
     typed_expression: $ => prec(PREC.decl, seq(
