@@ -94,10 +94,6 @@
         "named": true
       },
       {
-        "type": "generator_expression",
-        "named": true
-      },
-      {
         "type": "identifier",
         "named": true
       },
@@ -180,6 +176,10 @@
       {
         "type": "vector_expression",
         "named": true
+      },
+      {
+        "type": "where_expression",
+        "named": true
       }
     ]
   },
@@ -261,7 +261,7 @@
       "required": false,
       "types": [
         {
-          "type": "subtype_clause",
+          "type": "type_clause",
           "named": true
         },
         {
@@ -296,6 +296,14 @@
       "types": [
         {
           "type": "_expression",
+          "named": true
+        },
+        {
+          "type": "for_clause",
+          "named": true
+        },
+        {
+          "type": "if_clause",
           "named": true
         },
         {
@@ -404,10 +412,6 @@
           "named": true
         },
         {
-          "type": "generator_expression",
-          "named": true
-        },
-        {
           "type": "identifier",
           "named": true
         },
@@ -492,10 +496,6 @@
         },
         {
           "type": "field_expression",
-          "named": true
-        },
-        {
-          "type": "generator_expression",
           "named": true
         },
         {
@@ -732,7 +732,7 @@
           "named": true
         },
         {
-          "type": "subtype_clause",
+          "type": "type_clause",
           "named": true
         }
       ]
@@ -923,10 +923,6 @@
           },
           {
             "type": "field_expression",
-            "named": true
-          },
-          {
-            "type": "generator_expression",
             "named": true
           },
           {
@@ -1209,10 +1205,6 @@
             "named": true
           },
           {
-            "type": "generator_expression",
-            "named": true
-          },
-          {
             "type": "identifier",
             "named": true
           },
@@ -1329,6 +1321,10 @@
         {
           "type": "parameter_list",
           "named": true
+        },
+        {
+          "type": "typed_parameter",
+          "named": true
         }
       ]
     }
@@ -1377,10 +1373,6 @@
           },
           {
             "type": "field_expression",
-            "named": true
-          },
-          {
-            "type": "generator_expression",
             "named": true
           },
           {
@@ -1440,29 +1432,6 @@
       "types": [
         {
           "type": "where_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "generator_expression",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "_expression",
-          "named": true
-        },
-        {
-          "type": "for_clause",
-          "named": true
-        },
-        {
-          "type": "if_clause",
           "named": true
         }
       ]
@@ -1673,10 +1642,6 @@
           "named": true
         },
         {
-          "type": "generator_expression",
-          "named": true
-        },
-        {
           "type": "identifier",
           "named": true
         },
@@ -1765,10 +1730,6 @@
           "named": true
         },
         {
-          "type": "generator_expression",
-          "named": true
-        },
-        {
           "type": "identifier",
           "named": true
         },
@@ -1833,10 +1794,6 @@
         },
         {
           "type": "float_literal",
-          "named": true
-        },
-        {
-          "type": "generator_expression",
           "named": true
         },
         {
@@ -1908,6 +1865,10 @@
         },
         {
           "type": "interpolation_expression",
+          "named": true
+        },
+        {
+          "type": "macrocall_expression",
           "named": true
         },
         {
@@ -2178,10 +2139,6 @@
         },
         {
           "type": "field_expression",
-          "named": true
-        },
-        {
-          "type": "generator_expression",
           "named": true
         },
         {
@@ -2469,10 +2426,6 @@
           "named": true
         },
         {
-          "type": "generator_expression",
-          "named": true
-        },
-        {
           "type": "identifier",
           "named": true
         },
@@ -2544,7 +2497,15 @@
           "named": true
         },
         {
+          "type": "for_clause",
+          "named": true
+        },
+        {
           "type": "global_declaration",
+          "named": true
+        },
+        {
+          "type": "if_clause",
           "named": true
         },
         {
@@ -2658,7 +2619,7 @@
           "named": true
         },
         {
-          "type": "subtype_clause",
+          "type": "type_clause",
           "named": true
         },
         {
@@ -2698,10 +2659,6 @@
         },
         {
           "type": "float_literal",
-          "named": true
-        },
-        {
-          "type": "generator_expression",
           "named": true
         },
         {
@@ -2974,10 +2931,6 @@
             "named": true
           },
           {
-            "type": "generator_expression",
-            "named": true
-          },
-          {
             "type": "identifier",
             "named": true
           },
@@ -3218,26 +3171,11 @@
           "named": true
         },
         {
-          "type": "subtype_clause",
+          "type": "type_clause",
           "named": true
         },
         {
           "type": "type_parameter_list",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "subtype_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "_expression",
           "named": true
         }
       ]
@@ -3253,6 +3191,10 @@
       "types": [
         {
           "type": "_expression",
+          "named": true
+        },
+        {
+          "type": "assignment",
           "named": true
         }
       ]
@@ -3318,7 +3260,94 @@
           "named": true
         },
         {
+          "type": "for_clause",
+          "named": true
+        },
+        {
+          "type": "if_clause",
+          "named": true
+        },
+        {
           "type": "named_field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_clause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "broadcast_call_expression",
+          "named": true
+        },
+        {
+          "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "comprehension_expression",
+          "named": true
+        },
+        {
+          "type": "curly_expression",
+          "named": true
+        },
+        {
+          "type": "field_expression",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "index_expression",
+          "named": true
+        },
+        {
+          "type": "interpolation_expression",
+          "named": true
+        },
+        {
+          "type": "macrocall_expression",
+          "named": true
+        },
+        {
+          "type": "matrix_expression",
+          "named": true
+        },
+        {
+          "type": "parametrized_type_expression",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "prefixed_command_literal",
+          "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
+          "named": true
+        },
+        {
+          "type": "quote_expression",
+          "named": true
+        },
+        {
+          "type": "tuple_expression",
+          "named": true
+        },
+        {
+          "type": "vector_expression",
           "named": true
         }
       ]
@@ -3341,7 +3370,7 @@
           "named": true
         },
         {
-          "type": "subtype_clause",
+          "type": "type_clause",
           "named": true
         }
       ]
@@ -3386,7 +3415,7 @@
       },
       "type": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "broadcast_call_expression",
@@ -3406,10 +3435,6 @@
           },
           {
             "type": "field_expression",
-            "named": true
-          },
-          {
-            "type": "generator_expression",
             "named": true
           },
           {
@@ -3464,9 +3489,13 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "_expression",
+          "named": true
+        },
         {
           "type": "where_clause",
           "named": true
@@ -3537,10 +3566,6 @@
           "named": true
         },
         {
-          "type": "generator_expression",
-          "named": true
-        },
-        {
           "type": "identifier",
           "named": true
         },
@@ -3581,15 +3606,30 @@
           "named": true
         },
         {
-          "type": "subtype_clause",
-          "named": true
-        },
-        {
           "type": "tuple_expression",
           "named": true
         },
         {
+          "type": "type_clause",
+          "named": true
+        },
+        {
           "type": "vector_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "where_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_expression",
           "named": true
         }
       ]
@@ -3702,6 +3742,10 @@
     "named": false
   },
   {
+    "type": ">:",
+    "named": false
+  },
+  {
     "type": "?",
     "named": false
   },
@@ -3715,10 +3759,6 @@
   },
   {
     "type": "]",
-    "named": false
-  },
-  {
-    "type": "abstract",
     "named": false
   },
   {
@@ -3842,10 +3882,6 @@
     "named": false
   },
   {
-    "type": "primitive",
-    "named": false
-  },
-  {
     "type": "quote",
     "named": false
   },
@@ -3863,10 +3899,6 @@
   },
   {
     "type": "try",
-    "named": false
-  },
-  {
-    "type": "type",
     "named": false
   },
   {
