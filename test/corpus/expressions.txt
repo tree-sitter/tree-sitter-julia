@@ -120,7 +120,7 @@ $(usertype){T}
     (curly_expression (identifier)))
   (parametrized_type_expression
     (identifier)
-    (curly_expression (subtype_clause (identifier))))
+    (curly_expression (type_clause (identifier))))
   (parametrized_type_expression
     (interpolation_expression (parenthesized_expression (identifier)))
     (curly_expression (identifier)))

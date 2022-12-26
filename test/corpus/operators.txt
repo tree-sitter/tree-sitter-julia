@@ -102,8 +102,9 @@ a & b | c
 
 Dict(b => c, d => e)
 
-a |>
-b
+x |>
+  f |>
+  g
 
 1..10
 (1:10...,)
@@ -132,9 +133,12 @@ b
 
   ; Pipes (and newline)
   (binary_expression
-    (identifier)
-    (operator)
-    (identifier))
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier))
+      (operator)
+      (identifier))
 
   ; Ellipses
   (binary_expression
@@ -186,6 +190,7 @@ unary operators
 ==============================
 
 [a, b]'
+-A'
 +a
 -b
 √9
@@ -195,6 +200,7 @@ unary operators
 ---
 (source_file
   (adjoint_expression (vector_expression (identifier) (identifier)))
+  (unary_expression (operator) (adjoint_expression (identifier)))
   (unary_expression (operator) (identifier))
   (unary_expression (operator) (identifier))
   (unary_expression (operator) (integer_literal))
