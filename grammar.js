@@ -970,7 +970,6 @@ module.exports = grammar({
       choice(
         $._expression,
         $.assignment,
-        $.bare_tuple,
       )
     )),
 
