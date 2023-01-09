@@ -195,47 +195,38 @@ end
 
 
 ==============================
-macro expressions
+macro call expressions
 ==============================
 
-@enum(Light, red, yellow, green)
-
-joinpath(@__DIR__, "grammar.js")
-
 @assert x == y "a message"
-
-@. a * x + b
 
 @testset "a" begin
   b = c
 end
+
+@. a * x + b
+
+joinpath(@__DIR__, "grammar.js")
 
 @macroexpand @async accept(socket)
 
 @Meta.dump 1, 2
 Meta.@dump x = 1
 
-f(@nospecialize(x)) = x
-
-
 ---
 
 (source_file
   (macrocall_expression
     (macro_identifier (identifier))
-    (argument_list (identifier) (identifier) (identifier) (identifier)))
-
-  (call_expression
-    (identifier)
-    (argument_list
-      (macrocall_expression (macro_identifier (identifier)))
+    (macro_argument_list
+      (binary_expression (identifier) (operator) (identifier))
       (string_literal)))
 
   (macrocall_expression
     (macro_identifier (identifier))
     (macro_argument_list
-      (binary_expression (identifier) (operator) (identifier))
-      (string_literal)))
+      (string_literal)
+      (compound_statement (assignment (identifier) (operator) (identifier)))))
 
   (macrocall_expression
     (macro_identifier (operator))
@@ -245,12 +236,14 @@ f(@nospecialize(x)) = x
         (operator)
         (identifier))))
 
-  (macrocall_expression
-    (macro_identifier (identifier))
-    (macro_argument_list
-      (string_literal)
-      (compound_statement (assignment (identifier) (operator) (identifier)))))
+  ; Macros as arguments
+  (call_expression
+    (identifier)
+    (argument_list
+      (macrocall_expression (macro_identifier (identifier)))
+      (string_literal)))
 
+  ; Nested macros
   (macrocall_expression
     (macro_identifier (identifier))
     (macro_argument_list
@@ -259,24 +252,57 @@ f(@nospecialize(x)) = x
         (macro_argument_list
           (call_expression (identifier) (argument_list (identifier)))))))
 
+  ; Scoped macro identifiers
   (macrocall_expression
     (macro_identifier (scoped_identifier (identifier) (identifier)))
     (macro_argument_list
       (bare_tuple (integer_literal) (integer_literal))))
-
   (macrocall_expression
     (identifier)
     (macro_identifier (identifier))
     (macro_argument_list
-      (assignment (identifier) (operator) (integer_literal))))
+      (assignment (identifier) (operator) (integer_literal)))))
 
+
+==============================
+closed macro call expressions
+==============================
+
+@enum(Light, red, yellow, green)
+f(@nospecialize(x)) = x
+
+@m[1, 2] + 1
+@m [1, 2] + 1
+
+---
+(source_file
+  (macrocall_expression
+    (macro_identifier (identifier))
+    (argument_list (identifier) (identifier) (identifier) (identifier)))
+
+  ; Macros as parameters
   (short_function_definition
     (identifier)
     (parameter_list
       (macrocall_expression
         (macro_identifier (identifier))
         (argument_list (identifier))))
-    (identifier)))
+    (identifier))
+
+  ; Open vs closed macros
+  (binary_expression
+    (macrocall_expression
+      (macro_identifier (identifier))
+      (vector_expression (integer_literal) (integer_literal)))
+    (operator)
+    (integer_literal))
+  (macrocall_expression
+    (macro_identifier (identifier))
+    (macro_argument_list
+      (binary_expression
+        (vector_expression (integer_literal) (integer_literal))
+        (operator)
+        (integer_literal)))))
 
 
 ==============================
