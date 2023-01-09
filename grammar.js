@@ -482,9 +482,9 @@ module.exports = grammar({
       'end'
     ),
 
-    break_statement: $ => 'break',
+    break_statement: _ => 'break',
 
-    continue_statement: $ => 'continue',
+    continue_statement: _ => 'continue',
 
     return_statement: $ => prec.right(PREC_DECL, seq(
       'return',
@@ -626,8 +626,8 @@ module.exports = grammar({
     vector_expression: $ => seq(
       '[',
       sep(',', choice(
-      $._expression,
-      alias($.named_field, $.assignment), // JuMP.jl
+        $._expression,
+        alias($.named_field, $.assignment), // JuMP.jl
       )),
       optional(','),
       ']'
@@ -1084,7 +1084,7 @@ module.exports = grammar({
       ),
     ),
 
-    identifier: $ => {
+    identifier: _ => {
       const operators = [
         '$',
         '&',
@@ -1147,16 +1147,16 @@ module.exports = grammar({
       $.command_literal,
     ),
 
-    boolean_literal: $ => choice('true', 'false'),
+    boolean_literal: _ => choice('true', 'false'),
 
-    integer_literal: $ => choice(
+    integer_literal: _ => choice(
       token(seq('0b', numeral('01'))),
       token(seq('0o', numeral('0-7'))),
       token(seq('0x', numeral('0-9a-fA-F'))),
       numeral('0-9'),
     ),
 
-    float_literal: $ => {
+    float_literal: _ => {
       const dec = numeral('0-9');
       const hex = numeral('0-9a-fA-F');
       const exponent = /[eEf][+-]?\d+/;
@@ -1191,9 +1191,9 @@ module.exports = grammar({
       return choice(leading_period, trailing_period, just_exponent, hex_float);
     },
 
-    escape_sequence: $ => ESCAPE_SEQUENCE,
+    escape_sequence: _ => ESCAPE_SEQUENCE,
 
-    character_literal: $ => token(seq(
+    character_literal: _ => token(seq(
       "'",
       choice(
         /[^'\\]/,
@@ -1241,35 +1241,35 @@ module.exports = grammar({
       ),
     ),
 
-    _unary_operator: $ => token(addDots('+ - ! ~ ¬ √ ∛ ∜')),
+    _unary_operator: _ => token(addDots('+ - ! ~ ¬ √ ∛ ∜')),
 
-    _power_operator: $ => token(addDots(POWER_OPERATORS)),
+    _power_operator: _ => token(addDots(POWER_OPERATORS)),
 
-    _bitshift_operator: $ => token(addDots(BITSHIFT_OPERATORS)),
+    _bitshift_operator: _ => token(addDots(BITSHIFT_OPERATORS)),
 
-    _rational_operator: $ => token(addDots('//')),
+    _rational_operator: _ => token(addDots('//')),
 
-    _times_operator: $ => token(addDots(TIMES_OPERATORS)),
+    _times_operator: _ => token(addDots(TIMES_OPERATORS)),
 
-    _plus_operator: $ => token(addDots(PLUS_OPERATORS)),
+    _plus_operator: _ => token(addDots(PLUS_OPERATORS)),
 
-    _ellipsis_operator: $ => token(choice('..', addDots(ELLIPSIS_OPERATORS))),
+    _ellipsis_operator: _ => token(choice('..', addDots(ELLIPSIS_OPERATORS))),
 
-    _pipe_left_operator: $ => token(addDots('<|')),
+    _pipe_left_operator: _ => token(addDots('<|')),
 
-    _pipe_right_operator: $ => token(addDots('|>')),
+    _pipe_right_operator: _ => token(addDots('|>')),
 
-    _comparison_operator: $ => token(choice('<:', '>:', addDots(COMPARISON_OPERATORS))),
+    _comparison_operator: _ => token(choice('<:', '>:', addDots(COMPARISON_OPERATORS))),
 
-    _arrow_operator: $ => token(choice('<--', '-->', '<-->', addDots(ARROW_OPERATORS))),
+    _arrow_operator: _ => token(choice('<--', '-->', '<-->', addDots(ARROW_OPERATORS))),
 
-    _pair_operator: $ => token(addDots('=>')),
+    _pair_operator: _ => token(addDots('=>')),
 
-    _assign_operator: $ => token(choice(':=', '~', '$=', '.=', addDots(ASSIGN_OPERATORS))),
+    _assign_operator: _ => token(choice(':=', '~', '$=', '.=', addDots(ASSIGN_OPERATORS))),
 
-    _terminator: $ => choice('\n', /;+/),
+    _terminator: _ => choice('\n', /;+/),
 
-    line_comment: $ => token(seq('#', /.*/))
+    line_comment: _ => token(seq('#', /.*/))
   }
 });
 
