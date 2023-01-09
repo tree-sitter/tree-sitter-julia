@@ -551,13 +551,17 @@ module.exports = grammar({
 
     // Quotables are expressions that can be quoted without additional parentheses.
     _quotable: $ => choice(
+      $._array,
       $.identifier,
-      $.curly_expression, // Only valid inside macros
+      $.curly_expression, // Only valid in macros
+      $.parenthesized_expression,
+      $.tuple_expression,
+    ),
+
+    _array: $ => choice(
       $.comprehension_expression,
       $.matrix_expression,
       $.vector_expression,
-      $.parenthesized_expression,
-      $.tuple_expression,
     ),
 
     comprehension_expression: $ => prec(PREC_ARR, seq(
@@ -627,11 +631,6 @@ module.exports = grammar({
       )),
       optional(','),
       ']'
-    ),
-
-    generator_expression: $ => parenthesize(
-      $._expression,
-      $._comprehension_clause,
     ),
 
     parenthesized_expression: $ => parenthesize(
@@ -714,11 +713,7 @@ module.exports = grammar({
     index_expression: $ => seq(
       $._primary_expression,
       $._immediate_bracket,
-      choice(
-        $.comprehension_expression,
-        $.matrix_expression,
-        $.vector_expression,
-      ),
+      $._array,
     ),
 
     parametrized_type_expression: $ => seq(
@@ -748,9 +743,11 @@ module.exports = grammar({
         token.immediate('.'),
       )),
       $.macro_identifier,
-      $._immediate_paren,
-      $.argument_list,
-      optional($.do_clause)
+      choice(
+        seq($._immediate_brace, $.curly_expression),
+        seq($._immediate_bracket, $._array),
+        seq($._immediate_paren, $.argument_list, optional($.do_clause)),
+      ),
     )),
 
     macrocall_expression: $ => prec.right(seq(
@@ -840,20 +837,38 @@ module.exports = grammar({
       ':',
       choice(
         $._literal,
-        $._quotable,
+        $.identifier,
         $.operator,
-        alias(token.immediate(choice(
-          BINARY_AND_UNARY_PLUS_OPERATOR,
-          LAZY_AND,
-          LAZY_OR,
-          SYNTACTIC_OPERATOR,
-          addDots(ASSIGN_OPERATORS),
-          parenthesize(choice(
-            '::', ':=', '.=', '=',
+        seq($._immediate_brace, $.curly_expression),
+        seq($._immediate_bracket, $._array),
+        seq($._immediate_paren, choice(
+          $.parenthesized_expression,
+          $.tuple_expression,
+          // Syntactic operators in parentheses
+          parenthesize(
+            alias(
+              token(choice(
+                '::', ':=', '.=', '=',
+                LAZY_AND,
+                LAZY_OR,
+                SYNTACTIC_OPERATOR,
+                addDots(ASSIGN_OPERATORS),
+              )),
+              $.operator,
+            ),
+          ),
+        )),
+        // Syntactic operators without parentheses
+        alias(
+          token.immediate(choice(
+            BINARY_AND_UNARY_PLUS_OPERATOR,
+            LAZY_AND,
+            LAZY_OR,
             SYNTACTIC_OPERATOR,
             addDots(ASSIGN_OPERATORS),
           )),
-        )), $.operator),
+          $.operator,
+        ),
         alias(token.immediate(KEYWORDS), $.identifier),
       ),
     )),
