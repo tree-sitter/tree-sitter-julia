@@ -1315,10 +1315,6 @@
           "named": true
         },
         {
-          "type": "bare_tuple",
-          "named": true
-        },
-        {
           "type": "parameter_list",
           "named": true
         },
