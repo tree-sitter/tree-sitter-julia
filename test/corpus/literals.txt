@@ -159,6 +159,7 @@ non-standard string literals
 
 trailing_ws = r"\s+$"
 version = v"1.0"
+K"\\"
 
 ---
 
@@ -166,13 +167,17 @@ version = v"1.0"
   (assignment
     (identifier)
     (operator)
-    (prefixed_string_literal 
-        prefix: (identifier)))
+    (prefixed_string_literal
+        prefix: (identifier)
+        (escape_sequence)))
   (assignment
     (identifier)
     (operator)
-    (prefixed_string_literal 
-        prefix: (identifier))))
+    (prefixed_string_literal
+        prefix: (identifier)))
+  (prefixed_string_literal
+    prefix: (identifier)
+    (escape_sequence)))
 
 
 ==============================

@@ -117,20 +117,14 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack, bool interp) {
   TSSymbol end_symbol = (end_char == '"') ? STRING_END : COMMAND_END;
   TSSymbol end_content = interp ? STRING_CONTENT : STRING_CONTENT_NO_INTERP;
   while (lexer->lookahead) {
-    if (interp && (lexer->lookahead == '$' || lexer->lookahead == '\\')) {
+    if (interp && lexer->lookahead == '$') {
       mark_end(lexer);
       lexer->result_symbol = end_content;
       return has_content;
     } else if (lexer->lookahead == '\\') {
       mark_end(lexer);
-      advance(lexer);
-      // Only escape if there's a delimiter character
-      if (lexer->lookahead == end_char) {
-        lexer->result_symbol = end_content;
-        return has_content;
-      } else {
-        mark_end(lexer);
-      }
+      lexer->result_symbol = end_content;
+      return has_content;
     } else if (lexer->lookahead == end_char) {
       if (is_triple) {
         mark_end(lexer);
