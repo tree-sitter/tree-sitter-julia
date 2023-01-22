@@ -1085,7 +1085,8 @@ module.exports = grammar({
     ),
 
     identifier: _ => {
-      const operators = [
+      const nonIdentifierCharacters = [
+        '#',
         '$',
         '&',
         ',',
@@ -1102,10 +1103,7 @@ module.exports = grammar({
         TIMES_OPERATORS,
         BITSHIFT_OPERATORS,
         POWER_OPERATORS
-      ];
-
-      const operatorCharacters = operators
-        .join(' ')
+      ].join(' ')
         .trim()
         .replace(/\s+/g, '')
         .replace(/-/g, '')
@@ -1116,7 +1114,7 @@ module.exports = grammar({
       const validMathSymbols = "∂∇∏∑°";
 
       const start = `[_\\p{XID_Start}${validMathSymbols}\\p{Emoji}&&[^0-9#*]]`;
-      const rest = `[^"'\`\\s\\.\\-\\[\\]${operatorCharacters}]*`;
+      const rest = `[^"'\`\\s\\.\\-\\[\\]${nonIdentifierCharacters }]*`;
       return new RegExp(start + rest);
     },
 
