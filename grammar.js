@@ -495,27 +495,21 @@ module.exports = grammar({
       ))
     )),
 
-    export_statement: $ => seq(
-      'export',
-      prec.right(sep1(',', choice(
-        $.identifier,
-        $.macro_identifier,
-        $.operator,
-        parenthesize(choice($.identifier, $.operator)),
-        $.interpolation_expression,
-      ))),
+    _exportable: $ => choice(
+      $.identifier,
+      $.macro_identifier,
+      $.operator,
+      $.interpolation_expression,
+      parenthesize(choice($.identifier, $.operator)),
     ),
 
-    import_statement: $ => seq(
-      choice('import', 'using'),
-      choice(
-        $._import_list,
-        $.selected_import,
-      ),
+    export_statement: $ => seq(
+      'export',
+      prec.right(sep1(',', $._exportable)),
     ),
 
     relative_qualifier: $ => seq(
-      repeat1('.'),
+      token(repeat1('.')),
       choice(
         $.identifier,
         $.scoped_identifier,
@@ -523,11 +517,9 @@ module.exports = grammar({
     ),
 
     _importable: $ => choice(
-      $.identifier,
+      $._exportable,
       $.scoped_identifier,
       $.relative_qualifier,
-      parenthesize(choice($.identifier, $.operator)),
-      $.interpolation_expression,
     ),
 
     import_alias: $ => seq($._importable, 'as', $.identifier),
@@ -540,12 +532,15 @@ module.exports = grammar({
     selected_import: $ => seq(
       $._importable,
       token.immediate(':'),
-      prec.right(sep1(',', choice(
-        $._importable,
-        $.import_alias,
-        $.macro_identifier,
-        $.operator,
-      )))
+      $._import_list,
+    ),
+
+    import_statement: $ => seq(
+      choice('import', 'using'),
+      choice(
+        $._import_list,
+        $.selected_import,
+      ),
     ),
 
 
@@ -899,7 +894,7 @@ module.exports = grammar({
     ),
 
     adjoint_expression: $ => prec(PREC.postfix, seq(
-      $._expression,
+      $._primary_expression,
       token.immediate("'"),
     )),
 
