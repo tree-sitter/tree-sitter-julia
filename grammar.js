@@ -894,7 +894,7 @@ module.exports = grammar({
     ),
 
     adjoint_expression: $ => prec(PREC.postfix, seq(
-      $._expression,
+      $._primary_expression,
       token.immediate("'"),
     )),
 
