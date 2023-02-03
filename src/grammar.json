@@ -1879,187 +1879,7 @@
         ]
       }
     },
-    "export_statement": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "export"
-        },
-        {
-          "type": "PREC_RIGHT",
-          "value": 0,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "identifier"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "macro_identifier"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "operator"
-                  },
-                  {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "STRING",
-                        "value": "("
-                      },
-                      {
-                        "type": "CHOICE",
-                        "members": [
-                          {
-                            "type": "SYMBOL",
-                            "name": "identifier"
-                          },
-                          {
-                            "type": "SYMBOL",
-                            "name": "operator"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "STRING",
-                        "value": ")"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "interpolation_expression"
-                  }
-                ]
-              },
-              {
-                "type": "REPEAT",
-                "content": {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ","
-                    },
-                    {
-                      "type": "CHOICE",
-                      "members": [
-                        {
-                          "type": "SYMBOL",
-                          "name": "identifier"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "macro_identifier"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "operator"
-                        },
-                        {
-                          "type": "SEQ",
-                          "members": [
-                            {
-                              "type": "STRING",
-                              "value": "("
-                            },
-                            {
-                              "type": "CHOICE",
-                              "members": [
-                                {
-                                  "type": "SYMBOL",
-                                  "name": "identifier"
-                                },
-                                {
-                                  "type": "SYMBOL",
-                                  "name": "operator"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "STRING",
-                              "value": ")"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "interpolation_expression"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      ]
-    },
-    "import_statement": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "import"
-            },
-            {
-              "type": "STRING",
-              "value": "using"
-            }
-          ]
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "_import_list"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "selected_import"
-            }
-          ]
-        }
-      ]
-    },
-    "relative_qualifier": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "REPEAT1",
-          "content": {
-            "type": "STRING",
-            "value": "."
-          }
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "identifier"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "scoped_identifier"
-            }
-          ]
-        }
-      ]
-    },
-    "_importable": {
+    "_exportable": {
       "type": "CHOICE",
       "members": [
         {
@@ -2068,11 +1888,15 @@
         },
         {
           "type": "SYMBOL",
-          "name": "scoped_identifier"
+          "name": "macro_identifier"
         },
         {
           "type": "SYMBOL",
-          "name": "relative_qualifier"
+          "name": "operator"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "interpolation_expression"
         },
         {
           "type": "SEQ",
@@ -2099,10 +1923,89 @@
               "value": ")"
             }
           ]
+        }
+      ]
+    },
+    "export_statement": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "export"
+        },
+        {
+          "type": "PREC_RIGHT",
+          "value": 0,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_exportable"
+              },
+              {
+                "type": "REPEAT",
+                "content": {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": ","
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "_exportable"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "relative_qualifier": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "TOKEN",
+          "content": {
+            "type": "REPEAT1",
+            "content": {
+              "type": "STRING",
+              "value": "."
+            }
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "identifier"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "scoped_identifier"
+            }
+          ]
+        }
+      ]
+    },
+    "_importable": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_exportable"
         },
         {
           "type": "SYMBOL",
-          "name": "interpolation_expression"
+          "name": "scoped_identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "relative_qualifier"
         }
       ]
     },
@@ -2185,67 +2088,39 @@
           }
         },
         {
-          "type": "PREC_RIGHT",
-          "value": 0,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "_importable"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "import_alias"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "macro_identifier"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "operator"
-                  }
-                ]
-              },
-              {
-                "type": "REPEAT",
-                "content": {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ","
-                    },
-                    {
-                      "type": "CHOICE",
-                      "members": [
-                        {
-                          "type": "SYMBOL",
-                          "name": "_importable"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "import_alias"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "macro_identifier"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "operator"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "type": "SYMBOL",
+          "name": "_import_list"
+        }
+      ]
+    },
+    "import_statement": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "import"
+            },
+            {
+              "type": "STRING",
+              "value": "using"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_import_list"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "selected_import"
+            }
+          ]
         }
       ]
     },
@@ -4724,7 +4599,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "_primary_expression"
           },
           {
             "type": "IMMEDIATE_TOKEN",
