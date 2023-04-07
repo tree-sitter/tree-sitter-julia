@@ -131,6 +131,14 @@ finally
     close(f)
 end
 
+try
+    # fallible
+catch
+    # handle errors
+else
+    # do something if there were no exceptions
+end
+
 ---
 
 (source_file
@@ -151,7 +159,15 @@ end
   (try_statement
     (call_expression (identifier) (argument_list (identifier)))
     (finally_clause
-      (call_expression (identifier) (argument_list (identifier))))))
+      (call_expression (identifier) (argument_list (identifier)))))
+
+  (try_statement
+    (line_comment)
+    (catch_clause)
+    (line_comment)
+    (else_clause)
+    (line_comment)))
+
 
 
 ==============================

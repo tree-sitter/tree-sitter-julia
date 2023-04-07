@@ -494,8 +494,18 @@ module.exports = grammar({
       'try',
       optional($._terminator),
       optional($._block),
-      optional($.catch_clause),
-      optional($.finally_clause),
+      choice(
+        seq(
+          $.catch_clause,
+          optional($.else_clause),
+          optional($.finally_clause),
+        ),
+        seq(
+          $.finally_clause,
+          optional($.catch_clause),
+          // `else` is not valid here.
+        ),
+      ),
       'end'
     ),
 
