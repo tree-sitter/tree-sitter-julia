@@ -331,6 +331,8 @@ local declarations
 
 local x
 local y, z = 1, 2
+local foo() = 3
+local function bar() 4 end
 
 ---
 
@@ -340,7 +342,13 @@ local y, z = 1, 2
     (assignment
     (bare_tuple (identifier) (identifier))
     (operator)
-    (bare_tuple (integer_literal) (integer_literal)))))
+    (bare_tuple (integer_literal) (integer_literal))))
+  (local_declaration
+    (short_function_definition
+      (identifier) (parameter_list) (integer_literal)))
+  (local_declaration
+    (function_definition
+      (identifier) (parameter_list) (integer_literal))))
 
 
 ===============================
@@ -349,6 +357,8 @@ global declarations
 
 global X
 global Y, Z = 11, 42
+global foo() = 3
+global function bar() 4 end
 
 ---
 
@@ -358,4 +368,10 @@ global Y, Z = 11, 42
     (assignment
     (bare_tuple (identifier) (identifier))
     (operator)
-    (bare_tuple (integer_literal) (integer_literal)))))
+    (bare_tuple (integer_literal) (integer_literal))))
+  (global_declaration
+    (short_function_definition
+      (identifier) (parameter_list) (integer_literal)))
+  (global_declaration
+    (function_definition
+      (identifier) (parameter_list) (integer_literal))))

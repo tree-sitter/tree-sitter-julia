@@ -1041,6 +1041,8 @@ module.exports = grammar({
         $.bare_tuple,
         $.identifier,
         $.typed_expression,
+        $.function_definition,
+        $.short_function_definition,
       ),
     )),
 
@@ -1051,6 +1053,8 @@ module.exports = grammar({
         $.bare_tuple,
         $.identifier,
         $.typed_expression,
+        $.function_definition,
+        $.short_function_definition,
       ),
     )),
 
