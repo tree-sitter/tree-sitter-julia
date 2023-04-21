@@ -5491,6 +5491,14 @@
               {
                 "type": "SYMBOL",
                 "name": "typed_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "function_definition"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "short_function_definition"
               }
             ]
           }
@@ -5525,6 +5533,14 @@
               {
                 "type": "SYMBOL",
                 "name": "typed_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "function_definition"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "short_function_definition"
               }
             ]
           }
