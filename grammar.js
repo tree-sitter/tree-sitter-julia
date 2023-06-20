@@ -1110,7 +1110,7 @@ module.exports = grammar({
         .replace(/!/g, '');
 
       // Some symbols in Sm and So unicode categories that are identifiers
-      const validMathSymbols = "∂∇∏∑°";
+      const validMathSymbols = "°∀-∇∎-∑∫-∳";
 
       const start = `[_\\p{XID_Start}${validMathSymbols}\\p{Emoji}&&[^0-9#*]]`;
       const rest = `[^"'\`\\s\\.\\-\\[\\]${nonIdentifierCharacters }]*`;
