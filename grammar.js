@@ -1,4 +1,5 @@
 const PREC = [
+  'afunc',
   'pair',
   'conditional',
   'arrow',
@@ -30,57 +31,57 @@ PREC.assign = -2;
 PREC.stmt = -3;
 PREC.macro_arg = -4;
 
-const ASSIGN_OPERATORS = `
-  += -= *= /= //= \\= ^= ÷= %= <<= >>= >>>= |= &= ⊻= ≔ ⩴ ≕
-`;
+const OPERATORS = {
+  assignment: `
+    += -= *= /= //= \\= ^= %= <<= >>= >>>= |= &=
+    −= ÷= ⊻= ≔ ⩴ ≕
+  `,
 
-const ARROW_OPERATORS = `
-  ← → ↔ ↚ ↛ ↞ ↠ ↢ ↣ ↦ ↤ ↮ ⇎ ⇍ ⇏ ⇐ ⇒ ⇔ ⇴ ⇶
-  ⇷ ⇸ ⇹ ⇺ ⇻ ⇼ ⇽ ⇾ ⇿ ⟵ ⟶ ⟷ ⟹ ⟺ ⟻ ⟼ ⟽ ⟾
-  ⟿ ⤀ ⤁ ⤂ ⤃ ⤄ ⤅ ⤆ ⤇ ⤌ ⤍ ⤎ ⤏ ⤐ ⤑ ⤔ ⤕ ⤖ ⤗ ⤘
-  ⤝ ⤞ ⤟ ⤠ ⥄ ⥅ ⥆ ⥇ ⥈ ⥊ ⥋ ⥎ ⥐ ⥒ ⥓ ⥖ ⥗ ⥚ ⥛ ⥞ ⥟
-  ⥢ ⥤ ⥦ ⥧ ⥨ ⥩ ⥪ ⥫ ⥬ ⥭ ⥰ ⧴ ⬱ ⬰ ⬲ ⬳ ⬴ ⬵ ⬶ ⬷
-  ⬸ ⬹ ⬺ ⬻ ⬼ ⬽ ⬾ ⬿ ⭀ ⭁ ⭂ ⭃ ⭄ ⭇ ⭈ ⭉ ⭊ ⭋ ⭌ ￩ ￫
-  ⇜ ⇝ ↜ ↝ ↩ ↪ ↫ ↬ ↼ ↽ ⇀ ⇁ ⇄ ⇆ ⇇ ⇉ ⇋ ⇌ ⇚ ⇛ ⇠ ⇢
-`;
+  arrow: `
+    <-- --> <-->
+    ← → ↔ ↚ ↛ ↞ ↠ ↢ ↣ ↦ ↤ ↮ ⇎ ⇍ ⇏ ⇐ ⇒ ⇔ ⇴ ⇶ ⇷ ⇸ ⇹ ⇺ ⇻ ⇼ ⇽ ⇾ ⇿ ⟵ ⟶ ⟷ ⟹ ⟺ ⟻ ⟼ ⟽ ⟾ ⟿
+    ⤀ ⤁ ⤂ ⤃ ⤄ ⤅ ⤆ ⤇ ⤌ ⤍ ⤎ ⤏ ⤐ ⤑ ⤔ ⤕ ⤖ ⤗ ⤘ ⤝ ⤞ ⤟ ⤠ ⥄ ⥅ ⥆ ⥇ ⥈ ⥊ ⥋ ⥎ ⥐ ⥒ ⥓ ⥖ ⥗ ⥚ ⥛ ⥞
+    ⥟ ⥢ ⥤ ⥦ ⥧ ⥨ ⥩ ⥪ ⥫ ⥬ ⥭ ⥰ ⧴ ⬱ ⬰ ⬲ ⬳ ⬴ ⬵ ⬶ ⬷ ⬸ ⬹ ⬺ ⬻ ⬼ ⬽ ⬾ ⬿ ⭀ ⭁ ⭂ ⭃ ⥷ ⭄ ⥺ ⭇ ⭈ ⭉
+    ⭊ ⭋ ⭌ ￩ ￫ ⇜ ⇝ ↜ ↝ ↩ ↪ ↫ ↬ ↼ ↽ ⇀ ⇁ ⇄ ⇆ ⇇ ⇉ ⇋ ⇌ ⇚ ⇛ ⇠ ⇢ ↷ ↶ ↺ ↻
+  `,
 
-const COMPARISON_OPERATORS = `
-  > < >= ≥ <= ≤ == === ≡ != ≠ !== ≢ ∈ ∉ ∋ ∌ ⊆ ⊈ ⊂ ⊄ ⊊ ∝ ∊ ∍ ∥ ∦ ∷ ∺ ∻ ∽ ∾ ≁
-  ≃ ≂ ≄ ≅ ≆ ≇ ≈ ≉ ≊ ≋ ≌ ≍ ≎ ≐ ≑ ≒ ≓ ≖ ≗ ≘ ≙ ≚ ≛ ≜ ≝ ≞ ≟ ≣ ≦ ≧ ≨ ≩ ≪ ≫ ≬ ≭
-  ≮ ≯ ≰ ≱ ≲ ≳ ≴ ≵ ≶ ≷ ≸ ≹ ≺ ≻ ≼ ≽ ≾ ≿ ⊀ ⊁ ⊃ ⊅ ⊇ ⊉ ⊋ ⊏ ⊐ ⊑ ⊒ ⊜ ⊩ ⊬ ⊮ ⊰ ⊱
-  ⊲ ⊳ ⊴ ⊵ ⊶ ⊷ ⋍ ⋐ ⋑ ⋕ ⋖ ⋗ ⋘ ⋙ ⋚ ⋛ ⋜ ⋝ ⋞ ⋟ ⋠ ⋡ ⋢ ⋣ ⋤ ⋥ ⋦ ⋧ ⋨ ⋩ ⋪ ⋫
-  ⋬ ⋭ ⋲ ⋳ ⋴ ⋵ ⋶ ⋷ ⋸ ⋹ ⋺ ⋻ ⋼ ⋽ ⋾ ⋿ ⟈ ⟉ ⟒ ⦷ ⧀ ⧁ ⧡ ⧣ ⧤ ⧥ ⩦ ⩧ ⩪ ⩫ ⩬ ⩭ ⩮ ⩯
-  ⩰ ⩱ ⩲ ⩳ ⩵ ⩶ ⩷ ⩸ ⩹ ⩺ ⩻ ⩼ ⩽ ⩾ ⩿ ⪀ ⪁ ⪂ ⪃ ⪄ ⪅ ⪆ ⪇ ⪈ ⪉ ⪊ ⪋ ⪌ ⪍ ⪎ ⪏ ⪐ ⪑ ⪒ ⪓ ⪔
-  ⪕ ⪖ ⪗ ⪘ ⪙ ⪚ ⪛ ⪜ ⪝ ⪞ ⪟ ⪠ ⪡ ⪢ ⪣ ⪤ ⪥ ⪦ ⪧ ⪨ ⪩ ⪪ ⪫ ⪬ ⪭ ⪮ ⪯ ⪰ ⪱ ⪲ ⪳ ⪴ ⪵ ⪶ ⪷ ⪸
-  ⪹ ⪺ ⪻ ⪼ ⪽ ⪾ ⪿ ⫀ ⫁ ⫂ ⫃ ⫄ ⫅ ⫆ ⫇ ⫈ ⫉ ⫊ ⫋ ⫌ ⫍ ⫎ ⫏ ⫐ ⫑ ⫒ ⫓ ⫔ ⫕ ⫖ ⫗ ⫘ ⫙ ⫷ ⫸
-  ⫹ ⫺ ⊢ ⊣ ⟂
-`;
+  comparison: `
+    > < >= <= == === != !==
+    ≥ ≤ ≡ ≠ ≢ ∈ ∉ ∋ ∌ ⊆ ⊈ ⊂ ⊄ ⊊ ∝ ∊ ∍ ∥ ∦ ∷ ∺ ∻ ∽ ∾ ≁ ≃ ≂ ≄ ≅ ≆ ≇ ≈ ≉ ≊ ≋ ≌ ≍ ≎ ≐
+    ≑ ≒ ≓ ≖ ≗ ≘ ≙ ≚ ≛ ≜ ≝ ≞ ≟ ≣ ≦ ≧ ≨ ≩ ≪ ≫ ≬ ≭ ≮ ≯ ≰ ≱ ≲ ≳ ≴ ≵ ≶ ≷ ≸ ≹ ≺ ≻ ≼ ≽ ≾
+    ≿ ⊀ ⊁ ⊃ ⊅ ⊇ ⊉ ⊋ ⊏ ⊐ ⊑ ⊒ ⊜ ⊩ ⊬ ⊮ ⊰ ⊱ ⊲ ⊳ ⊴ ⊵ ⊶ ⊷ ⋍ ⋐ ⋑ ⋕ ⋖ ⋗ ⋘ ⋙ ⋚ ⋛ ⋜ ⋝ ⋞ ⋟ ⋠
+    ⋡ ⋢ ⋣ ⋤ ⋥ ⋦ ⋧ ⋨ ⋩ ⋪ ⋫ ⋬ ⋭ ⋲ ⋳ ⋴ ⋵ ⋶ ⋷ ⋸ ⋹ ⋺ ⋻ ⋼ ⋽ ⋾ ⋿ ⟈ ⟉ ⟒ ⦷ ⧀ ⧁ ⧡ ⧣ ⧤ ⧥ ⩦ ⩧
+    ⩪ ⩫ ⩬ ⩭ ⩮ ⩯ ⩰ ⩱ ⩲ ⩳ ⩵ ⩶ ⩷ ⩸ ⩹ ⩺ ⩻ ⩼ ⩽ ⩾ ⩿ ⪀ ⪁ ⪂ ⪃ ⪄ ⪅ ⪆ ⪇ ⪈ ⪉ ⪊ ⪋ ⪌ ⪍ ⪎ ⪏ ⪐ ⪑
+    ⪒ ⪓ ⪔ ⪕ ⪖ ⪗ ⪘ ⪙ ⪚ ⪛ ⪜ ⪝ ⪞ ⪟ ⪠ ⪡ ⪢ ⪣ ⪤ ⪥ ⪦ ⪧ ⪨ ⪩ ⪪ ⪫ ⪬ ⪭ ⪮ ⪯ ⪰ ⪱ ⪲ ⪳ ⪴ ⪵ ⪶ ⪷ ⪸
+    ⪹ ⪺ ⪻ ⪼ ⪽ ⪾ ⪿ ⫀ ⫁ ⫂ ⫃ ⫄ ⫅ ⫆ ⫇ ⫈ ⫉ ⫊ ⫋ ⫌ ⫍ ⫎ ⫏ ⫐ ⫑ ⫒ ⫓ ⫔ ⫕ ⫖ ⫗ ⫘ ⫙ ⫷ ⫸ ⫹ ⫺ ⊢ ⊣
+    ⟂ ⫪ ⫫
+  `,
 
-const ELLIPSIS_OPERATORS = '… ⁝ ⋮ ⋱ ⋰ ⋯';
+  ellipsis: '… ⁝ ⋮ ⋱ ⋰ ⋯',
 
-const PLUS_OPERATORS = `
-  + - | ⊕ ⊖ ⊞ ⊟ ++ ∪ ∨ ⊔ ± ∓ ∔ ∸ ≂ ≏ ⊎ ⊻ ⊽ ⋎ ⋓ ⧺ ⧻ ⨈
-  ⨢ ⨣ ⨤ ⨥ ⨦ ⨧ ⨨ ⨩ ⨪ ⨫ ⨬ ⨭ ⨮ ⨹ ⨺ ⩁ ⩂ ⩅ ⩊ ⩌ ⩏ ⩐ ⩒ ⩔ ⩖ ⩗ ⩛ ⩝ ⩡ ⩢ ⩣
-`;
+  plus: `
+    ++ |
+    − ¦ ⊕ ⊖ ⊞ ⊟ ∪ ∨ ⊔ ± ∓ ∔ ∸ ≏ ⊎ ⊻ ⊽ ⋎ ⋓ ⟇ ⧺ ⧻ ⨈ ⨢ ⨣ ⨤ ⨥ ⨦ ⨧ ⨨ ⨩ ⨪ ⨫ ⨬ ⨭ ⨮ ⨹ ⨺ ⩁
+    ⩂ ⩅ ⩊ ⩌ ⩏ ⩐ ⩒ ⩔ ⩖ ⩗ ⩛ ⩝ ⩡ ⩢ ⩣
+  `,
 
-const TIMES_OPERATORS = `
-  * / ÷ % & ⋅ ∘ × \\ ∩ ∧ ⊗ ⊘ ⊙ ⊚ ⊛ ⊠ ⊡ ⊓ ∗ ∙
-  ∤ ⅋ ≀ ⊼ ⋄ ⋆ ⋇ ⋉ ⋊ ⋋ ⋌ ⋏ ⋒ ⟑ ⦸ ⦼ ⦾ ⦿ ⧶ ⧷ ⨇ ⨰
-  ⨱ ⨲ ⨳ ⨴ ⨵ ⨶ ⨷ ⨸ ⨻ ⨼ ⨽ ⩀ ⩃ ⩄ ⩋ ⩍ ⩎ ⩑ ⩓ ⩕ ⩘
-  ⩚ ⩜ ⩞ ⩟ ⩠ ⫛ ⊍ ▷ ⨝ ⟕ ⟖ ⟗
-`;
+  times: `
+    * / % & \\
+    ⌿ ÷ · · ⋅ ∘ × ∩ ∧ ⊗ ⊘ ⊙ ⊚ ⊛ ⊠ ⊡ ⊓ ∗ ∙ ∤ ⅋ ≀ ⊼ ⋄ ⋆ ⋇ ⋉ ⋊ ⋋ ⋌ ⋏ ⋒ ⟑ ⦸ ⦼ ⦾ ⦿ ⧶ ⧷
+    ⨇ ⨰ ⨱ ⨲ ⨳ ⨴ ⨵ ⨶ ⨷ ⨸ ⨻ ⨼ ⨽ ⩀ ⩃ ⩄ ⩋ ⩍ ⩎ ⩑ ⩓ ⩕ ⩘ ⩚ ⩜ ⩞ ⩟ ⩠ ⫛ ⊍ ▷ ⨝ ⟕ ⟖ ⟗ ⨟
+  `,
 
-const BITSHIFT_OPERATORS = '<< >> >>>';
+  bitshift: '<< >> >>>',
 
-const POWER_OPERATORS = `
-  ^ ↑ ↓ ⇵ ⟰ ⟱ ⤈ ⤉ ⤊ ⤋ ⤒ ⤓ ⥉ ⥌ ⥍ ⥏ ⥑ ⥔ ⥕ ⥘ ⥙ ⥜ ⥝ ⥠ ⥡ ⥣ ⥥ ⥮ ⥯ ￪ ￬
-`;
+  power: `
+    ^
+    ↑ ↓ ⇵ ⟰ ⟱ ⤈ ⤉ ⤊ ⤋ ⤒ ⤓ ⥉ ⥌ ⥍ ⥏ ⥑ ⥔ ⥕ ⥘ ⥙ ⥜ ⥝ ⥠ ⥡ ⥣ ⥥ ⥮ ⥯ ￪ ￬
+  `,
 
-const BINARY_AND_UNARY_PLUS_OPERATOR = token(addDots('+ - ± ∓'));
+  unary: '! ¬ √ ∛ ∜',
 
-const LAZY_AND = token(addDots('&&'));
-
-const LAZY_OR = token(addDots('||'));
+  unary_plus: '+ - ± ∓',
+};
 
 const SYNTACTIC_OPERATOR = token(choice('$', '->', '.', '...'));
 
@@ -301,10 +302,10 @@ module.exports = grammar({
       'end'
     ),
 
-    type_clause: $ => seq(
-      choice('<:', '>:'),
+    type_clause: $ => prec.right(PREC.prefix, seq(
+      alias($._type_order_operator, $.operator),
       $._primary_expression
-    ),
+    )),
 
     function_definition: $ => seq(
       'function',
@@ -362,11 +363,11 @@ module.exports = grammar({
       repeat($.where_clause),
     ),
 
-    where_clause: $ => seq(
+    where_clause: $ => prec.left(seq(
       'where',
       $._primary_expression,
       optional($.type_clause),
-    ),
+    )),
 
     macro_definition: $ => seq(
       'macro',
@@ -925,26 +926,25 @@ module.exports = grammar({
           // Syntactic operators in parentheses
           parenthesize(
             alias(
-              token(choice(
+              choice(
                 '::', ':=', '.=', '=',
-                LAZY_AND,
-                LAZY_OR,
                 SYNTACTIC_OPERATOR,
-                addDots(ASSIGN_OPERATORS),
-              )),
+                $._lazy_or_operator,
+                $._lazy_and_operator,
+                $._assignment_operator,
+              ),
               $.operator,
             ),
           ),
         )),
         // Syntactic operators without parentheses
         alias(
-          token.immediate(choice(
-            BINARY_AND_UNARY_PLUS_OPERATOR,
-            LAZY_AND,
-            LAZY_OR,
+          choice(
             SYNTACTIC_OPERATOR,
-            addDots(ASSIGN_OPERATORS),
-          )),
+            $._lazy_or_operator,
+            $._lazy_and_operator,
+            $._assignment_operator,
+          ),
           $.operator,
         ),
         alias(token.immediate(KEYWORDS), $.identifier),
@@ -969,26 +969,21 @@ module.exports = grammar({
       $.where_expression,
     ),
 
-    unary_expression: $ => prec.right(PREC.prefix, seq(
-      alias($._unary_operator, $.operator),
-      $._expression,
-    )),
-
     binary_expression: $ => {
       const table = [
-        [prec.left, PREC.power, $._power_operator],
-        [prec.left, PREC.rational, $._rational_operator],
-        [prec.left, PREC.bitshift, $._bitshift_operator],
-        [prec.left, PREC.times, $._times_operator],
-        [prec.left, PREC.plus, choice(BINARY_AND_UNARY_PLUS_OPERATOR, $._plus_operator)],
-        [prec.left, PREC.colon, $._ellipsis_operator],
+        [prec.right, PREC.pair, $._pair_operator],
         [prec.right, PREC.arrow, $._arrow_operator],
+        [prec.left, PREC.lazy_or, $._lazy_or_operator],
+        [prec.left, PREC.lazy_and, $._lazy_and_operator],
+        [prec.left, PREC.comparison, choice('in', 'isa', $._comparison_operator, $._type_order_operator)],
         [prec.right, PREC.pipe_left, $._pipe_left_operator],
         [prec.left, PREC.pipe_right, $._pipe_right_operator],
-        [prec.left, PREC.comparison, choice('in', 'isa', $._comparison_operator)],
-        [prec.left, PREC.lazy_or, LAZY_OR],
-        [prec.left, PREC.lazy_and, LAZY_AND],
-        [prec.right, PREC.pair, $._pair_operator],
+        [prec.left, PREC.colon, $._ellipsis_operator],
+        [prec.left, PREC.plus, choice($._unary_plus_operator, $._plus_operator)],
+        [prec.left, PREC.times, $._times_operator],
+        [prec.left, PREC.rational, $._rational_operator],
+        [prec.left, PREC.bitshift, $._bitshift_operator],
+        [prec.left, PREC.power, $._power_operator],
       ];
 
       return choice(...table.map(([fn, prec, op]) => fn(prec, seq(
@@ -997,6 +992,15 @@ module.exports = grammar({
         $._expression,
       ))));
     },
+
+    unary_expression: $ => prec.right(PREC.prefix, seq(
+      alias(choice(
+        $._tilde_operator,
+        $._unary_operator,
+        $._unary_plus_operator,
+      ), $.operator),
+      $._expression,
+    )),
 
     range_expression: $ => prec.left(PREC.colon, seq(
       $._expression,
@@ -1026,7 +1030,7 @@ module.exports = grammar({
       choice($._primary_expression)
     )),
 
-    function_expression: $ => prec.right(PREC.arrow, seq(
+    function_expression: $ => prec.right(PREC.afunc, seq(
       choice(
         $.identifier,
         $.parameter_list,
@@ -1050,7 +1054,7 @@ module.exports = grammar({
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(
       $._primary_expression,
-      alias($._assign_operator, $.operator),
+      alias(choice($._assignment_operator, $._tilde_operator), $.operator),
       $._expression,
     )),
 
@@ -1085,27 +1089,20 @@ module.exports = grammar({
       const nonIdentifierCharacters = [
         '#',
         '$',
-        '&',
         ',',
         ':',
         ';',
         '@',
+        '~',
         '(', ')',
         '{', '}',
-        ASSIGN_OPERATORS,
-        ARROW_OPERATORS,
-        COMPARISON_OPERATORS,
-        ELLIPSIS_OPERATORS,
-        PLUS_OPERATORS,
-        TIMES_OPERATORS,
-        BITSHIFT_OPERATORS,
-        POWER_OPERATORS
+        ...Object.values(OPERATORS),
       ].join(' ')
         .trim()
-        .replace(/\s+/g, '')
+        .replace(/!/g, '')
         .replace(/-/g, '')
         .replace(/\\/g, '\\\\')
-        .replace(/!/g, '');
+        .replace(/\s+/g, '');
 
       // Some symbols in Sm and So unicode categories that are identifiers
       const validMathSymbols = "°∀-∇∎-∑∫-∳";
@@ -1114,22 +1111,6 @@ module.exports = grammar({
       const rest = `[^"'\`\\s\\.\\-\\[\\]${nonIdentifierCharacters }]*`;
       return new RegExp(start + rest);
     },
-
-    operator: $ => choice(
-      // NOTE: Syntactic operators (&&, +=, etc) cannot be used as identifiers.
-      $._pair_operator,
-      $._arrow_operator,
-      $._comparison_operator,
-      $._pipe_left_operator,
-      $._pipe_right_operator,
-      $._ellipsis_operator,
-      $._plus_operator,
-      $._times_operator,
-      $._rational_operator,
-      $._bitshift_operator,
-      $._power_operator,
-      $._unary_operator,
-    ),
 
     // Literals
 
@@ -1241,31 +1222,62 @@ module.exports = grammar({
       ),
     ),
 
-    _unary_operator: _ => token(addDots('+ - ! ~ ¬ √ ∛ ∜')),
+    operator: $ => choice(
+      // NOTE: Syntactic operators (&&, +=, etc) cannot be used as identifiers.
+      $._pair_operator,
+      $._arrow_operator,
+      $._comparison_operator,
+      $._pipe_left_operator,
+      $._pipe_right_operator,
+      $._ellipsis_operator,
+      $._plus_operator,
+      $._times_operator,
+      $._rational_operator,
+      $._bitshift_operator,
+      $._power_operator,
+      $._tilde_operator,
+      $._type_order_operator,
+      $._unary_operator,
+      $._unary_plus_operator,
+    ),
 
-    _power_operator: _ => token(addDots(POWER_OPERATORS)),
-
-    _bitshift_operator: _ => token(addDots(BITSHIFT_OPERATORS)),
-
-    _rational_operator: _ => token(addDots('//')),
-
-    _times_operator: _ => token(addDots(TIMES_OPERATORS)),
-
-    _plus_operator: _ => token(addDots(PLUS_OPERATORS)),
-
-    _ellipsis_operator: _ => token(choice('..', addDots(ELLIPSIS_OPERATORS))),
-
-    _pipe_left_operator: _ => token(addDots('<|')),
-
-    _pipe_right_operator: _ => token(addDots('|>')),
-
-    _comparison_operator: _ => token(choice('<:', '>:', addDots(COMPARISON_OPERATORS))),
-
-    _arrow_operator: _ => token(choice('<--', '-->', '<-->', addDots(ARROW_OPERATORS))),
+    _assignment_operator: _ => token(choice(':=', '$=', '.=', addDots(OPERATORS.assignment))),
 
     _pair_operator: _ => token(addDots('=>')),
 
-    _assign_operator: _ => token(choice(':=', '~', '$=', '.=', addDots(ASSIGN_OPERATORS))),
+    _arrow_operator: _ => token(addDots(OPERATORS.arrow)),
+
+    _lazy_or_operator: _ => token(addDots('||')),
+
+    _lazy_and_operator: _ => token(addDots('&&')),
+
+    _comparison_operator: _ => token(addDots(OPERATORS.comparison)),
+
+    _pipe_right_operator: _ => token(addDots('|>')),
+
+    _pipe_left_operator: _ => token(addDots('<|')),
+
+    _ellipsis_operator: _ => token(choice('..', addDots(OPERATORS.ellipsis))),
+
+    _plus_operator: _ => token(addDots(OPERATORS.plus)),
+
+    _times_operator: _ => token(addDots(OPERATORS.times)),
+
+    _rational_operator: _ => token(addDots('//')),
+
+    _bitshift_operator: _ => token(addDots(OPERATORS.bitshift)),
+
+    _power_operator: _ => token(addDots(OPERATORS.power)),
+
+
+    _tilde_operator: _ => token(addDots('~')), // unary or assignment
+
+    _type_order_operator: _ => token(addDots('<: >:')), // unary or comparison
+
+    _unary_operator: _ => token(addDots(OPERATORS.unary)),
+
+    _unary_plus_operator: _ => token(addDots(OPERATORS.unary_plus)),
+
 
     _terminator: _ => choice('\n', /;+/),
 
