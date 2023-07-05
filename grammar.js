@@ -1,5 +1,4 @@
 const PREC = [
-  'assign',
   'pair',
   'conditional',
   'arrow',
@@ -25,10 +24,11 @@ const PREC = [
   return result;
 }, {});
 
-const PREC_TUP = -1;
-const PREC_ARR = PREC_TUP; // Arrays cannot contain bare_tuples
-const PREC_DECL = PREC_TUP - 1; // _declarations can contain bare_tuples
-const PREC_MACROARG = PREC_DECL - 1; // macro_argument_list can contain _declarations
+PREC.mat_elem = -1;
+PREC.tuple = -1; // Bare tuples
+PREC.assign = -2;
+PREC.stmt = -3;
+PREC.macro_arg = -4;
 
 const ASSIGN_OPERATORS = `
   += -= *= /= //= \\= ^= ÷= %= <<= >>= >>>= |= &= ⊻= ≔ ⩴ ≕
@@ -204,7 +204,6 @@ module.exports = grammar({
     _block: $ => seq(
       sep1($._terminator, choice(
         $._expression,
-        $._declaration,
         $.assignment,
         $.bare_tuple,
         $.short_function_definition,
@@ -224,6 +223,36 @@ module.exports = grammar({
       prec(-1, alias(':', $.operator)),
       prec(-1, alias('begin', $.identifier)),
     ),
+
+    assignment: $ => prec.right(PREC.assign, seq(
+      // LHS
+      choice(
+        $._quotable,
+        // No function calls. Those are parsed as short_function_definition
+        $.field_expression,
+        $.index_expression,
+        $.parametrized_type_expression,
+        $.interpolation_expression,
+        $.quote_expression,
+        $.typed_expression,
+        $.operator,
+
+        $.binary_expression,
+        $.unary_expression,
+        $.bare_tuple
+      ),
+      alias('=', $.operator),
+      choice(
+        $._expression,
+        $.assignment,
+        $.bare_tuple
+      )
+    )),
+
+    bare_tuple: $ => prec(PREC.tuple, seq(
+      $._expression,
+      repeat1(prec(PREC.tuple, seq(',', $._expression)))
+    )),
 
     // Definitions
 
@@ -406,6 +435,7 @@ module.exports = grammar({
     // Statements
 
     _statement: $ => choice(
+      // block statements:
       $.compound_statement,
       $.quote_statement,
       $.let_statement,
@@ -413,9 +443,13 @@ module.exports = grammar({
       $.try_statement,
       $.for_statement,
       $.while_statement,
+      // simple statements:
       $.break_statement,
       $.continue_statement,
       $.return_statement,
+      $.const_statement,
+      $.global_statement,
+      $.local_statement,
       $.export_statement,
       $.import_statement,
     ),
@@ -500,7 +534,7 @@ module.exports = grammar({
 
     continue_statement: _ => 'continue',
 
-    return_statement: $ => prec.right(PREC_DECL, seq(
+    return_statement: $ => prec.right(PREC.stmt, seq(
       'return',
       optional(choice(
         $._expression,
@@ -508,6 +542,40 @@ module.exports = grammar({
         $.bare_tuple,
       ))
     )),
+
+    const_statement: $ => prec.right(PREC.stmt, seq(
+      'const',
+      choice(
+        $.assignment,
+        $.identifier,
+        $.typed_expression,
+      ),
+    )),
+
+    global_statement: $ => prec.right(PREC.stmt, seq(
+      'global',
+      choice(
+        $.assignment,
+        $.bare_tuple,
+        $.identifier,
+        $.typed_expression,
+        $.function_definition,
+        $.short_function_definition,
+      ),
+    )),
+
+    local_statement: $ => prec.right(PREC.stmt, seq(
+      'local',
+      choice(
+        $.assignment,
+        $.bare_tuple,
+        $.identifier,
+        $.typed_expression,
+        $.function_definition,
+        $.short_function_definition,
+      ),
+    )),
+
 
     _exportable: $ => choice(
       $.identifier,
@@ -574,7 +642,7 @@ module.exports = grammar({
       $.vector_expression,
     ),
 
-    comprehension_expression: $ => prec(PREC_ARR, seq(
+    comprehension_expression: $ => prec(PREC.mat_elem, seq(
       '[',
       choice(
         $._expression,
@@ -616,7 +684,7 @@ module.exports = grammar({
       $._expression
     ),
 
-    matrix_expression: $ => prec(PREC_ARR, seq(
+    matrix_expression: $ => prec(PREC.mat_elem, seq(
       '[',
       choice(
         // Must allow newlines even if there's already a semicolon.
@@ -628,7 +696,7 @@ module.exports = grammar({
       ']'
     )),
 
-    matrix_row: $ => repeat1(prec(PREC_ARR, choice(
+    matrix_row: $ => repeat1(prec(PREC.mat_elem, choice(
       $._expression,
       alias($.named_field, $.assignment), // JuMP.jl
     ))),
@@ -645,7 +713,6 @@ module.exports = grammar({
 
     parenthesized_expression: $ => parenthesize(
       sep1(';', choice(
-        $._declaration,
         $._expression,
         $.assignment,
         $.short_function_definition,
@@ -770,9 +837,8 @@ module.exports = grammar({
       optional($.macro_argument_list),
     )),
 
-    macro_argument_list: $ => prec.left(repeat1(prec(PREC_MACROARG, choice(
+    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, choice(
       $._expression,
-      $._declaration,
       $.assignment,
       $.bare_tuple,
       $.short_function_definition,
@@ -994,76 +1060,6 @@ module.exports = grammar({
       $._expression,
     )),
 
-    // Assignments and declarations
-
-    assignment: $ => prec.right(PREC.assign, seq(
-      // LHS
-      choice(
-        $._quotable,
-        // No function calls. Those are parsed as short_function_definition
-        $.field_expression,
-        $.index_expression,
-        $.parametrized_type_expression,
-        $.interpolation_expression,
-        $.quote_expression,
-        $.typed_expression,
-        $.operator,
-
-        $.binary_expression,
-        $.unary_expression,
-        $.bare_tuple
-      ),
-      alias('=', $.operator),
-      choice(
-        $._expression,
-        $.assignment,
-        $.bare_tuple
-      )
-    )),
-
-    _declaration: $ => choice(
-      $.const_declaration,
-      $.local_declaration,
-      $.global_declaration,
-    ),
-
-    const_declaration: $ => prec.right(PREC_DECL, seq(
-      'const',
-      choice(
-        $.assignment,
-        $.identifier,
-        $.typed_expression,
-      ),
-    )),
-
-    global_declaration: $ => prec.right(PREC_DECL, seq(
-      'global',
-      choice(
-        $.assignment,
-        $.bare_tuple,
-        $.identifier,
-        $.typed_expression,
-        $.function_definition,
-        $.short_function_definition,
-      ),
-    )),
-
-    local_declaration: $ => prec.right(PREC_DECL, seq(
-      'local',
-      choice(
-        $.assignment,
-        $.bare_tuple,
-        $.identifier,
-        $.typed_expression,
-        $.function_definition,
-        $.short_function_definition,
-      ),
-    )),
-
-    bare_tuple: $ => prec(PREC_TUP, seq(
-      $._expression,
-      repeat1(prec(PREC_TUP, seq(',', $._expression)))
-    )),
 
 
     // Tokens
