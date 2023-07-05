@@ -181,7 +181,7 @@ module.exports = grammar({
     // Comprehensions with newlines
     [$.matrix_row, $.comprehension_expression],
 
-    [$.juxtaposition_expression, $._literal],
+    [$.juxtaposition_expression, $._number],
     [$.juxtaposition_expression, $._expression], // adjoint
   ],
 
@@ -551,6 +551,7 @@ module.exports = grammar({
       $.curly_expression, // Only valid in macros
       $.parenthesized_expression,
       $.tuple_expression,
+      $._string,
     ),
 
     _array: $ => choice(
@@ -687,8 +688,6 @@ module.exports = grammar({
       $.index_expression,
       $.interpolation_expression,
       $.quote_expression,
-      $.prefixed_command_literal,
-      $.prefixed_string_literal,
     ),
 
     field_expression: $ => prec(PREC.dot, seq(
@@ -698,10 +697,7 @@ module.exports = grammar({
         $.identifier,
         $.interpolation_expression,
         $.quote_expression,
-        $.command_literal,
-        $.string_literal,
-        $.prefixed_command_literal,
-        $.prefixed_string_literal,
+        $._string,
       ),
     )),
 
@@ -823,7 +819,7 @@ module.exports = grammar({
     interpolation_expression: $ => prec.right(PREC.prefix, seq(
       '$',
       choice(
-        $._literal,
+        $._number,
         $._quotable,
       ),
     )),
@@ -831,7 +827,8 @@ module.exports = grammar({
     quote_expression: $ => prec.right(PREC.prefix, seq(
       ':',
       choice(
-        $._literal,
+        $._number,
+        $._string,
         $.identifier,
         $.operator,
         seq($._immediate_brace, $.curly_expression),
@@ -874,7 +871,7 @@ module.exports = grammar({
       // All previous rules are expressions
       $._definition,
       $._statement,
-      $._literal,
+      $._number,
       $._primary_expression,
       $.macrocall_expression,
       $.adjoint_expression,
@@ -1004,9 +1001,6 @@ module.exports = grammar({
         $.typed_expression,
         $.operator,
 
-        $.prefixed_command_literal,
-        $.prefixed_string_literal,
-
         $.binary_expression,
         $.unary_expression,
         $.bare_tuple
@@ -1135,13 +1129,10 @@ module.exports = grammar({
 
     // Literals
 
-    _literal: $ => choice(
+    _number: $ => choice(
       $.boolean_literal,
       $.integer_literal,
       $.float_literal,
-      $.character_literal,
-      $.string_literal,
-      $.command_literal,
     ),
 
     boolean_literal: _ => choice('true', 'false'),
@@ -1187,6 +1178,14 @@ module.exports = grammar({
 
       return choice(leading_period, trailing_period, just_exponent, hex_float);
     },
+
+    _string: $ => choice(
+      $.character_literal,
+      $.string_literal,
+      $.command_literal,
+      $.prefixed_string_literal,
+      $.prefixed_command_literal,
+    ),
 
     escape_sequence: _ => ESCAPE_SEQUENCE,
 

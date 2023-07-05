@@ -86,6 +86,7 @@ index expressions
 
 a[1, 2, 3]
 a[1, :]
+"foo"[1]
 
 ---
 (source_file
@@ -99,7 +100,10 @@ a[1, :]
     (identifier)
     (vector_expression
       (integer_literal)
-      (operator))))
+      (operator)))
+  (index_expression
+    (string_literal)
+    (vector_expression (integer_literal))))
 
 
 ==============================
