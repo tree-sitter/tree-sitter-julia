@@ -182,7 +182,7 @@ module.exports = grammar({
     [$.matrix_row, $.comprehension_expression],
 
     [$.juxtaposition_expression, $._number],
-    [$.juxtaposition_expression, $._expression], // adjoint
+    [$.juxtaposition_expression, $._primary_expression], // adjoint
   ],
 
   supertypes: $ => [
@@ -680,6 +680,7 @@ module.exports = grammar({
     // Primary expressions can be called, indexed, accessed, and type parametrized.
     _primary_expression: $ => choice(
       $._quotable,
+      $.adjoint_expression,
       $.broadcast_call_expression,
       $.call_expression,
       alias($._closed_macrocall_expression, $.macrocall_expression),
@@ -689,6 +690,11 @@ module.exports = grammar({
       $.interpolation_expression,
       $.quote_expression,
     ),
+
+    adjoint_expression: $ => prec(PREC.postfix, seq(
+      $._primary_expression,
+      token.immediate("'"),
+    )),
 
     field_expression: $ => prec(PREC.dot, seq(
       field('value', $._primary_expression),
@@ -874,7 +880,6 @@ module.exports = grammar({
       $._number,
       $._primary_expression,
       $.macrocall_expression,
-      $.adjoint_expression,
       $.unary_expression,
       $.binary_expression,
       $.range_expression,
@@ -889,11 +894,6 @@ module.exports = grammar({
       prec(-1, alias(':', $.operator)),
       prec(-1, alias('begin', $.identifier)),
     ),
-
-    adjoint_expression: $ => prec(PREC.postfix, seq(
-      $._primary_expression,
-      token.immediate("'"),
-    )),
 
     unary_expression: $ => prec.right(PREC.prefix, seq(
       alias($._unary_operator, $.operator),

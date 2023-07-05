@@ -422,6 +422,32 @@ end
 
 
 ==============================
+adjoint expressions
+==============================
+
+[u, v]'
+A'[i]
+(x, y)'
+f'(x)
+:a'
+
+
+---
+(source_file
+  (adjoint_expression
+    (vector_expression (identifier) (identifier)))
+  (index_expression
+    (adjoint_expression (identifier))
+    (vector_expression (identifier)))
+  (adjoint_expression
+    (tuple_expression (identifier) (identifier)))
+  (call_expression
+    (adjoint_expression (identifier))
+    (argument_list (identifier)))
+  (adjoint_expression
+    (quote_expression (identifier))))
+
+==============================
 juxtaposition expressions
 ==============================
 

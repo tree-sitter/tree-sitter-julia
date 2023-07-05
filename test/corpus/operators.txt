@@ -189,7 +189,6 @@ x ≥ 0 ≥ z
 unary operators
 ==============================
 
-[a, b]'
 -A'
 +a
 -b
@@ -199,7 +198,6 @@ unary operators
 
 ---
 (source_file
-  (adjoint_expression (vector_expression (identifier) (identifier)))
   (unary_expression (operator) (adjoint_expression (identifier)))
   (unary_expression (operator) (identifier))
   (unary_expression (operator) (identifier))
