@@ -131,6 +131,7 @@ module.exports = grammar({
     $._terminator,
     $._definition,
     $._statement,
+    $._operation,
   ],
 
   externals: $ => [
@@ -209,6 +210,19 @@ module.exports = grammar({
         $.short_function_definition,
       )),
       optional($._terminator)
+    ),
+
+    _expression: $ => choice(
+      // All previous rules are expressions
+      $._definition,
+      $._statement,
+      $._number,
+      $._primary_expression,
+      $._operation,
+      $.macrocall_expression,
+      $.operator,
+      prec(-1, alias(':', $.operator)),
+      prec(-1, alias('begin', $.identifier)),
     ),
 
     // Definitions
@@ -871,28 +885,22 @@ module.exports = grammar({
       ),
     )),
 
-    // Expressions
+    // Operations
 
-    _expression: $ => choice(
-      // All previous rules are expressions
-      $._definition,
-      $._statement,
-      $._number,
-      $._primary_expression,
-      $.macrocall_expression,
+    _operation: $ => choice(
+      // Use regular operators
       $.unary_expression,
       $.binary_expression,
       $.range_expression,
+      // Use syntactic operators
       $.splat_expression,
       $.ternary_expression,
       $.typed_expression,
       $.function_expression,
+      // Other stuff
       $.juxtaposition_expression,
       $.compound_assignment_expression,
       $.where_expression,
-      $.operator,
-      prec(-1, alias(':', $.operator)),
-      prec(-1, alias('begin', $.identifier)),
     ),
 
     unary_expression: $ => prec.right(PREC.prefix, seq(
