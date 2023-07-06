@@ -6,3 +6,9 @@ examples/*
 !examples/.gitkeep
 target
 Cargo.lock
+/*.a
+/*.dylib
+/*.so*
+*.o
+/bindings/c/*.h
+/bindings/c/tree-sitter-*.pc
