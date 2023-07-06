@@ -6,3 +6,4 @@ examples/*
 !examples/.gitkeep
 target
 Cargo.lock
+.build/
