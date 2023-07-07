@@ -83,8 +83,6 @@ const OPERATORS = {
   unary_plus: '+ - ± ∓',
 };
 
-const SYNTACTIC_OPERATOR = token(choice('$', '->', '.', '...'));
-
 const ESCAPE_SEQUENCE = token(seq(
   '\\',
   choice(
@@ -928,10 +926,10 @@ module.exports = grammar({
             alias(
               choice(
                 '::', ':=', '.=', '=',
-                SYNTACTIC_OPERATOR,
+                $._assignment_operator,
                 $._lazy_or_operator,
                 $._lazy_and_operator,
-                $._assignment_operator,
+                $._syntactic_operator,
               ),
               $.operator,
             ),
@@ -940,10 +938,10 @@ module.exports = grammar({
         // Syntactic operators without parentheses
         alias(
           choice(
-            SYNTACTIC_OPERATOR,
+            $._assignment_operator,
             $._lazy_or_operator,
             $._lazy_and_operator,
-            $._assignment_operator,
+            $._syntactic_operator,
           ),
           $.operator,
         ),
@@ -1070,9 +1068,9 @@ module.exports = grammar({
 
     macro_identifier: $ => seq('@', choice(
       $.identifier,
-      $.operator,
       $.scoped_identifier,
-      alias(token.immediate('.'), $.operator)
+      $.operator,
+      alias($._syntactic_operator, $.operator),
     )),
 
     scoped_identifier: $ => seq(
@@ -1277,6 +1275,9 @@ module.exports = grammar({
     _unary_operator: _ => token(addDots(OPERATORS.unary)),
 
     _unary_plus_operator: _ => token(addDots(OPERATORS.unary_plus)),
+
+
+    _syntactic_operator: _ => token(choice('$', '.', '...', '->', '?')),
 
 
     _terminator: _ => choice('\n', /;+/),
