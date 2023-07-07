@@ -211,7 +211,6 @@ module.exports = grammar({
     ),
 
     _expression: $ => choice(
-      // All previous rules are expressions
       $._definition,
       $._statement,
       $._number,
