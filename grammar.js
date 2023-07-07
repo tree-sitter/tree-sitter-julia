@@ -25,7 +25,7 @@ const PREC = [
   return result;
 }, {});
 
-PREC.mat_elem = -1;
+PREC.array = -1;
 PREC.tuple = -1; // Bare tuples
 PREC.assign = -2;
 PREC.stmt = -3;
@@ -643,7 +643,7 @@ module.exports = grammar({
       $.vector_expression,
     ),
 
-    comprehension_expression: $ => prec(PREC.mat_elem, seq(
+    comprehension_expression: $ => prec(PREC.array, seq(
       '[',
       choice(
         $._expression,
@@ -685,7 +685,7 @@ module.exports = grammar({
       $._expression
     ),
 
-    matrix_expression: $ => prec(PREC.mat_elem, seq(
+    matrix_expression: $ => prec(PREC.array, seq(
       '[',
       choice(
         // Must allow newlines even if there's already a semicolon.
@@ -697,7 +697,7 @@ module.exports = grammar({
       ']'
     )),
 
-    matrix_row: $ => repeat1(prec(PREC.mat_elem, choice(
+    matrix_row: $ => repeat1(prec(PREC.array, choice(
       $._expression,
       alias($.named_field, $.assignment), // JuMP.jl
     ))),
