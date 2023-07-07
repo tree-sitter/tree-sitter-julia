@@ -86,6 +86,7 @@ index expressions
 
 a[1, 2, 3]
 a[1, :]
+"foo"[1]
 
 ---
 (source_file
@@ -99,7 +100,10 @@ a[1, :]
     (identifier)
     (vector_expression
       (integer_literal)
-      (operator))))
+      (operator)))
+  (index_expression
+    (string_literal)
+    (vector_expression (integer_literal))))
 
 
 ==============================
@@ -120,7 +124,7 @@ $(usertype){T}
     (curly_expression (identifier)))
   (parametrized_type_expression
     (identifier)
-    (curly_expression (type_clause (identifier))))
+    (curly_expression (type_clause (operator) (identifier))))
   (parametrized_type_expression
     (interpolation_expression (parenthesized_expression (identifier)))
     (curly_expression (identifier)))
@@ -416,6 +420,32 @@ end
         (interpolation_expression
           (parenthesized_expression (splat_expression (identifier))))))))
 
+
+==============================
+adjoint expressions
+==============================
+
+[u, v]'
+A'[i]
+(x, y)'
+f'(x)
+:a'
+
+
+---
+(source_file
+  (adjoint_expression
+    (vector_expression (identifier) (identifier)))
+  (index_expression
+    (adjoint_expression (identifier))
+    (vector_expression (identifier)))
+  (adjoint_expression
+    (tuple_expression (identifier) (identifier)))
+  (call_expression
+    (adjoint_expression (identifier))
+    (argument_list (identifier)))
+  (adjoint_expression
+    (quote_expression (identifier))))
 
 ==============================
 juxtaposition expressions

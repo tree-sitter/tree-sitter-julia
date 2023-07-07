@@ -41,7 +41,7 @@ abstract type T{S} <: U end
 
   (primitive_definition
     (identifier)
-    (type_clause (identifier))
+    (type_clause (operator) (identifier))
     (integer_literal))
 
   (primitive_definition
@@ -55,13 +55,13 @@ abstract type T{S} <: U end
 
   (abstract_definition
     (identifier)
-    (type_clause (identifier)))
+    (type_clause (operator) (identifier)))
 
   (abstract_definition
     (identifier)
     (type_parameter_list
       (identifier))
-    (type_clause (identifier))))
+    (type_clause (operator) (identifier))))
 
 
 ==============================
@@ -120,14 +120,14 @@ end
     (identifier)
     (type_parameter_list
       (binary_expression (identifier) (operator) (identifier)))
-    (type_clause (identifier))
+    (type_clause (operator) (identifier))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
 
   ;; Parametric fields
   (struct_definition
     (identifier)
-    (type_clause (identifier))
+    (type_clause (operator) (identifier))
     (typed_expression
       (identifier)
       (parametrized_type_expression
@@ -519,6 +519,7 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                     (where_clause
                       (identifier)
                       (type_clause
+                        (operator)
                         (identifier)))))
     (call_expression (identifier) (argument_list (identifier))))
 

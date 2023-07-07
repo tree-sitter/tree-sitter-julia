@@ -196,6 +196,10 @@
         "named": true
       },
       {
+        "type": "const_statement",
+        "named": true
+      },
+      {
         "type": "continue_statement",
         "named": true
       },
@@ -208,6 +212,10 @@
         "named": true
       },
       {
+        "type": "global_statement",
+        "named": true
+      },
+      {
         "type": "if_statement",
         "named": true
       },
@@ -217,6 +225,10 @@
       },
       {
         "type": "let_statement",
+        "named": true
+      },
+      {
+        "type": "local_statement",
         "named": true
       },
       {
@@ -280,11 +292,23 @@
       "required": true,
       "types": [
         {
+          "type": "adjoint_expression",
+          "named": true
+        },
+        {
           "type": "broadcast_call_expression",
           "named": true
         },
         {
           "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "command_literal",
           "named": true
         },
         {
@@ -337,6 +361,10 @@
         },
         {
           "type": "quote_expression",
+          "named": true
+        },
+        {
+          "type": "string_literal",
           "named": true
         },
         {
@@ -448,6 +476,10 @@
       "required": true,
       "types": [
         {
+          "type": "adjoint_expression",
+          "named": true
+        },
+        {
           "type": "argument_list",
           "named": true
         },
@@ -457,6 +489,14 @@
         },
         {
           "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "command_literal",
           "named": true
         },
         {
@@ -516,6 +556,10 @@
           "named": true
         },
         {
+          "type": "string_literal",
+          "named": true
+        },
+        {
           "type": "tuple_expression",
           "named": true
         },
@@ -535,6 +579,10 @@
       "required": true,
       "types": [
         {
+          "type": "adjoint_expression",
+          "named": true
+        },
+        {
           "type": "argument_list",
           "named": true
         },
@@ -544,6 +592,14 @@
         },
         {
           "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "command_literal",
           "named": true
         },
         {
@@ -607,6 +663,10 @@
           "named": true
         },
         {
+          "type": "string_literal",
+          "named": true
+        },
+        {
           "type": "tuple_expression",
           "named": true
         },
@@ -635,18 +695,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -711,18 +759,6 @@
           "named": true
         },
         {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
-          "named": true
-        },
-        {
           "type": "short_function_definition",
           "named": true
         }
@@ -757,7 +793,7 @@
     }
   },
   {
-    "type": "const_declaration",
+    "type": "const_statement",
     "named": true,
     "fields": {},
     "children": {
@@ -823,18 +859,6 @@
           "named": true
         },
         {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
-          "named": true
-        },
-        {
           "type": "parameter_list",
           "named": true
         },
@@ -863,18 +887,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -913,18 +925,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -970,11 +970,23 @@
         "required": true,
         "types": [
           {
+            "type": "adjoint_expression",
+            "named": true
+          },
+          {
             "type": "broadcast_call_expression",
             "named": true
           },
           {
             "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "character_literal",
+            "named": true
+          },
+          {
+            "type": "command_literal",
             "named": true
           },
           {
@@ -1030,6 +1042,10 @@
             "named": true
           },
           {
+            "type": "string_literal",
+            "named": true
+          },
+          {
             "type": "tuple_expression",
             "named": true
           },
@@ -1044,6 +1060,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "character_literal",
+          "named": true
+        },
         {
           "type": "command_literal",
           "named": true
@@ -1093,18 +1113,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -1174,19 +1182,7 @@
           "named": true
         },
         {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
           "type": "for_binding",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -1249,11 +1245,23 @@
         "required": false,
         "types": [
           {
+            "type": "adjoint_expression",
+            "named": true
+          },
+          {
             "type": "broadcast_call_expression",
             "named": true
           },
           {
             "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "character_literal",
+            "named": true
+          },
+          {
+            "type": "command_literal",
             "named": true
           },
           {
@@ -1309,6 +1317,10 @@
             "named": true
           },
           {
+            "type": "string_literal",
+            "named": true
+          },
+          {
             "type": "tuple_expression",
             "named": true
           },
@@ -1333,18 +1345,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -1416,11 +1416,23 @@
         "required": true,
         "types": [
           {
+            "type": "adjoint_expression",
+            "named": true
+          },
+          {
             "type": "broadcast_call_expression",
             "named": true
           },
           {
             "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "character_literal",
+            "named": true
+          },
+          {
+            "type": "command_literal",
             "named": true
           },
           {
@@ -1476,6 +1488,10 @@
             "named": true
           },
           {
+            "type": "string_literal",
+            "named": true
+          },
+          {
             "type": "tuple_expression",
             "named": true
           },
@@ -1498,7 +1514,7 @@
     }
   },
   {
-    "type": "global_declaration",
+    "type": "global_statement",
     "named": true,
     "fields": {},
     "children": {
@@ -1590,18 +1606,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -1698,11 +1702,23 @@
       "required": true,
       "types": [
         {
+          "type": "adjoint_expression",
+          "named": true
+        },
+        {
           "type": "broadcast_call_expression",
           "named": true
         },
         {
           "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "command_literal",
           "named": true
         },
         {
@@ -1755,6 +1771,10 @@
         },
         {
           "type": "quote_expression",
+          "named": true
+        },
+        {
+          "type": "string_literal",
           "named": true
         },
         {
@@ -1822,6 +1842,14 @@
           "named": true
         },
         {
+          "type": "prefixed_command_literal",
+          "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
+          "named": true
+        },
+        {
           "type": "string_literal",
           "named": true
         },
@@ -1854,6 +1882,14 @@
         },
         {
           "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "command_literal",
           "named": true
         },
         {
@@ -1914,6 +1950,10 @@
         },
         {
           "type": "quote_expression",
+          "named": true
+        },
+        {
+          "type": "string_literal",
           "named": true
         },
         {
@@ -2002,19 +2042,7 @@
           "named": true
         },
         {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
           "type": "let_binding",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -2025,7 +2053,7 @@
     }
   },
   {
-    "type": "local_declaration",
+    "type": "local_statement",
     "named": true,
     "fields": {},
     "children": {
@@ -2077,18 +2105,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -2148,18 +2164,6 @@
           "named": true
         },
         {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
-          "named": true
-        },
-        {
           "type": "short_function_definition",
           "named": true
         }
@@ -2198,6 +2202,10 @@
       "required": true,
       "types": [
         {
+          "type": "adjoint_expression",
+          "named": true
+        },
+        {
           "type": "argument_list",
           "named": true
         },
@@ -2207,6 +2215,14 @@
         },
         {
           "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "command_literal",
           "named": true
         },
         {
@@ -2271,6 +2287,10 @@
         },
         {
           "type": "quote_expression",
+          "named": true
+        },
+        {
+          "type": "string_literal",
           "named": true
         },
         {
@@ -2351,18 +2371,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -2490,11 +2498,23 @@
       "required": true,
       "types": [
         {
+          "type": "adjoint_expression",
+          "named": true
+        },
+        {
           "type": "broadcast_call_expression",
           "named": true
         },
         {
           "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "command_literal",
           "named": true
         },
         {
@@ -2550,6 +2570,10 @@
           "named": true
         },
         {
+          "type": "string_literal",
+          "named": true
+        },
+        {
           "type": "tuple_expression",
           "named": true
         },
@@ -2577,23 +2601,11 @@
           "named": true
         },
         {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
           "type": "for_clause",
           "named": true
         },
         {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
           "type": "if_clause",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -2766,6 +2778,14 @@
           "named": true
         },
         {
+          "type": "prefixed_command_literal",
+          "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
+          "named": true
+        },
+        {
           "type": "string_literal",
           "named": true
         },
@@ -2798,18 +2818,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -2995,11 +3003,23 @@
         "required": false,
         "types": [
           {
+            "type": "adjoint_expression",
+            "named": true
+          },
+          {
             "type": "broadcast_call_expression",
             "named": true
           },
           {
             "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "character_literal",
+            "named": true
+          },
+          {
+            "type": "command_literal",
             "named": true
           },
           {
@@ -3052,6 +3072,10 @@
           },
           {
             "type": "quote_expression",
+            "named": true
+          },
+          {
+            "type": "string_literal",
             "named": true
           },
           {
@@ -3129,18 +3153,6 @@
         },
         {
           "type": "bare_tuple",
-          "named": true
-        },
-        {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -3239,18 +3251,6 @@
           "named": true
         },
         {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
-          "named": true
-        },
-        {
           "type": "short_function_definition",
           "named": true
         },
@@ -3309,19 +3309,7 @@
           "named": true
         },
         {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
           "type": "finally_clause",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
           "named": true
         },
         {
@@ -3363,15 +3351,27 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "adjoint_expression",
+          "named": true
+        },
         {
           "type": "broadcast_call_expression",
           "named": true
         },
         {
           "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "command_literal",
           "named": true
         },
         {
@@ -3407,6 +3407,10 @@
           "named": true
         },
         {
+          "type": "operator",
+          "named": true
+        },
+        {
           "type": "parametrized_type_expression",
           "named": true
         },
@@ -3424,6 +3428,10 @@
         },
         {
           "type": "quote_expression",
+          "named": true
+        },
+        {
+          "type": "string_literal",
           "named": true
         },
         {
@@ -3502,11 +3510,23 @@
         "required": false,
         "types": [
           {
+            "type": "adjoint_expression",
+            "named": true
+          },
+          {
             "type": "broadcast_call_expression",
             "named": true
           },
           {
             "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "character_literal",
+            "named": true
+          },
+          {
+            "type": "command_literal",
             "named": true
           },
           {
@@ -3559,6 +3579,10 @@
           },
           {
             "type": "quote_expression",
+            "named": true
+          },
+          {
+            "type": "string_literal",
             "named": true
           },
           {
@@ -3630,11 +3654,23 @@
       "required": true,
       "types": [
         {
+          "type": "adjoint_expression",
+          "named": true
+        },
+        {
           "type": "broadcast_call_expression",
           "named": true
         },
         {
           "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "command_literal",
           "named": true
         },
         {
@@ -3687,6 +3723,10 @@
         },
         {
           "type": "quote_expression",
+          "named": true
+        },
+        {
+          "type": "string_literal",
           "named": true
         },
         {
@@ -3751,18 +3791,6 @@
           "named": true
         },
         {
-          "type": "const_declaration",
-          "named": true
-        },
-        {
-          "type": "global_declaration",
-          "named": true
-        },
-        {
-          "type": "local_declaration",
-          "named": true
-        },
-        {
           "type": "short_function_definition",
           "named": true
         }
@@ -3818,15 +3846,7 @@
     "named": false
   },
   {
-    "type": "<:",
-    "named": false
-  },
-  {
     "type": "=",
-    "named": false
-  },
-  {
-    "type": ">:",
     "named": false
   },
   {

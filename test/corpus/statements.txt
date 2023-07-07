@@ -307,26 +307,36 @@ import LinearAlgebra as la
 
 
 ===============================
-const declarations
+const statements
 ===============================
 
 const x = 5
 const y, z = 1, 2
 
+(0, const x, y = 1, 2)
+
 ---
 
 (source_file
-  (const_declaration
+  (const_statement
     (assignment (identifier) (operator) (integer_literal)))
-  (const_declaration
+  (const_statement
     (assignment
     (bare_tuple (identifier) (identifier))
     (operator)
-    (bare_tuple (integer_literal) (integer_literal)))))
+    (bare_tuple (integer_literal) (integer_literal))))
+  ; const statements inside tuples
+  (tuple_expression
+    (integer_literal)
+    (const_statement
+      (assignment
+        (bare_tuple (identifier) (identifier))
+        (operator)
+        (bare_tuple (integer_literal) (integer_literal))))))
 
 
 ===============================
-local declarations
+local statements
 ===============================
 
 local x
@@ -337,22 +347,22 @@ local function bar() 4 end
 ---
 
 (source_file
-  (local_declaration (identifier))
-  (local_declaration
+  (local_statement (identifier))
+  (local_statement
     (assignment
     (bare_tuple (identifier) (identifier))
     (operator)
     (bare_tuple (integer_literal) (integer_literal))))
-  (local_declaration
+  (local_statement
     (short_function_definition
       (identifier) (parameter_list) (integer_literal)))
-  (local_declaration
+  (local_statement
     (function_definition
       (identifier) (parameter_list) (integer_literal))))
 
 
 ===============================
-global declarations
+global statements
 ===============================
 
 global X
@@ -363,15 +373,15 @@ global function bar() 4 end
 ---
 
 (source_file
-  (global_declaration (identifier))
-  (global_declaration
+  (global_statement (identifier))
+  (global_statement
     (assignment
     (bare_tuple (identifier) (identifier))
     (operator)
     (bare_tuple (integer_literal) (integer_literal))))
-  (global_declaration
+  (global_statement
     (short_function_definition
       (identifier) (parameter_list) (integer_literal)))
-  (global_declaration
+  (global_statement
     (function_definition
       (identifier) (parameter_list) (integer_literal))))
