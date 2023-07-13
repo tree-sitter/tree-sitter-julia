@@ -299,10 +299,8 @@ module.exports = grammar({
       'end'
     ),
 
-    type_clause: $ => prec.right(PREC.prefix, seq(
-      alias($._type_order_operator, $.operator),
-      $._primary_expression
-    )),
+    // Just for type definitions
+    type_clause: $ => seq(alias('<:', $.operator), $._primary_expression),
 
     function_definition: $ => seq(
       'function',
@@ -313,7 +311,8 @@ module.exports = grammar({
             // Anonymous function
             seq(
               field('parameters', $.parameter_list),
-              repeat($.where_clause),
+              optional(seq('::', field('return_type', $._primary_expression))),
+              optional($.where_clause),
             ),
           ),
           optional($._terminator),
@@ -351,20 +350,15 @@ module.exports = grammar({
         $.interpolation_expression,
       )),
       optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
+
       $._immediate_paren,
       field('parameters', $.parameter_list),
-      optional(seq(
-        '::',
-        field('return_type', $._primary_expression),
-      )),
-      repeat($.where_clause),
+
+      optional(seq('::', field('return_type', $._primary_expression))),
+      optional($.where_clause),
     ),
 
-    where_clause: $ => prec.left(seq(
-      'where',
-      $._primary_expression,
-      optional($.type_clause),
-    )),
+    where_clause: $ => seq('where', $._expression),
 
     macro_definition: $ => seq(
       'macro',
@@ -758,7 +752,6 @@ module.exports = grammar({
       '{',
       sep(',', choice(
         $._expression,
-        $.type_clause,
         alias($.named_field, $.assignment),
       )),
       optional(','),
@@ -1003,6 +996,7 @@ module.exports = grammar({
     unary_expression: $ => prec.right(PREC.prefix, seq(
       alias(choice(
         $._tilde_operator,
+        $._type_order_operator,
         $._unary_operator,
         $._unary_plus_operator,
       ), $.operator),
