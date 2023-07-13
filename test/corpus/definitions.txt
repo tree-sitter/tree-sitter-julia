@@ -479,17 +479,17 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                     parameter: (identifier)
                     type: (identifier)))
     (where_clause
-      (curly_expression
-        (binary_expression
-          (identifier)
-          (operator)
-          (identifier))))
-    (where_clause
-      (curly_expression
-        (binary_expression
-          (identifier)
-          (operator)
-          (identifier))))
+      (where_expression
+        (curly_expression
+          (binary_expression
+            (identifier)
+            (operator)
+            (identifier)))
+        (curly_expression
+          (binary_expression
+            (identifier)
+            (operator)
+            (identifier)))))
     (binary_expression
       (identifier)
       (operator)
@@ -517,8 +517,8 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
                             (identifier)
                             (curly_expression (identifier)))
                     (where_clause
-                      (identifier)
-                      (type_clause
+                      (binary_expression
+                        (identifier)
                         (operator)
                         (identifier)))))
     (call_expression (identifier) (argument_list (identifier))))
