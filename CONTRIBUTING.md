@@ -10,7 +10,7 @@ If possible, the issue should include an brief explanation of the bug, the expec
 
 If your text editor isn't highlighting code correctly, the error might be in the editor or in the parser.
 The best way to check if it's an error in the parser is to read the generated syntax tree of the erroneously highlighted code.
-Some editors have can display the syntax tree of a text file.
+Some editors can display the syntax tree of a text file.
 For example, Neovim has the [`:InspectTree`](https://neovim.io/doc/user/treesitter.html#vim.treesitter.inspect_tree()) command.
 
 If the syntax tree has `ERROR` nodes for valid Julia programs, then you should file an issue here.
