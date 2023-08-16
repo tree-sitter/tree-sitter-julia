@@ -124,7 +124,7 @@ const KEYWORDS = choice(
 module.exports = grammar({
   name: 'julia',
 
-  word: $ => $.identifier,
+  word: $ => $._word_identifier,
 
   inline: $ => [
     $._terminator,
@@ -1086,7 +1086,7 @@ module.exports = grammar({
       ),
     ),
 
-    identifier: _ => {
+    _word_identifier: _ => {
       const nonIdentifierCharacters = [
         '#',
         '$',
@@ -1112,6 +1112,8 @@ module.exports = grammar({
       const rest = `[^"'\`\\s\\.\\-\\[\\]${nonIdentifierCharacters }]*`;
       return new RegExp(start + rest);
     },
+
+    identifier: $ => $._word_identifier,
 
     // Literals
 
