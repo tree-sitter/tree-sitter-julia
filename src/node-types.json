@@ -1545,6 +1545,11 @@
     }
   },
   {
+    "type": "identifier",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "if_clause",
     "named": true,
     "fields": {},
@@ -3856,10 +3861,6 @@
   {
     "type": "global",
     "named": false
-  },
-  {
-    "type": "identifier",
-    "named": true
   },
   {
     "type": "if",
