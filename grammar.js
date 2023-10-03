@@ -1050,7 +1050,26 @@ module.exports = grammar({
         $.float_literal,
         $.adjoint_expression,
       ),
-      $._primary_expression,
+        choice(
+          $._array,
+          $.identifier,
+          $.curly_expression, // Only valid in macros
+          $.parenthesized_expression,
+          $.tuple_expression,
+          $.character_literal,
+          $.command_literal,
+          $.prefixed_string_literal,
+          $.prefixed_command_literal,
+          $.adjoint_expression,
+          $.broadcast_call_expression,
+          $.call_expression,
+          alias($._closed_macrocall_expression, $.macrocall_expression),
+          $.parametrized_type_expression,
+          $.field_expression,
+          $.index_expression,
+          $.interpolation_expression,
+          $.quote_expression,
+       ),
     )),
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(
