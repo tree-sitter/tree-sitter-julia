@@ -127,7 +127,7 @@ x |>
   ; Pairs
   (call_expression
     (identifier)
-    (argument_list
+    (arguments
       (binary_expression (identifier) (operator) (identifier))
       (binary_expression (identifier) (operator) (identifier))))
 
@@ -205,7 +205,7 @@ unary operators
   (binary_expression
     (unary_expression (operator) (identifier))
     (operator)
-    (call_expression (operator) (argument_list (identifier))))
+    (call_expression (operator) (arguments (identifier))))
   (binary_expression
     (integer_literal)
     (operator)
@@ -246,8 +246,8 @@ x = batch_size == 1 ?
     (operator)
     (ternary_expression
       (binary_expression (identifier) (operator) (integer_literal))
-      (call_expression (identifier) (argument_list (integer_literal)))
-      (call_expression (identifier) (argument_list (integer_literal) (identifier))))))
+      (call_expression (identifier) (arguments (integer_literal)))
+      (call_expression (identifier) (arguments (integer_literal) (identifier))))))
 
 
 ==============================
@@ -271,8 +271,8 @@ foo(^, ÷, -)
     (operator))
   (call_expression
     (identifier)
-    (argument_list (operator)))
+    (arguments (operator)))
   (call_expression
   (identifier)
-  (argument_list (operator) (operator) (operator))))
+  (arguments (operator) (operator) (operator))))
 

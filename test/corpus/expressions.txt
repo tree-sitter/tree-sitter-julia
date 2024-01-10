@@ -66,7 +66,7 @@ df."a"
           (field_expression
             (index_expression (identifier) (vector_expression (integer_literal)))
             (identifier))
-          (argument_list))
+          (arguments))
         (identifier)))
     (identifier))
 
@@ -135,7 +135,7 @@ $(usertype){T}
     (operator)
     (call_expression
       (identifier)
-      (argument_list (integer_literal) (integer_literal)))))
+      (arguments (integer_literal) (integer_literal)))))
 
 
 ==============================
@@ -154,25 +154,25 @@ new{typeof(xs)}(xs)
 ---
 
 (source_file
-  (call_expression (identifier) (argument_list))
-  (call_expression (identifier) (argument_list (string_literal) (integer_literal)))
-  (call_expression (identifier) (argument_list (splat_expression (identifier))))
+  (call_expression (identifier) (arguments))
+  (call_expression (identifier) (arguments (string_literal) (integer_literal)))
+  (call_expression (identifier) (arguments (splat_expression (identifier))))
 
   (call_expression
     (identifier)
-    (argument_list
+    (arguments
       (identifier)
-      (named_argument (identifier) (identifier))))
+      (named_argument (identifier) (operator) (identifier))))
   (call_expression
     (identifier)
-    (argument_list (identifier) (identifier)))
+    (arguments (identifier) (identifier)))
 
   (call_expression
     (parametrized_type_expression
       (identifier)
       (curly_expression
-        (call_expression (identifier) (argument_list (identifier)))))
-    (argument_list (identifier))))
+        (call_expression (identifier) (arguments (identifier)))))
+    (arguments (identifier))))
 
 
 ========================================
@@ -188,14 +188,14 @@ end
 (source_file
   (call_expression
     (identifier)
-    (argument_list (identifier))
+    (arguments (identifier))
     (do_clause
-      (parameter_list
+      (arguments
         (identifier)
         (identifier))
       (call_expression
         (identifier)
-        (argument_list (identifier) (identifier))))))
+        (arguments (identifier) (identifier))))))
 
 
 ==============================
@@ -222,19 +222,19 @@ Meta.@dump x = 1
 (source_file
   (macrocall_expression
     (macro_identifier (identifier))
-    (macro_argument_list
+    (macro_arguments
       (binary_expression (identifier) (operator) (identifier))
       (string_literal)))
 
   (macrocall_expression
     (macro_identifier (identifier))
-    (macro_argument_list
+    (macro_arguments
       (string_literal)
       (compound_statement (assignment (identifier) (operator) (identifier)))))
 
   (macrocall_expression
     (macro_identifier (operator))
-    (macro_argument_list
+    (macro_arguments
       (binary_expression
         (binary_expression (identifier) (operator) (identifier))
         (operator)
@@ -243,28 +243,28 @@ Meta.@dump x = 1
   ; Macros as arguments
   (call_expression
     (identifier)
-    (argument_list
+    (arguments
       (macrocall_expression (macro_identifier (identifier)))
       (string_literal)))
 
   ; Nested macros
   (macrocall_expression
     (macro_identifier (identifier))
-    (macro_argument_list
+    (macro_arguments
       (macrocall_expression
         (macro_identifier (identifier))
-        (macro_argument_list
-          (call_expression (identifier) (argument_list (identifier)))))))
+        (macro_arguments
+          (call_expression (identifier) (arguments (identifier)))))))
 
   ; Scoped macro identifiers
   (macrocall_expression
     (macro_identifier (scoped_identifier (identifier) (identifier)))
-    (macro_argument_list
+    (macro_arguments
       (bare_tuple (integer_literal) (integer_literal))))
   (macrocall_expression
     (identifier)
     (macro_identifier (identifier))
-    (macro_argument_list
+    (macro_arguments
       (assignment (identifier) (operator) (integer_literal)))))
 
 
@@ -282,15 +282,17 @@ f(@nospecialize(x)) = x
 (source_file
   (macrocall_expression
     (macro_identifier (identifier))
-    (argument_list (identifier) (identifier) (identifier) (identifier)))
+    (arguments (identifier) (identifier) (identifier) (identifier)))
 
   ; Macros as parameters
-  (short_function_definition
-    (identifier)
-    (parameter_list
-      (macrocall_expression
-        (macro_identifier (identifier))
-        (argument_list (identifier))))
+  (assignment
+    (function_signature
+      (identifier)
+      (arguments
+        (macrocall_expression
+          (macro_identifier (identifier))
+          (arguments (identifier)))))
+    (operator)
     (identifier))
 
   ; Open vs closed macros
@@ -302,7 +304,7 @@ f(@nospecialize(x)) = x
     (integer_literal))
   (macrocall_expression
     (macro_identifier (identifier))
-    (macro_argument_list
+    (macro_arguments
       (binary_expression
         (vector_expression (integer_literal) (integer_literal))
         (operator)
@@ -387,7 +389,7 @@ end
   (call_expression
     (interpolation_expression
       (identifier))
-    (argument_list
+    (arguments
       (identifier)))
   (index_expression
     (interpolation_expression
@@ -408,17 +410,18 @@ end
     (interpolation_expression
       (parenthesized_expression (splat_expression (identifier)))))
   (function_definition
-    (interpolation_expression
-      (parenthesized_expression (identifier)))
-    (parameter_list
-      (interpolation_expression
-        (parenthesized_expression (identifier))))
-    (call_expression
+    (function_signature
       (interpolation_expression
         (parenthesized_expression (identifier)))
-      (argument_list
+      (arguments
         (interpolation_expression
-          (parenthesized_expression (splat_expression (identifier))))))))
+          (parenthesized_expression (identifier)))))
+      (call_expression
+        (interpolation_expression
+          (parenthesized_expression (identifier)))
+        (arguments
+          (interpolation_expression
+            (parenthesized_expression (splat_expression (identifier))))))))
 
 
 ==============================
@@ -443,7 +446,7 @@ f'(x)
     (tuple_expression (identifier) (identifier)))
   (call_expression
     (adjoint_expression (identifier))
-    (argument_list (identifier)))
+    (arguments (identifier)))
   (adjoint_expression
     (quote_expression (identifier))))
 
@@ -471,7 +474,7 @@ x'x
     (index_expression (identifier) (vector_expression (identifier))))
   (juxtaposition_expression
     (integer_literal)
-    (call_expression (identifier) (argument_list (identifier))))
+    (call_expression (identifier) (arguments (identifier))))
   (juxtaposition_expression
     (integer_literal)
     (field_expression (identifier) (identifier)))
@@ -518,7 +521,7 @@ x -> x^2
     (identifier)
     (binary_expression (identifier) (operator) (integer_literal)))
   (function_expression
-    (parameter_list (identifier) (identifier) (identifier))
+    (arguments (identifier) (identifier) (identifier))
     (binary_expression
       (binary_expression
         (binary_expression (integer_literal) (operator) (identifier))
@@ -527,12 +530,12 @@ x -> x^2
       (operator)
       (identifier)))
   (function_expression
-    (parameter_list)
+    (arguments)
     (integer_literal))
   (function_expression
-    (parameter_list)
+    (arguments)
     (parenthesized_expression
-      (call_expression (identifier) (argument_list (float_literal)))
+      (call_expression (identifier) (arguments (float_literal)))
       (compound_assignment_expression (identifier) (operator) (integer_literal))
       (identifier))))
 
