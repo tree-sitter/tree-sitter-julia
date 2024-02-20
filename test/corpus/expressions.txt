@@ -217,6 +217,7 @@ joinpath(@__DIR__, "grammar.js")
 @Meta.dump 1, 2
 Meta.@dump x = 1
 
+@assert x == 1 "equals string"
 ---
 
 (source_file
@@ -265,8 +266,17 @@ Meta.@dump x = 1
     (identifier)
     (macro_identifier (identifier))
     (macro_argument_list
-      (assignment (identifier) (operator) (integer_literal)))))
+      (assignment (identifier) (operator) (integer_literal))))
 
+  (macrocall_expression
+    (macro_identifier
+      (identifier))
+    (macro_argument_list
+      (binary_expression
+        (identifier)
+        (operator)
+        (integer_literal))
+      (string_literal))))
 
 ==============================
 closed macro call expressions
@@ -535,4 +545,3 @@ x -> x^2
       (call_expression (identifier) (argument_list (float_literal)))
       (compound_assignment_expression (identifier) (operator) (integer_literal))
       (identifier))))
-
