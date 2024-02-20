@@ -175,19 +175,19 @@ f(1, 2, i for i in iter)
   (index_expression
     (identifier)
     (comprehension_expression
-      (call_expression (identifier) (argument_list (identifier) (identifier)))
+      (call_expression (identifier) (arguments (identifier) (identifier)))
       (for_clause (for_binding (identifier) (identifier)))
       (for_clause (for_binding (identifier) (identifier)))))
 
   (call_expression
     (identifier)
-    (argument_list
+    (arguments
       (integer_literal)
       (integer_literal)
       (identifier)
       (for_clause (for_binding (identifier) (identifier)))))
   (parenthesized_expression
-    (call_expression (identifier) (argument_list (identifier) (identifier)))
+    (call_expression (identifier) (arguments (identifier) (identifier)))
     (for_clause
       (for_binding (identifier) (identifier))
       (for_binding (identifier) (integer_literal)))

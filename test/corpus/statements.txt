@@ -103,13 +103,13 @@ end
 
   (if_statement
     (identifier)
-    (call_expression (identifier) (argument_list))
+    (call_expression (identifier) (arguments))
     (elseif_clause
       (identifier)
-      (call_expression (identifier) (argument_list))
-      (call_expression (identifier) (argument_list)))
+      (call_expression (identifier) (arguments))
+      (call_expression (identifier) (arguments)))
     (else_clause
-      (call_expression (identifier) (argument_list)))))
+      (call_expression (identifier) (arguments)))))
 
 
 ==============================
@@ -149,17 +149,17 @@ end
     (finally_clause))
 
   (try_statement
-    (call_expression (identifier) (argument_list (identifier)))
+    (call_expression (identifier) (arguments (identifier)))
     (catch_clause
       (call_expression
         (identifier)
-        (argument_list
-          (call_expression (identifier) (argument_list (identifier) (integer_literal)))))))
+        (arguments
+          (call_expression (identifier) (arguments (identifier) (integer_literal)))))))
 
   (try_statement
-    (call_expression (identifier) (argument_list (identifier)))
+    (call_expression (identifier) (arguments (identifier)))
     (finally_clause
-      (call_expression (identifier) (argument_list (identifier)))))
+      (call_expression (identifier) (arguments (identifier)))))
 
   (try_statement
     (line_comment)
@@ -198,19 +198,19 @@ end
     (for_binding
       (identifier)
       (identifier))
-    (call_expression (identifier) (argument_list (identifier))))
+    (call_expression (identifier) (arguments (identifier))))
 
   (for_statement
     (for_binding
       (identifier)
       (vector_expression (integer_literal) (integer_literal) (integer_literal)))
-    (call_expression (identifier) (argument_list (identifier))))
+    (call_expression (identifier) (arguments (identifier))))
 
   (for_statement
     (for_binding
       (tuple_expression (identifier) (identifier))
       (identifier))
-    (call_expression (identifier) (argument_list (identifier) (identifier)))))
+    (call_expression (identifier) (arguments (identifier) (identifier)))))
 
 
 ==============================
@@ -234,13 +234,13 @@ while a(); b(); end
 
   (while_statement
     (binary_expression (identifier) (operator) (integer_literal))
-    (call_expression (identifier) (argument_list (identifier)))
+    (call_expression (identifier) (arguments (identifier)))
     (continue_statement)
     (break_statement))
 
   (while_statement
-    (call_expression (identifier) (argument_list))
-    (call_expression (identifier) (argument_list))))
+    (call_expression (identifier) (arguments))
+    (call_expression (identifier) (arguments))))
 
 
 ==============================
@@ -370,11 +370,14 @@ local function bar() 4 end
     (operator)
     (bare_tuple (integer_literal) (integer_literal))))
   (local_statement
-    (short_function_definition
-      (identifier) (parameter_list) (integer_literal)))
+    (assignment
+      (function_signature (identifier) (arguments))
+      (operator)
+      (integer_literal)))
   (local_statement
     (function_definition
-      (identifier) (parameter_list) (integer_literal))))
+      (function_signature (identifier) (arguments))
+      (integer_literal))))
 
 
 ===============================
@@ -396,8 +399,11 @@ global function bar() 4 end
     (operator)
     (bare_tuple (integer_literal) (integer_literal))))
   (global_statement
-    (short_function_definition
-      (identifier) (parameter_list) (integer_literal)))
+    (assignment
+      (function_signature (identifier) (arguments))
+      (operator)
+      (integer_literal)))
   (global_statement
     (function_definition
-      (identifier) (parameter_list) (integer_literal))))
+      (function_signature (identifier) (arguments))
+      (integer_literal))))
