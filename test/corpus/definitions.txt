@@ -174,29 +174,29 @@ end
 
   (function_definition
     name: (identifier)
-    parameters: (parameter_list))
+    parameters: (argument_list))
 
   (function_definition
     name: (identifier)
-    parameters: (parameter_list (identifier))
+    parameters: (argument_list (identifier))
     (identifier))
 
   (function_definition
     name: (field_expression value: (identifier) (identifier))
-    parameters: (parameter_list
-                  (typed_parameter
-                    parameter: (identifier)
-                    type: (identifier)))
+    parameters: (argument_list
+                  (typed_expression
+                    (identifier)
+                    (identifier)))
     (return_statement (integer_literal)))
 
   (function_definition
     name: (identifier)
-    parameters: (parameter_list (identifier))
+    parameters: (argument_list (identifier))
     (call_expression (identifier) (argument_list (identifier))))
 
   (function_definition
     name: (operator)
-    parameters: (parameter_list (identifier) (identifier))
+    parameters: (argument_list (identifier) (identifier))
     (binary_expression
       (identifier)
       (operator)
@@ -205,10 +205,10 @@ end
   ;; Anonymous function
   (function_definition
     name: (identifier)
-    parameters: (parameter_list (identifier) (identifier))
+    parameters: (argument_list (identifier) (identifier))
     (return_statement
       (function_definition
-        parameters: (parameter_list (identifier))
+        parameters: (argument_list (identifier))
         (call_expression
           (identifier)
           (argument_list (identifier) (identifier))))))
@@ -216,9 +216,9 @@ end
   ;; Function Objects
   (function_definition
     name: (function_object
-            parameter: (identifier)
-            type: (identifier))
-    parameters: (parameter_list)))
+            (identifier)
+            (identifier))
+    parameters: (argument_list)))
 
 
 ==============================
@@ -314,56 +314,54 @@ end
   ;; Parameters
   (function_definition
     name: (identifier)
-    parameters: (parameter_list
+    parameters: (argument_list
                   (identifier)
-                  (typed_parameter
-                    parameter: (identifier)
-                    type: (identifier))
-                  (optional_parameter (identifier) (integer_literal))
-                  (slurp_parameter (identifier))))
+                  (typed_expression
+                    (identifier)
+                    (identifier))
+                  (named_argument (identifier) (integer_literal))
+                  (splat_expression (identifier))))
 
   ;; Typed parameters
   (function_definition
-    parameters: (parameter_list
-                  (typed_parameter
-                    type: (parametrized_type_expression (identifier)
-                                                        (curly_expression (identifier))))
-                  (optional_parameter
-                    (typed_parameter
-                      parameter: (identifier)
-                      type: (identifier))
+    parameters: (argument_list
+                  (unary_typed_expression
+                    (parametrized_type_expression (identifier)
+                      (curly_expression (identifier))))
+                  (named_argument
+                    (typed_expression
+                      (identifier)
+                      (identifier))
                     (integer_literal))
-                  (slurp_parameter
-                    (typed_parameter
-                      parameter: (identifier)
-                      type: (identifier)))))
+                  (splat_expression
+                    (typed_expression
+                      (identifier)
+                      (identifier)))))
 
   ;; Keyword parameters
   (function_definition
     name: (identifier)
-    parameters: (parameter_list
+    parameters: (argument_list
       (identifier)
-      (slurp_parameter (identifier))
-      (keyword_parameters
-        (slurp_parameter (identifier)))))
+      (splat_expression (identifier))
+      (splat_expression (identifier))))
 
   (function_definition
     name: (identifier)
-    parameters: (parameter_list
-                  (keyword_parameters
+    parameters: (argument_list
+                  (identifier)
+                  (typed_expression
                     (identifier)
-                    (typed_parameter
-                      parameter: (identifier)
-                      type: (identifier))
-                    (optional_parameter (identifier) (integer_literal))
-                    (slurp_parameter (identifier))))
+                    (identifier))
+                  (named_argument (identifier) (integer_literal))
+                  (splat_expression (identifier)))
       (identifier))
 
   ;; Return types
   (function_definition
     name: (identifier)
-    parameters: (parameter_list (identifier))
-    return_type: (identifier)
+    parameters: (argument_list (identifier))
+    return_type: (unary_typed_expression (identifier))
     (call_expression
       (identifier)
       (argument_list
@@ -372,12 +370,12 @@ end
   ;; Important: "scoped" return types are still parsed as field expressions.
   (function_definition
     name: (identifier)
-    parameters: (parameter_list
+    parameters: (argument_list
                   (identifier)
-                  (typed_parameter
-                    parameter: (identifier)
-                    type: (field_expression value: (identifier) (identifier))))
-    return_type: (field_expression value: (identifier) (identifier))
+                  (typed_expression
+                    (identifier)
+                    (field_expression value: (identifier) (identifier))))
+    return_type: (unary_typed_expression (field_expression value: (identifier) (identifier)))
     (call_expression
       (identifier)
       (argument_list
@@ -406,26 +404,26 @@ end
 (source_file
   (function_definition
     name: (identifier)
-    parameters: (parameter_list (tuple_expression (identifier) (identifier)))
+    parameters: (argument_list (tuple_expression (identifier) (identifier)))
     (tuple_expression (identifier) (identifier)))
 
 
   (function_definition
     name: (identifier)
-    parameters: (parameter_list
-                  (optional_parameter
+    parameters: (argument_list
+                  (named_argument
                     (tuple_expression (identifier) (identifier))
                     (tuple_expression (integer_literal) (integer_literal))))
     (tuple_expression (identifier) (identifier)))
 
   (function_definition
     name: (identifier)
-    parameters: (parameter_list
-                  (typed_parameter
-                    parameter: (tuple_expression (identifier) (identifier))
-                    type: (parametrized_type_expression
-                            (identifier)
-                            (curly_expression (identifier) (identifier)))))
+    parameters: (argument_list
+                  (typed_expression
+                    (tuple_expression (identifier) (identifier))
+                    (parametrized_type_expression
+                      (identifier)
+                      (curly_expression (identifier) (identifier)))))
     (where_clause (identifier))
     (identifier)))
 
@@ -457,19 +455,19 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
   ;; `where` without brackets
   (function_definition
     name: (identifier)
-    parameters: (parameter_list
-                  (typed_parameter
-                    parameter: (identifier)
-                    type: (identifier)))
+    parameters: (argument_list
+                  (typed_expression
+                    (identifier)
+                    (identifier)))
     (where_clause (identifier)))
 
   ;; `where`
   (function_definition
     name: (identifier)
-    parameters: (parameter_list
-                  (typed_parameter
-                    parameter: (identifier)
-                    type: (identifier)))
+    parameters: (argument_list
+                  (typed_expression
+                    (identifier)
+                    (identifier)))
     (where_clause
       (curly_expression
         (binary_expression
@@ -486,9 +484,7 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
           (identifier)
           (argument_list
             (typed_expression (identifier) (identifier))
-            (typed_parameter
-              parameter: (identifier)
-              type: (identifier))))
+            (typed_expression (identifier) (identifier))))
         (curly_expression
           (binary_expression
             (identifier)
@@ -521,17 +517,17 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
   ;; `where` clauses in parameters
   (function_definition
     name: (identifier)
-    parameters: (parameter_list
-                  (typed_parameter
-                    parameter: (identifier)
-                    type: (parametrized_type_expression
-                            (identifier)
-                            (curly_expression (identifier)))
-                    (where_clause
-                      (binary_expression
+    parameters: (argument_list
+                  (where_expression
+                    (typed_expression
+                      (identifier)
+                      (parametrized_type_expression
                         (identifier)
-                        (operator)
-                        (identifier)))))
+                        (curly_expression (identifier))))
+                    (binary_expression
+                      (identifier)
+                      (operator)
+                      (identifier))))
     (call_expression (identifier) (argument_list (identifier))))
 
   ;; Almost everything at once
@@ -542,11 +538,9 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
         (identifier))
       (argument_list
         (typed_expression (identifier) (identifier))
-        (typed_parameter
-          type: (prefixed_string_literal prefix: (identifier)))
-        (typed_parameter
-          parameter: (identifier)
-          type: (identifier))
+        (unary_typed_expression
+          (prefixed_string_literal prefix: (identifier)))
+        (typed_expression (identifier) (identifier))
         (splat_expression (identifier))))
       (operator)
       (call_expression
@@ -572,16 +566,16 @@ macro count(args...) length(args) end
 (source_file
     (macro_definition
       (identifier)
-      (parameter_list
-        (typed_parameter (identifier) (identifier)))
+      (argument_list
+        (typed_expression (identifier) (identifier)))
       (call_expression
         (identifier)
         (argument_list (identifier))))
 
     (macro_definition
       (identifier)
-      (parameter_list
-        (slurp_parameter (identifier)))
+      (argument_list
+        (splat_expression (identifier)))
       (call_expression
         (identifier)
         (argument_list (identifier)))))

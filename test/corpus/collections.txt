@@ -37,7 +37,7 @@ named tuple collections
 
 (source_file
   (parenthesized_expression
-    (assignment (identifier) (operator) (integer_literal)))
+    (assignment (identifier) (integer_literal)))
   (line_comment)
   (tuple_expression
     (named_field (identifier) (integer_literal)))

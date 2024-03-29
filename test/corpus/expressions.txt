@@ -190,7 +190,7 @@ end
     (identifier)
     (argument_list (identifier))
     (do_clause
-      (parameter_list
+      (argument_list
         (identifier)
         (identifier))
       (call_expression
@@ -412,7 +412,7 @@ end
   (function_definition
     (interpolation_expression
       (parenthesized_expression (identifier)))
-    (parameter_list
+    (argument_list
       (interpolation_expression
         (parenthesized_expression (identifier))))
     (call_expression
@@ -520,7 +520,7 @@ x -> x^2
     (identifier)
     (binary_expression (identifier) (operator) (integer_literal)))
   (function_expression
-    (parameter_list (identifier) (identifier) (identifier))
+    (argument_list (identifier) (identifier) (identifier))
     (binary_expression
       (binary_expression
         (binary_expression (integer_literal) (operator) (identifier))
@@ -529,10 +529,10 @@ x -> x^2
       (operator)
       (identifier)))
   (function_expression
-    (parameter_list)
+    (argument_list)
     (integer_literal))
   (function_expression
-    (parameter_list)
+    (argument_list)
     (parenthesized_expression
       (call_expression (identifier) (argument_list (float_literal)))
       (compound_assignment_expression (identifier) (operator) (integer_literal))

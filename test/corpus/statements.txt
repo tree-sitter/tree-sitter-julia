@@ -376,7 +376,7 @@ local function bar() 4 end
       (integer_literal)))
   (local_statement
     (function_definition
-      (identifier) (parameter_list) (integer_literal))))
+      (identifier) (argument_list) (integer_literal))))
 
 
 ===============================
@@ -404,4 +404,4 @@ global function bar() 4 end
       (integer_literal)))
   (global_statement
     (function_definition
-      (identifier) (parameter_list) (integer_literal))))
+      (identifier) (argument_list) (integer_literal))))
