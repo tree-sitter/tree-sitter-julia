@@ -238,39 +238,49 @@ Base.foo(x) = x
 ---
 
 (source_file
-  (short_function_definition
-    name: (identifier)
-    parameters: (parameter_list (identifier))
+  (assignment
+    (call_expression
+      (identifier)
+      (argument_list (identifier)))
+    (operator)
     (binary_expression
       (identifier)
       (operator)
       (integer_literal)))
 
-  (short_function_definition
-    name: (field_expression value: (identifier) (identifier))
-    parameters: (parameter_list (identifier))
+  (assignment
+    (call_expression
+      (field_expression value: (identifier) (identifier))
+      (argument_list (identifier)))
+    (operator)
     (identifier))
 
-  (short_function_definition
-    name: (identifier)
-    parameters: (parameter_list (identifier))
+  (assignment
+    (call_expression
+      (identifier)
+      (argument_list (identifier)))
+    (operator)
     (call_expression
       (identifier)
       (argument_list
         (integer_literal)
         (identifier))))
 
-  (short_function_definition
-    name: (operator)
-    parameters: (parameter_list (identifier) (identifier))
+  (assignment
+    (call_expression
+      (operator)
+      (argument_list (identifier) (identifier)))
+    (operator)
     (binary_expression
       (identifier)
       (operator)
       (identifier)))
 
-  (short_function_definition
-    name: (operator)
-    parameters: (parameter_list (identifier) (identifier))
+  (assignment
+    (call_expression
+      (parenthesized_expression (operator))
+      (argument_list (identifier) (identifier)))
+    (operator)
     (binary_expression
       (identifier)
       (operator)
@@ -469,42 +479,43 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
     (identifier))
 
   ;; Short function `where`
-  (short_function_definition
-    name: (identifier)
-    parameters: (parameter_list
-                  (typed_parameter
-                    parameter: (identifier)
-                    type: (identifier))
-                  (typed_parameter
-                    parameter: (identifier)
-                    type: (identifier)))
-    (where_clause
+  (assignment
+    (where_expression
       (where_expression
+        (call_expression
+          (identifier)
+          (argument_list
+            (typed_expression (identifier) (identifier))
+            (typed_parameter
+              parameter: (identifier)
+              type: (identifier))))
         (curly_expression
           (binary_expression
             (identifier)
             (operator)
-            (identifier)))
-        (curly_expression
-          (binary_expression
-            (identifier)
-            (operator)
-            (identifier)))))
+            (identifier))))
+      (curly_expression
+        (binary_expression
+          (identifier)
+          (operator)
+          (identifier))))
+    (operator)
     (binary_expression
       (identifier)
       (operator)
       (identifier)))
 
   ;; Short function with type parameters
-  (short_function_definition
-    name: (identifier)
-    (type_parameter_list (identifier))
-    parameters: (parameter_list
-                  (typed_parameter
-                    parameter: (identifier)
-                    type: (identifier)))
-    (where_clause
+  (assignment
+    (where_expression
+      (call_expression
+        (parametrized_type_expression
+          (identifier)
+          (curly_expression (identifier)))
+        (argument_list
+          (typed_expression (identifier) (identifier))))
       (curly_expression (identifier)))
+    (operator)
     (identifier))
 
   ;; `where` clauses in parameters
@@ -524,21 +535,20 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
     (call_expression (identifier) (argument_list (identifier))))
 
   ;; Almost everything at once
-  (short_function_definition
-    name: (field_expression
-      value: (identifier)
-      (identifier))
-    parameters: (parameter_list
-      (typed_parameter
-        parameter: (identifier)
-        type: (identifier))
-      (typed_parameter
-        type: (prefixed_string_literal prefix: (identifier)))
-      (typed_parameter
-        parameter: (identifier)
-        type: (identifier))
-      (keyword_parameters
-        (slurp_parameter (identifier))))
+  (assignment
+    (call_expression
+      (field_expression
+        value: (identifier)
+        (identifier))
+      (argument_list
+        (typed_expression (identifier) (identifier))
+        (typed_parameter
+          type: (prefixed_string_literal prefix: (identifier)))
+        (typed_parameter
+          parameter: (identifier)
+          type: (identifier))
+        (splat_expression (identifier))))
+      (operator)
       (call_expression
         (identifier)
         (argument_list

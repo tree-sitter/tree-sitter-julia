@@ -370,8 +370,10 @@ local function bar() 4 end
     (operator)
     (bare_tuple (integer_literal) (integer_literal))))
   (local_statement
-    (short_function_definition
-      (identifier) (parameter_list) (integer_literal)))
+    (assignment
+      (call_expression (identifier) (argument_list))
+      (operator)
+      (integer_literal)))
   (local_statement
     (function_definition
       (identifier) (parameter_list) (integer_literal))))
@@ -396,8 +398,10 @@ global function bar() 4 end
     (operator)
     (bare_tuple (integer_literal) (integer_literal))))
   (global_statement
-    (short_function_definition
-      (identifier) (parameter_list) (integer_literal)))
+    (assignment
+      (call_expression (identifier) (argument_list))
+      (operator)
+      (integer_literal)))
   (global_statement
     (function_definition
       (identifier) (parameter_list) (integer_literal))))

@@ -151,7 +151,7 @@ module.exports = grammar({
 
   // The two notable conflicts in the grammar are:
   // - Arrow function parameters vs tuple expressions
-  // - Short function definitions vs function calls
+  // - Function signatures vs function calls
   // The femptolisp parser makes no distinction between these, but having the
   // distinction is better because it's easier to keep track of formal parameters.
   conflicts: $ => [
@@ -169,9 +169,10 @@ module.exports = grammar({
     [$._quotable, $.optional_parameter],
     [$._quotable, $.keyword_parameters],
 
+    [$.argument_list, $.keyword_parameters],
+
     [$.parameter_list, $._quotable],
     [$.parameter_list, $._primary_expression],
-    [$.parameter_list, $.argument_list],
 
     // // interpolations
     [$._primary_expression, $.typed_parameter],
@@ -205,7 +206,6 @@ module.exports = grammar({
         $._expression,
         $.assignment,
         $.bare_tuple,
-        $.short_function_definition,
       )),
       optional($._terminator)
     ),
@@ -223,20 +223,13 @@ module.exports = grammar({
     ),
 
     assignment: $ => prec.right(PREC.assign, seq(
-      // LHS
       choice(
-        $._quotable,
-        // No function calls. Those are parsed as short_function_definition
-        $.field_expression,
-        $.index_expression,
-        $.parametrized_type_expression,
-        $.interpolation_expression,
-        $.quote_expression,
+        $._primary_expression,
         $.typed_expression,
         $.operator,
-
         $.binary_expression,
         $.unary_expression,
+        $.where_expression,
         $.bare_tuple
       ),
       alias('=', $.operator),
@@ -328,16 +321,6 @@ module.exports = grammar({
       ),
       'end'
     ),
-
-    short_function_definition: $ => prec.right(PREC.assign, seq(
-      $._function_signature,
-      '=',
-      choice(
-        $._expression,
-        $.assignment,
-        $.bare_tuple,
-      ),
-    )),
 
     _function_signature: $ => seq(
       field('name', choice(
@@ -564,7 +547,6 @@ module.exports = grammar({
         $.identifier,
         $.typed_expression,
         $.function_definition,
-        $.short_function_definition,
       ),
     )),
 
@@ -576,7 +558,6 @@ module.exports = grammar({
         $.identifier,
         $.typed_expression,
         $.function_definition,
-        $.short_function_definition,
       ),
     )),
 
@@ -719,7 +700,6 @@ module.exports = grammar({
       sep1(';', choice(
         $._expression,
         $.assignment,
-        $.short_function_definition,
       )),
       optional($._comprehension_clause),
       optional(';'),
@@ -844,13 +824,13 @@ module.exports = grammar({
       $._expression,
       $.assignment,
       $.bare_tuple,
-      $.short_function_definition,
     )))),
 
     argument_list: $ => parenthesize(
       optional(';'),
       sep(choice(',', ';'), choice(
         $._expression,
+        prec(-1, $.typed_parameter), // TODO: REMOVE
         alias($.named_field, $.named_argument),
         seq($._expression, $._comprehension_clause),
       )),

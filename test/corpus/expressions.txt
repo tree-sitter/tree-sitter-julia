@@ -285,12 +285,14 @@ f(@nospecialize(x)) = x
     (argument_list (identifier) (identifier) (identifier) (identifier)))
 
   ; Macros as parameters
-  (short_function_definition
-    (identifier)
-    (parameter_list
-      (macrocall_expression
-        (macro_identifier (identifier))
-        (argument_list (identifier))))
+  (assignment
+    (call_expression
+      (identifier)
+      (argument_list
+        (macrocall_expression
+          (macro_identifier (identifier))
+          (argument_list (identifier)))))
+    (operator)
     (identifier))
 
   ; Open vs closed macros
