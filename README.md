@@ -10,9 +10,8 @@ Julia grammar for [tree-sitter](https://github.com/tree-sitter/tree-sitter).
 
 ### References
 
-- [The Julia Parser](https://github.com/JuliaLang/julia/blob/master/src/julia-parser.scm)
+- [The Julia Parser: JuliaSyntax.jl](https://github.com/JuliaLang/JuliaSyntax.jl)
 - [Julia ASTs documentation](https://docs.julialang.org/en/v1/devdocs/ast/)
-- [JuliaSyntax.jl](https://julialang.github.io/JuliaSyntax.jl/dev/)
 
 [ci]: https://img.shields.io/github/actions/workflow/status/tree-sitter/tree-sitter-julia/ci.yml?logo=github&label=CI
 [discord]: https://img.shields.io/discord/1063097320771698699?logo=discord&label=discord
