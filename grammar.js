@@ -162,7 +162,7 @@ module.exports = grammar({
     // Comprehensions with newlines
     [$.matrix_row, $.comprehension_expression],
 
-    [$.juxtaposition_expression, $._number],
+    [$.juxtaposition_expression, $._expression],
     [$.juxtaposition_expression, $._primary_expression], // adjoint
   ],
 
@@ -193,7 +193,8 @@ module.exports = grammar({
     _expression: $ => choice(
       $._definition,
       $._statement,
-      $._number,
+      $.integer_literal,
+      $.float_literal,
       $._primary_expression,
       $._operation,
       $.compound_assignment_expression,
@@ -648,6 +649,7 @@ module.exports = grammar({
     // Primary expressions can be called, indexed, accessed, and type parametrized.
     _primary_expression: $ => choice(
       $.identifier,
+      $.boolean_literal,
       $.curly_expression, // Only valid in macros
       $.parenthesized_expression,
       $.tuple_expression,
@@ -772,7 +774,8 @@ module.exports = grammar({
     interpolation_expression: $ => prec.right(PREC.prefix, seq(
       '$',
       choice(
-        $._number,
+        $.integer_literal,
+        $.float_literal,
         $.identifier,
         $.curly_expression,
         $.parenthesized_expression,
@@ -785,7 +788,8 @@ module.exports = grammar({
     quote_expression: $ => prec.right(PREC.prefix, seq(
       ':',
       choice(
-        $._number,
+        $.integer_literal,
+        $.float_literal,
         $._string,
         $.identifier,
         $.operator,
@@ -986,12 +990,6 @@ module.exports = grammar({
     identifier: $ => $._word_identifier,
 
     // Literals
-
-    _number: $ => choice(
-      $.boolean_literal,
-      $.integer_literal,
-      $.float_literal,
-    ),
 
     boolean_literal: _ => choice('true', 'false'),
 
