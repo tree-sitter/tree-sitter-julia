@@ -170,33 +170,34 @@ end
 
 (source_file
   (function_definition
-    name: (identifier))
+    (signature
+      (identifier)))
 
   (function_definition
-    name: (identifier)
-    parameters: (argument_list))
+    (signature
+      (call_expression (identifier) (argument_list))))
 
   (function_definition
-    name: (identifier)
-    parameters: (argument_list (identifier))
+    (signature
+      (call_expression (identifier) (argument_list (identifier))))
     (identifier))
 
   (function_definition
-    name: (field_expression value: (identifier) (identifier))
-    parameters: (argument_list
-                  (typed_expression
-                    (identifier)
-                    (identifier)))
+    (signature
+      (call_expression
+        (field_expression value: (identifier) (identifier))
+        (argument_list
+          (typed_expression (identifier) (identifier)))))
     (return_statement (integer_literal)))
 
   (function_definition
-    name: (identifier)
-    parameters: (argument_list (identifier))
+    (signature
+      (call_expression (identifier) (argument_list (identifier))))
     (call_expression (identifier) (argument_list (identifier))))
 
   (function_definition
-    name: (operator)
-    parameters: (argument_list (identifier) (identifier))
+    (signature
+      (call_expression (operator) (argument_list (identifier) (identifier))))
     (binary_expression
       (identifier)
       (operator)
@@ -204,21 +205,23 @@ end
 
   ;; Anonymous function
   (function_definition
-    name: (identifier)
-    parameters: (argument_list (identifier) (identifier))
+    (signature
+      (call_expression (identifier) (argument_list (identifier) (identifier))))
     (return_statement
       (function_definition
-        parameters: (argument_list (identifier))
+        (signature
+          (argument_list (identifier)))
         (call_expression
           (identifier)
           (argument_list (identifier) (identifier))))))
 
   ;; Function Objects
   (function_definition
-    name: (function_object
-            (identifier)
-            (identifier))
-    parameters: (argument_list)))
+    (signature
+      (call_expression
+        (parenthesized_expression
+          (typed_expression (identifier) (identifier)))
+        (argument_list)))))
 
 
 ==============================
@@ -313,69 +316,80 @@ end
 (source_file
   ;; Parameters
   (function_definition
-    name: (identifier)
-    parameters: (argument_list
-                  (identifier)
-                  (typed_expression
-                    (identifier)
-                    (identifier))
-                  (named_argument (identifier) (integer_literal))
-                  (splat_expression (identifier))))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list
+          (identifier)
+          (typed_expression
+            (identifier)
+            (identifier))
+          (named_argument (identifier) (integer_literal))
+          (splat_expression (identifier))))))
 
   ;; Typed parameters
   (function_definition
-    parameters: (argument_list
-                  (unary_typed_expression
-                    (parametrized_type_expression (identifier)
-                      (curly_expression (identifier))))
-                  (named_argument
-                    (typed_expression
-                      (identifier)
-                      (identifier))
-                    (integer_literal))
-                  (splat_expression
-                    (typed_expression
-                      (identifier)
-                      (identifier)))))
+    (signature
+      (argument_list
+        (unary_typed_expression
+          (parametrized_type_expression (identifier)
+            (curly_expression (identifier))))
+        (named_argument
+          (typed_expression
+            (identifier)
+            (identifier))
+          (integer_literal))
+        (splat_expression
+          (typed_expression
+            (identifier)
+            (identifier))))))
 
   ;; Keyword parameters
   (function_definition
-    name: (identifier)
-    parameters: (argument_list
-      (identifier)
-      (splat_expression (identifier))
-      (splat_expression (identifier))))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list
+          (identifier)
+          (splat_expression (identifier))
+          (splat_expression (identifier))))))
 
   (function_definition
-    name: (identifier)
-    parameters: (argument_list
-                  (identifier)
-                  (typed_expression
-                    (identifier)
-                    (identifier))
-                  (named_argument (identifier) (integer_literal))
-                  (splat_expression (identifier)))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list
+          (identifier)
+          (typed_expression
+            (identifier)
+            (identifier))
+          (named_argument (identifier) (integer_literal))
+          (splat_expression (identifier)))))
       (identifier))
 
   ;; Return types
   (function_definition
-    name: (identifier)
-    parameters: (argument_list (identifier))
-    return_type: (unary_typed_expression (identifier))
-    (call_expression
-      (identifier)
-      (argument_list
-        (binary_expression (identifier) (operator) (integer_literal)))))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list (identifier)))
+      return_type: (unary_typed_expression (identifier)))
+      (call_expression
+        (identifier)
+        (argument_list
+          (binary_expression (identifier) (operator) (integer_literal)))))
 
   ;; Important: "scoped" return types are still parsed as field expressions.
   (function_definition
-    name: (identifier)
-    parameters: (argument_list
-                  (identifier)
-                  (typed_expression
-                    (identifier)
-                    (field_expression value: (identifier) (identifier))))
-    return_type: (unary_typed_expression (field_expression value: (identifier) (identifier)))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list
+          (identifier)
+          (typed_expression
+            (identifier)
+            (field_expression value: (identifier) (identifier)))))
+      return_type: (unary_typed_expression (field_expression value: (identifier) (identifier))))
     (call_expression
       (identifier)
       (argument_list
@@ -403,28 +417,34 @@ end
 ---
 (source_file
   (function_definition
-    name: (identifier)
-    parameters: (argument_list (tuple_expression (identifier) (identifier)))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list (tuple_expression (identifier) (identifier)))))
     (tuple_expression (identifier) (identifier)))
 
 
   (function_definition
-    name: (identifier)
-    parameters: (argument_list
-                  (named_argument
-                    (tuple_expression (identifier) (identifier))
-                    (tuple_expression (integer_literal) (integer_literal))))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list
+          (named_argument
+            (tuple_expression (identifier) (identifier))
+            (tuple_expression (integer_literal) (integer_literal))))))
     (tuple_expression (identifier) (identifier)))
 
   (function_definition
-    name: (identifier)
-    parameters: (argument_list
-                  (typed_expression
-                    (tuple_expression (identifier) (identifier))
-                    (parametrized_type_expression
-                      (identifier)
-                      (curly_expression (identifier) (identifier)))))
-    (where_clause (identifier))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list
+          (typed_expression
+            (tuple_expression (identifier) (identifier))
+            (parametrized_type_expression
+              (identifier)
+              (curly_expression (identifier) (identifier))))))
+      (where_clause (identifier)))
     (identifier)))
 
 
@@ -454,26 +474,30 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
 (source_file
   ;; `where` without brackets
   (function_definition
-    name: (identifier)
-    parameters: (argument_list
-                  (typed_expression
-                    (identifier)
-                    (identifier)))
-    (where_clause (identifier)))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list
+          (typed_expression
+            (identifier)
+            (identifier))))
+      (where_clause (identifier))))
 
   ;; `where`
   (function_definition
-    name: (identifier)
-    parameters: (argument_list
-                  (typed_expression
-                    (identifier)
-                    (identifier)))
-    (where_clause
-      (curly_expression
-        (binary_expression
-          (identifier)
-          (operator)
-          (identifier))))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list
+          (typed_expression
+            (identifier)
+            (identifier))))
+      (where_clause
+        (curly_expression
+          (binary_expression
+            (identifier)
+            (operator)
+            (identifier)))))
     (identifier))
 
   ;; Short function `where`
@@ -516,18 +540,20 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
 
   ;; `where` clauses in parameters
   (function_definition
-    name: (identifier)
-    parameters: (argument_list
-                  (where_expression
-                    (typed_expression
-                      (identifier)
-                      (parametrized_type_expression
-                        (identifier)
-                        (curly_expression (identifier))))
-                    (binary_expression
-                      (identifier)
-                      (operator)
-                      (identifier))))
+    (signature
+      (call_expression
+        (identifier)
+        (argument_list
+          (where_expression
+            (typed_expression
+              (identifier)
+              (parametrized_type_expression
+                (identifier)
+                (curly_expression (identifier))))
+            (binary_expression
+              (identifier)
+              (operator)
+              (identifier))))))
     (call_expression (identifier) (argument_list (identifier))))
 
   ;; Almost everything at once
@@ -565,17 +591,21 @@ macro count(args...) length(args) end
 
 (source_file
     (macro_definition
-      (identifier)
-      (argument_list
-        (typed_expression (identifier) (identifier)))
+      (signature
+        (call_expression
+          (identifier)
+          (argument_list
+            (typed_expression (identifier) (identifier)))))
       (call_expression
         (identifier)
         (argument_list (identifier))))
 
     (macro_definition
-      (identifier)
-      (argument_list
-        (splat_expression (identifier)))
+      (signature
+        (call_expression
+          (identifier)
+          (argument_list
+            (splat_expression (identifier)))))
       (call_expression
         (identifier)
         (argument_list (identifier)))))

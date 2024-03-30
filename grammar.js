@@ -149,16 +149,7 @@ module.exports = grammar({
     $._string_content_no_interp,
   ],
 
-  // The two notable conflicts in the grammar are:
-  // - Arrow function parameters vs tuple expressions
-  // - Function signatures vs function calls
-  // The femptolisp parser makes no distinction between these, but having the
-  // distinction is better because it's easier to keep track of formal parameters.
   conflicts: $ => [
-    [$._function_signature, $._quotable],
-    [$._function_signature, $._primary_expression],
-    [$._function_signature, $._expression],
-
     [$.named_field, $._expression],
 
     [$.argument_list, $.tuple_expression],
@@ -289,65 +280,34 @@ module.exports = grammar({
 
     function_definition: $ => seq(
       'function',
-      choice(
-        seq(
-          choice(
-            $._function_signature,
-            // Anonymous function
-            seq(
-              field('parameters', $.argument_list),
-              optional(seq('::', field('return_type', $._primary_expression))),
-              optional($.where_clause),
-            ),
-          ),
-          optional($._terminator),
-          optional($._block),
-        ),
-        // zero method functions
-        field('name', choice(
-          $.identifier,
-          $.operator,
-        )),
-      ),
-      'end'
-    ),
-
-    _function_signature: $ => prec.right(seq(
-      field('name', choice(
-        $.identifier,
-        $.operator,
-        $.field_expression,
-        parenthesize(choice(
-          $.identifier,
-          $.operator,
-        )),
-        parenthesize(alias($.typed_expression, $.function_object)),
-        $.interpolation_expression,
-      )),
-      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-
-      $._immediate_paren,
-      field('parameters', $.argument_list),
-
-      field('return_type', optional($.unary_typed_expression)),
-      optional($.where_clause),
-    )),
-
-    where_clause: $ => seq('where', $._expression),
-
-    macro_definition: $ => seq(
-      'macro',
-      field('name', choice(
-        $.identifier,
-        $.operator,
-        $.interpolation_expression,
-      )),
-      $._immediate_paren,
-      field('parameters', $.argument_list),
+      $.signature,
       optional($._terminator),
       optional($._block),
       'end'
     ),
+
+    macro_definition: $ => seq(
+      'macro',
+      $.signature,
+      optional($._terminator),
+      optional($._block),
+      'end'
+    ),
+
+    signature: $ => choice(
+      $.identifier, // zero-method definition
+      seq(
+        choice(
+          $.call_expression,
+          $.argument_list, // anonymous function
+        ),
+        field('return_type', optional($.unary_typed_expression)),
+        optional($.where_clause),
+      ),
+    ),
+
+    // TODO: Remove
+    where_clause: $ => seq('where', $._expression),
 
     // Statements
 

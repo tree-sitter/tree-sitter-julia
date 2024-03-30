@@ -410,17 +410,19 @@ end
     (interpolation_expression
       (parenthesized_expression (splat_expression (identifier)))))
   (function_definition
-    (interpolation_expression
-      (parenthesized_expression (identifier)))
-    (argument_list
-      (interpolation_expression
-        (parenthesized_expression (identifier))))
-    (call_expression
-      (interpolation_expression
-        (parenthesized_expression (identifier)))
-      (argument_list
+    (signature
+      (call_expression
         (interpolation_expression
-          (parenthesized_expression (splat_expression (identifier))))))))
+          (parenthesized_expression (identifier)))
+        (argument_list
+          (interpolation_expression
+            (parenthesized_expression (identifier))))))
+      (call_expression
+        (interpolation_expression
+          (parenthesized_expression (identifier)))
+        (argument_list
+          (interpolation_expression
+            (parenthesized_expression (splat_expression (identifier))))))))
 
 
 ==============================
