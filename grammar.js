@@ -150,12 +150,11 @@ module.exports = grammar({
   ],
 
   conflicts: $ => [
-    [$.named_field, $._quotable],
+    [$.named_field, $._primary_expression],
 
     [$.argument_list, $.tuple_expression],
     [$.argument_list, $.parenthesized_expression],
 
-    [$.for_binding, $._quotable],
     [$.for_binding, $._primary_expression],
     [$.for_binding, $._expression],
 
@@ -526,17 +525,6 @@ module.exports = grammar({
       ),
     ),
 
-
-    // Quotables are expressions that can be quoted without additional parentheses.
-    _quotable: $ => choice(
-      $._array,
-      $.identifier,
-      $.curly_expression, // Only valid in macros
-      $.parenthesized_expression,
-      $.tuple_expression,
-      $._string,
-    ),
-
     _array: $ => choice(
       $.comprehension_expression,
       $.matrix_expression,
@@ -659,7 +647,12 @@ module.exports = grammar({
 
     // Primary expressions can be called, indexed, accessed, and type parametrized.
     _primary_expression: $ => choice(
-      $._quotable,
+      $.identifier,
+      $.curly_expression, // Only valid in macros
+      $.parenthesized_expression,
+      $.tuple_expression,
+      $._array,
+      $._string,
       $.adjoint_expression,
       $.broadcast_call_expression,
       $.call_expression,
@@ -780,7 +773,12 @@ module.exports = grammar({
       '$',
       choice(
         $._number,
-        $._quotable,
+        $.identifier,
+        $.curly_expression,
+        $.parenthesized_expression,
+        $.tuple_expression,
+        $._array,
+        $._string,
       ),
     )),
 
