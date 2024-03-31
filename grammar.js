@@ -197,7 +197,11 @@ module.exports = grammar({
       $._number,
       $._primary_expression,
       $._operation,
+      $.compound_assignment_expression,
       $.macrocall_expression,
+      $.function_expression,
+      $.juxtaposition_expression,
+      $.ternary_expression,
       $.operator,
       prec(-1, alias(':', $.operator)),
       prec(-1, alias('begin', $.identifier)),
@@ -207,11 +211,8 @@ module.exports = grammar({
     assignment: $ => prec.right(PREC.assign, seq(
       choice(
         $._primary_expression,
-        $.typed_expression,
+        $._operation,
         $.operator,
-        $.binary_expression,
-        $.unary_expression,
-        $.where_expression,
         $.bare_tuple
       ),
       alias('=', $.operator),
@@ -226,11 +227,8 @@ module.exports = grammar({
     _closed_assignment: $ => prec.right(PREC.assign, seq(
       choice(
         $._primary_expression,
-        $.typed_expression,
+        $._operation,
         $.operator,
-        $.binary_expression,
-        $.unary_expression,
-        $.where_expression,
       ),
       alias('=', $.operator),
       choice(
@@ -312,7 +310,7 @@ module.exports = grammar({
       'end'
     ),
 
-    signature: $ => choice(
+    signature: $ => prec.right(choice(
       $.identifier, // zero-method definition
       seq(
         choice(
@@ -322,7 +320,7 @@ module.exports = grammar({
         field('return_type', optional($.unary_typed_expression)),
         optional($.where_clause),
       ),
-    ),
+    )),
 
     // TODO: Remove
     where_clause: $ => seq('where', $._expression),
@@ -748,7 +746,6 @@ module.exports = grammar({
       optional(';'),
       sep(choice(',', ';'), choice(
         $._expression,
-        $.unary_typed_expression,
         alias($._closed_assignment, $.named_argument),
         seq($._expression, $._comprehension_clause),
       )),
@@ -830,18 +827,12 @@ module.exports = grammar({
     // Operations
 
     _operation: $ => choice(
-      // Use regular operators
       $.unary_expression,
       $.binary_expression,
       $.range_expression,
-      // Use syntactic operators
       $.splat_expression,
-      $.ternary_expression,
       $.typed_expression,
-      $.function_expression,
-      // Other stuff
-      $.juxtaposition_expression,
-      $.compound_assignment_expression,
+      $.unary_typed_expression,
       $.where_expression,
     ),
 
