@@ -303,8 +303,8 @@ import LinearAlgebra as la
 
   ;; Relative paths
   (import_statement
-    (relative_qualifier (identifier))
-    (relative_qualifier (identifier)))
+    (import_path (identifier))
+    (import_path (identifier)))
 
   ;; List import
   (import_statement (identifier) (identifier) (identifier))

@@ -464,7 +464,7 @@ module.exports = grammar({
 
     import_alias: $ => seq($._importable, 'as', $.identifier),
 
-    relative_qualifier: $ => seq(
+    import_path: $ => seq(
       token(repeat1('.')),
       choice(
         $.identifier,
@@ -483,7 +483,7 @@ module.exports = grammar({
     _importable: $ => choice(
       $._exportable,
       $.scoped_identifier,
-      $.relative_qualifier,
+      $.import_path,
     ),
 
     _import_list: $ => prec.right(sep1(',', choice(
