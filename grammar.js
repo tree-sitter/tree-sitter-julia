@@ -150,7 +150,7 @@ module.exports = grammar({
   ],
 
   conflicts: $ => [
-    [$.named_field, $._expression],
+    [$.named_field, $._quotable],
 
     [$.argument_list, $.tuple_expression],
     [$.argument_list, $.parenthesized_expression],
@@ -203,6 +203,7 @@ module.exports = grammar({
       prec(-1, alias('begin', $.identifier)),
     ),
 
+    // assignments inside blocks (including top-level)
     assignment: $ => prec.right(PREC.assign, seq(
       choice(
         $._primary_expression,
@@ -218,6 +219,23 @@ module.exports = grammar({
         $._expression,
         $.assignment,
         $.bare_tuple
+      )
+    )),
+
+    // assignments inside brackets
+    _closed_assignment: $ => prec.right(PREC.assign, seq(
+      choice(
+        $._primary_expression,
+        $.typed_expression,
+        $.operator,
+        $.binary_expression,
+        $.unary_expression,
+        $.where_expression,
+      ),
+      alias('=', $.operator),
+      choice(
+        $._expression,
+        alias($._closed_assignment, $.assignment),
       )
     )),
 
@@ -339,7 +357,7 @@ module.exports = grammar({
       'let',
       sep(',', choice(
         $.identifier,
-        alias($.named_field, $.let_binding),
+        alias($._closed_assignment, $.let_binding),
       )),
       $._terminator,
       optional($._block),
@@ -531,7 +549,7 @@ module.exports = grammar({
       '[',
       choice(
         $._expression,
-        $.assignment,
+        alias($._closed_assignment, $.assignment),
       ),
       optional($._terminator),
       $._comprehension_clause,
@@ -583,14 +601,14 @@ module.exports = grammar({
 
     matrix_row: $ => repeat1(prec(PREC.array, choice(
       $._expression,
-      alias($.named_field, $.assignment), // JuMP.jl
+      alias($._closed_assignment, $.assignment),
     ))),
 
     vector_expression: $ => seq(
       '[',
       sep(',', choice(
         $._expression,
-        alias($.named_field, $.assignment), // JuMP.jl
+        alias($._closed_assignment, $.assignment),
       )),
       optional(','),
       ']'
@@ -599,7 +617,7 @@ module.exports = grammar({
     parenthesized_expression: $ => parenthesize(
       sep1(';', choice(
         $._expression,
-        alias($.named_field, $.assignment), // FIXME
+        alias($._closed_assignment, $.assignment),
       )),
       optional($._comprehension_clause),
       optional(';'),
@@ -634,7 +652,7 @@ module.exports = grammar({
       '{',
       sep(',', choice(
         $._expression,
-        alias($.named_field, $.assignment),
+        alias($._closed_assignment, $.assignment),
       )),
       optional(','),
       '}'
@@ -731,7 +749,7 @@ module.exports = grammar({
       sep(choice(',', ';'), choice(
         $._expression,
         $.unary_typed_expression,
-        alias($.named_field, $.named_argument),
+        alias($._closed_assignment, $.named_argument),
         seq($._expression, $._comprehension_clause),
       )),
       optional(','),
@@ -755,17 +773,10 @@ module.exports = grammar({
       $._terminator,
     ),
 
-    // TODO: binding and closed assignment
     named_field: $ => seq(
-      choice(
-        $._primary_expression,
-        $.typed_expression,
-      ),
+      $.identifier,
       '=',
-      choice(
-        $._expression,
-        // $.named_field, // FIXME
-      ),
+      $._expression,
     ),
 
     interpolation_expression: $ => prec.right(PREC.prefix, seq(

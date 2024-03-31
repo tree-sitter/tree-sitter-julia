@@ -324,7 +324,7 @@ end
           (typed_expression
             (identifier)
             (identifier))
-          (named_argument (identifier) (integer_literal))
+          (named_argument (identifier) (operator) (integer_literal))
           (splat_expression (identifier))))))
 
   ;; Typed parameters
@@ -338,6 +338,7 @@ end
           (typed_expression
             (identifier)
             (identifier))
+          (operator)
           (integer_literal))
         (splat_expression
           (typed_expression
@@ -363,7 +364,7 @@ end
           (typed_expression
             (identifier)
             (identifier))
-          (named_argument (identifier) (integer_literal))
+          (named_argument (identifier) (operator) (integer_literal))
           (splat_expression (identifier)))))
       (identifier))
 
@@ -431,6 +432,7 @@ end
         (argument_list
           (named_argument
             (tuple_expression (identifier) (identifier))
+            (operator)
             (tuple_expression (integer_literal) (integer_literal))))))
     (tuple_expression (identifier) (identifier)))
 
