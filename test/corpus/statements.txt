@@ -258,7 +258,7 @@ return a, b, c
   (return_statement)
   (return_statement (identifier))
   (return_statement (binary_expression (identifier) (operator) (identifier)))
-  (return_statement (bare_tuple (identifier) (identifier) (identifier))))
+  (return_statement (open_tuple (identifier) (identifier) (identifier))))
 
 
 ==============================
@@ -338,17 +338,17 @@ const y, z = 1, 2
     (assignment (identifier) (operator) (integer_literal)))
   (const_statement
     (assignment
-    (bare_tuple (identifier) (identifier))
+    (open_tuple (identifier) (identifier))
     (operator)
-    (bare_tuple (integer_literal) (integer_literal))))
+    (open_tuple (integer_literal) (integer_literal))))
   ; const statements inside tuples
   (tuple_expression
     (integer_literal)
     (const_statement
       (assignment
-        (bare_tuple (identifier) (identifier))
+        (open_tuple (identifier) (identifier))
         (operator)
-        (bare_tuple (integer_literal) (integer_literal))))))
+        (open_tuple (integer_literal) (integer_literal))))))
 
 
 ===============================
@@ -366,9 +366,9 @@ local function bar() 4 end
   (local_statement (identifier))
   (local_statement
     (assignment
-    (bare_tuple (identifier) (identifier))
+    (open_tuple (identifier) (identifier))
     (operator)
-    (bare_tuple (integer_literal) (integer_literal))))
+    (open_tuple (integer_literal) (integer_literal))))
   (local_statement
     (assignment
       (call_expression (identifier) (argument_list))
@@ -396,9 +396,9 @@ global function bar() 4 end
   (global_statement (identifier))
   (global_statement
     (assignment
-    (bare_tuple (identifier) (identifier))
+    (open_tuple (identifier) (identifier))
     (operator)
-    (bare_tuple (integer_literal) (integer_literal))))
+    (open_tuple (integer_literal) (integer_literal))))
   (global_statement
     (assignment
       (call_expression (identifier) (argument_list))

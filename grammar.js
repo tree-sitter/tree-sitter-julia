@@ -26,7 +26,7 @@ const PREC = [
 }, {});
 
 PREC.array = -1;
-PREC.tuple = -1; // Bare tuples
+PREC.tuple = -1; // open_tuple
 PREC.assign = -2;
 PREC.stmt = -3;
 PREC.macro_arg = -4;
@@ -177,7 +177,7 @@ module.exports = grammar({
       sep1($._terminator, choice(
         $._expression,
         $.assignment,
-        $.bare_tuple,
+        $.open_tuple,
       )),
       optional($._terminator)
     ),
@@ -186,15 +186,15 @@ module.exports = grammar({
     assignment: $ => prec.right(PREC.assign, seq(
       choice(
         $._primary_expression,
+        $.open_tuple,
         $._operation,
         $.operator,
-        $.bare_tuple
       ),
       alias('=', $.operator),
       choice(
         $._expression,
         $.assignment,
-        $.bare_tuple
+        $.open_tuple,
       )
     )),
 
@@ -212,7 +212,7 @@ module.exports = grammar({
       )
     )),
 
-    bare_tuple: $ => prec(PREC.tuple, seq(
+    open_tuple: $ => prec(PREC.tuple, seq(
       $._expression,
       repeat1(prec(PREC.tuple, seq(',', $._expression)))
     )),
@@ -435,7 +435,7 @@ module.exports = grammar({
       optional(choice(
         $._expression,
         $.assignment,
-        $.bare_tuple,
+        $.open_tuple,
       ))
     )),
 
@@ -447,18 +447,18 @@ module.exports = grammar({
     global_statement: $ => prec.right(PREC.stmt, seq(
       'global',
       choice(
-        $.assignment,
-        $.bare_tuple,
         $._expression,
+        $.assignment,
+        $.open_tuple,
       ),
     )),
 
     local_statement: $ => prec.right(PREC.stmt, seq(
       'local',
       choice(
-        $.assignment,
-        $.bare_tuple,
         $._expression,
+        $.assignment,
+        $.open_tuple,
       ),
     )),
 
@@ -718,7 +718,7 @@ module.exports = grammar({
     macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, choice(
       $._expression,
       $.assignment,
-      $.bare_tuple,
+      $.open_tuple,
     )))),
 
     argument_list: $ => parenthesize(
