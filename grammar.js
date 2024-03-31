@@ -846,25 +846,11 @@ module.exports = grammar({
     )))),
 
     argument_list: $ => parenthesize(
-      optional(choice(
-        seq(
-          sep1(',', choice(
-            $._expression,
-            alias($.named_field, $.named_argument)
-          )),
-          optional(seq(
-            ',',
-            optional(seq($._expression, $._comprehension_clause)),
-          )),
-        ),
+      optional(';'),
+      sep(choice(',', ';'), choice(
+        $._expression,
+        alias($.named_field, $.named_argument),
         seq($._expression, $._comprehension_clause),
-      )),
-      optional(seq(
-        ';',
-        sep(',', choice(
-          $._expression,
-          alias($.named_field, $.named_argument),
-        )),
       )),
       optional(','),
     ),
