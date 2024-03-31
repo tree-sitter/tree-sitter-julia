@@ -3783,6 +3783,10 @@
     "named": false
   },
   {
+    "type": "abstract",
+    "named": false
+  },
+  {
     "type": "as",
     "named": false
   },
@@ -3899,6 +3903,10 @@
     "named": false
   },
   {
+    "type": "primitive",
+    "named": false
+  },
+  {
     "type": "quote",
     "named": false
   },
@@ -3916,6 +3924,10 @@
   },
   {
     "type": "try",
+    "named": false
+  },
+  {
+    "type": "type",
     "named": false
   },
   {

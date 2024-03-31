@@ -362,24 +362,12 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "TOKEN",
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "abstract"
-              },
-              {
-                "type": "PATTERN",
-                "value": "\\s+"
-              },
-              {
-                "type": "STRING",
-                "value": "type"
-              }
-            ]
-          }
+          "type": "STRING",
+          "value": "abstract"
+        },
+        {
+          "type": "STRING",
+          "value": "type"
         },
         {
           "type": "FIELD",
@@ -446,24 +434,12 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "TOKEN",
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "primitive"
-              },
-              {
-                "type": "PATTERN",
-                "value": "\\s+"
-              },
-              {
-                "type": "STRING",
-                "value": "type"
-              }
-            ]
-          }
+          "type": "STRING",
+          "value": "primitive"
+        },
+        {
+          "type": "STRING",
+          "value": "type"
         },
         {
           "type": "FIELD",
