@@ -272,7 +272,8 @@ module.exports = grammar({
     ),
 
     abstract_definition: $ => seq(
-      token(seq('abstract', /\s+/, 'type')),
+      'abstract',
+      'type',
       field('name', choice($.identifier, $.interpolation_expression)),
       optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
       optional($.type_clause),
@@ -280,7 +281,8 @@ module.exports = grammar({
     ),
 
     primitive_definition: $ => seq(
-      token(seq('primitive', /\s+/, 'type')),
+      'primitive',
+      'type',
       field('name', choice($.identifier, $.interpolation_expression)),
       optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
       optional($.type_clause),
@@ -846,25 +848,11 @@ module.exports = grammar({
     )))),
 
     argument_list: $ => parenthesize(
-      optional(choice(
-        seq(
-          sep1(',', choice(
-            $._expression,
-            alias($.named_field, $.named_argument)
-          )),
-          optional(seq(
-            ',',
-            optional(seq($._expression, $._comprehension_clause)),
-          )),
-        ),
+      optional(';'),
+      sep(choice(',', ';'), choice(
+        $._expression,
+        alias($.named_field, $.named_argument),
         seq($._expression, $._comprehension_clause),
-      )),
-      optional(seq(
-        ';',
-        sep(',', choice(
-          $._expression,
-          alias($.named_field, $.named_argument),
-        )),
       )),
       optional(','),
     ),
