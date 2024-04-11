@@ -162,7 +162,7 @@ new{typeof(xs)}(xs)
     (identifier)
     (argument_list
       (identifier)
-      (named_argument (identifier) (identifier))))
+      (named_argument (identifier) (operator) (identifier))))
   (call_expression
     (identifier)
     (argument_list (identifier) (identifier)))
@@ -190,7 +190,7 @@ end
     (identifier)
     (argument_list (identifier))
     (do_clause
-      (parameter_list
+      (argument_list
         (identifier)
         (identifier))
       (call_expression
@@ -260,7 +260,7 @@ Meta.@dump x = 1
   (macrocall_expression
     (macro_identifier (scoped_identifier (identifier) (identifier)))
     (macro_argument_list
-      (bare_tuple (integer_literal) (integer_literal))))
+      (open_tuple (integer_literal) (integer_literal))))
   (macrocall_expression
     (identifier)
     (macro_identifier (identifier))
@@ -285,12 +285,14 @@ f(@nospecialize(x)) = x
     (argument_list (identifier) (identifier) (identifier) (identifier)))
 
   ; Macros as parameters
-  (short_function_definition
-    (identifier)
-    (parameter_list
-      (macrocall_expression
-        (macro_identifier (identifier))
-        (argument_list (identifier))))
+  (assignment
+    (call_expression
+      (identifier)
+      (argument_list
+        (macrocall_expression
+          (macro_identifier (identifier))
+          (argument_list (identifier)))))
+    (operator)
     (identifier))
 
   ; Open vs closed macros
@@ -408,17 +410,19 @@ end
     (interpolation_expression
       (parenthesized_expression (splat_expression (identifier)))))
   (function_definition
-    (interpolation_expression
-      (parenthesized_expression (identifier)))
-    (parameter_list
-      (interpolation_expression
-        (parenthesized_expression (identifier))))
-    (call_expression
-      (interpolation_expression
-        (parenthesized_expression (identifier)))
-      (argument_list
+    (signature
+      (call_expression
         (interpolation_expression
-          (parenthesized_expression (splat_expression (identifier))))))))
+          (parenthesized_expression (identifier)))
+        (argument_list
+          (interpolation_expression
+            (parenthesized_expression (identifier))))))
+      (call_expression
+        (interpolation_expression
+          (parenthesized_expression (identifier)))
+        (argument_list
+          (interpolation_expression
+            (parenthesized_expression (splat_expression (identifier))))))))
 
 
 ==============================
@@ -518,7 +522,7 @@ x -> x^2
     (identifier)
     (binary_expression (identifier) (operator) (integer_literal)))
   (function_expression
-    (parameter_list (identifier) (identifier) (identifier))
+    (argument_list (identifier) (identifier) (identifier))
     (binary_expression
       (binary_expression
         (binary_expression (integer_literal) (operator) (identifier))
@@ -527,10 +531,10 @@ x -> x^2
       (operator)
       (identifier)))
   (function_expression
-    (parameter_list)
+    (argument_list)
     (integer_literal))
   (function_expression
-    (parameter_list)
+    (argument_list)
     (parenthesized_expression
       (call_expression (identifier) (argument_list (float_literal)))
       (compound_assignment_expression (identifier) (operator) (integer_literal))

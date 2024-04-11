@@ -59,9 +59,9 @@ end
 (source_file
   (let_statement)
   (let_statement
-    (let_binding (identifier) (identifier))
+    (let_binding (identifier) (operator) (identifier))
     (identifier)
-    (let_binding (identifier) (identifier))
+    (let_binding (identifier) (operator) (identifier))
     (identifier)))
 
 
@@ -258,7 +258,7 @@ return a, b, c
   (return_statement)
   (return_statement (identifier))
   (return_statement (binary_expression (identifier) (operator) (identifier)))
-  (return_statement (bare_tuple (identifier) (identifier) (identifier))))
+  (return_statement (open_tuple (identifier) (identifier) (identifier))))
 
 
 ==============================
@@ -303,8 +303,8 @@ import LinearAlgebra as la
 
   ;; Relative paths
   (import_statement
-    (relative_qualifier (identifier))
-    (relative_qualifier (identifier)))
+    (import_path (identifier))
+    (import_path (identifier)))
 
   ;; List import
   (import_statement (identifier) (identifier) (identifier))
@@ -338,17 +338,17 @@ const y, z = 1, 2
     (assignment (identifier) (operator) (integer_literal)))
   (const_statement
     (assignment
-    (bare_tuple (identifier) (identifier))
+    (open_tuple (identifier) (identifier))
     (operator)
-    (bare_tuple (integer_literal) (integer_literal))))
+    (open_tuple (integer_literal) (integer_literal))))
   ; const statements inside tuples
   (tuple_expression
     (integer_literal)
     (const_statement
       (assignment
-        (bare_tuple (identifier) (identifier))
+        (open_tuple (identifier) (identifier))
         (operator)
-        (bare_tuple (integer_literal) (integer_literal))))))
+        (open_tuple (integer_literal) (integer_literal))))))
 
 
 ===============================
@@ -366,15 +366,19 @@ local function bar() 4 end
   (local_statement (identifier))
   (local_statement
     (assignment
-    (bare_tuple (identifier) (identifier))
+    (open_tuple (identifier) (identifier))
     (operator)
-    (bare_tuple (integer_literal) (integer_literal))))
+    (open_tuple (integer_literal) (integer_literal))))
   (local_statement
-    (short_function_definition
-      (identifier) (parameter_list) (integer_literal)))
+    (assignment
+      (call_expression (identifier) (argument_list))
+      (operator)
+      (integer_literal)))
   (local_statement
     (function_definition
-      (identifier) (parameter_list) (integer_literal))))
+      (signature
+        (call_expression (identifier) (argument_list)))
+        (integer_literal))))
 
 
 ===============================
@@ -392,12 +396,16 @@ global function bar() 4 end
   (global_statement (identifier))
   (global_statement
     (assignment
-    (bare_tuple (identifier) (identifier))
+    (open_tuple (identifier) (identifier))
     (operator)
-    (bare_tuple (integer_literal) (integer_literal))))
+    (open_tuple (integer_literal) (integer_literal))))
   (global_statement
-    (short_function_definition
-      (identifier) (parameter_list) (integer_literal)))
+    (assignment
+      (call_expression (identifier) (argument_list))
+      (operator)
+      (integer_literal)))
   (global_statement
     (function_definition
-      (identifier) (parameter_list) (integer_literal))))
+      (signature
+        (call_expression (identifier) (argument_list)))
+        (integer_literal))))

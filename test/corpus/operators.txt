@@ -23,13 +23,13 @@ c &= d ÷= e
   (assignment
     (identifier)
     (operator)
-    (bare_tuple
+    (open_tuple
       (integer_literal)
       (integer_literal)
       (integer_literal)))
 
   (assignment
-    (bare_tuple
+    (open_tuple
       (identifier)
       (splat_expression (identifier)))
     (operator)
