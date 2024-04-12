@@ -40,7 +40,7 @@ typedef char Delimiter;
 // We use a stack to keep track of the string and command delimiters.
 typedef Array(Delimiter) Stack;
 
-static Stack *new_stack() {
+void *tree_sitter_julia_external_scanner_create() {
     Delimiter *contents = ts_malloc(TREE_SITTER_SERIALIZATION_BUFFER_SIZE);
     if (contents == NULL) abort();
     Stack *stack = ts_malloc(sizeof(Stack));
@@ -51,13 +51,20 @@ static Stack *new_stack() {
     return stack;
 }
 
-static unsigned serialize_stack(Stack *stack, char *buffer) {
+void tree_sitter_julia_external_scanner_destroy(void *payload) {
+    array_delete(payload);
+    ts_free(payload);
+}
+
+unsigned tree_sitter_julia_external_scanner_serialize(void *payload, char *buffer) {
+    Stack *stack = payload;
     unsigned size = stack->size;
     memcpy(buffer, stack->contents, size);
     return size;
 }
 
-static void deserialize_stack(Stack *stack, const char *buffer, unsigned size) {
+void tree_sitter_julia_external_scanner_deserialize(void *payload, const char *buffer, unsigned size) {
+    Stack *stack = payload;
     if (size > 0) {
         memcpy(stack->contents, buffer, size);
         stack->size = size;
@@ -229,19 +236,4 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
     }
 
     return false;
-}
-
-void *tree_sitter_julia_external_scanner_create() { return new_stack(); }
-
-void tree_sitter_julia_external_scanner_destroy(void *payload) {
-    array_delete(payload);
-    ts_free(payload);
-}
-
-unsigned tree_sitter_julia_external_scanner_serialize(void *payload, char *buffer) {
-    return serialize_stack(payload, buffer);
-}
-
-void tree_sitter_julia_external_scanner_deserialize(void *payload, const char *buffer, unsigned length) {
-    deserialize_stack(payload, buffer, length);
 }
