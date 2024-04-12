@@ -4,6 +4,16 @@
 #include <string.h> // memcpy
 #include <wctype.h>
 
+/// Block comments and immediate parentheses are easy to parse, but strings
+/// require extra-attention.
+///
+/// The main problems that arise when parsing strings are:
+/// 1. Triple quoted strings allow single quotes inside. e.g. """ "foo" """.
+/// 2. Strings can have arbitrary interpolations, including other strings.
+///    e.g. "echo $("foo")"
+/// 3. Non-standard string literals don't allow interpolations or escape
+///    sequences, but you can always write \" and \`.
+/// All of the above also applies to command literals.
 enum TokenType {
     BLOCK_COMMENT,
     IMMEDIATE_PAREN,
@@ -19,34 +29,24 @@ enum TokenType {
     STRING_CONTENT_NO_INTERP,
 };
 
-// Block comments and immediate parentheses are easy to parse, but strings
-// require extra-attention.
-
-// The main problems that arise when parsing strings are:
-// 1. Triple quoted strings allow single quotes inside. e.g. """ "foo" """.
-// 2. Strings can have arbitrary interpolations, including other strings.
-//    e.g. "echo $("foo")"
-// 3. Non-standard string literals don't allow interpolations or escape
-//    sequences, but you can always write \" and \`.
-// All of the above also applies to command literals.
-
-// To efficiently store a delimiter, we take advantage of the fact that:
-// (int)'"' == 34 && 34 % 2 == 0
-// (int)'`' == 96 && 96 % 2 == 0
-// i.e. " and ` have an even numeric representation, so we can store a triple
-// quoted delimiter as (delimiter + 1).
+/// To efficiently store a delimiter, we take advantage of the fact that:
+///     (int)'"' % 2 == 0
+///     (int)'`' % 2 == 0
+/// Since " and ` have an even numeric representation,
+/// we store a triple quoted delimiter as (delimiter + 1).
 typedef char Delimiter;
 
-// We use a stack to keep track of the string and command delimiters.
+/// Use a stack to keep track of string and command delimiters.
 typedef Array(Delimiter) Stack;
 
 void *tree_sitter_julia_external_scanner_create() {
-    Delimiter *contents = ts_malloc(TREE_SITTER_SERIALIZATION_BUFFER_SIZE);
+    unsigned capacity = TREE_SITTER_SERIALIZATION_BUFFER_SIZE;
+    Delimiter *contents = ts_malloc(capacity);
     if (contents == NULL) abort();
     Stack *stack = ts_malloc(sizeof(Stack));
     if (stack == NULL) abort();
     stack->contents = contents;
-    stack->capacity = TREE_SITTER_SERIALIZATION_BUFFER_SIZE;
+    stack->capacity = capacity;
     stack->size = 0;
     return stack;
 }
@@ -83,60 +83,69 @@ static bool scan_string_start(TSLexer *lexer, Stack *stack, char start_char) {
     if (lexer->lookahead != start_char) return false;
     advance(lexer);
     mark_end(lexer);
-    for (unsigned count = 1; count < 3; count++) {
-        if (lexer->lookahead != start_char) {
-            // It's not a triple quoted delimiter.
-            array_push(stack, start_char);
-            return true;
+    bool is_triple = true;
+    for (unsigned i = 1; i < 3; i++) {
+        if (lexer->lookahead == start_char) {
+            advance(lexer);
+        } else {
+            is_triple = false;
+            break;
         }
-        advance(lexer);
     }
-    mark_end(lexer);
-    array_push(stack, start_char + 1);
+    if (is_triple) {
+        mark_end(lexer);
+        array_push(stack, start_char + 1);
+    } else {
+        array_push(stack, start_char);
+    }
     return true;
 }
 
 static bool scan_string_content(TSLexer *lexer, Stack *stack, bool interp) {
-    if (stack->size == 0) return false;      // Stack is empty. We're not in a string.
+    if (stack->size == 0) return false;      // Stack is empty, so we're not in a string
     Delimiter end_char = *array_back(stack); // peek
     bool is_triple = false;
-    bool has_content = false;
     if (end_char % 2 != 0) {
         is_triple = true;
         end_char--;
     }
     TSSymbol end_symbol = (end_char == '"') ? STRING_END : COMMAND_END;
-    TSSymbol end_content = interp ? STRING_CONTENT : STRING_CONTENT_NO_INTERP;
-    while (lexer->lookahead) {
-        if (interp && lexer->lookahead == '$') {
-            mark_end(lexer);
-            lexer->result_symbol = end_content;
+    TSSymbol content_symbol = interp ? STRING_CONTENT : STRING_CONTENT_NO_INTERP;
+    bool has_content = false;
+    char next;
+    while ((next = lexer->lookahead)) {
+        mark_end(lexer);
+        if (next == '\\') {
+            lexer->result_symbol = content_symbol;
             return has_content;
-        } else if (lexer->lookahead == '\\') {
-            mark_end(lexer);
-            lexer->result_symbol = end_content;
+        } else if (next == '$' && interp) {
+            lexer->result_symbol = content_symbol;
             return has_content;
-        } else if (lexer->lookahead == end_char) {
+        } else if (next == end_char) {
+            bool is_end_delimiter = true;
             if (is_triple) {
-                mark_end(lexer);
-                for (unsigned count = 1; count < 3; count++) {
-                    advance(lexer);
-                    if (lexer->lookahead != end_char) {
-                        mark_end(lexer);
-                        lexer->result_symbol = end_content;
-                        return true;
+                for (unsigned i = 0; i < 3; i++) {
+                    if (lexer->lookahead == end_char) {
+                        advance(lexer);
+                    } else {
+                        is_end_delimiter = false;
+                        break;
                     }
                 }
-            }
-            if (has_content) {
-                lexer->result_symbol = end_content;
             } else {
-                array_pop(stack);
                 advance(lexer);
-                mark_end(lexer);
-                lexer->result_symbol = end_symbol;
             }
-            return true;
+            if (is_end_delimiter) {
+                if (has_content) {
+                    lexer->result_symbol = content_symbol;
+                    return true;
+                } else {
+                    mark_end(lexer);
+                    array_pop(stack);
+                    lexer->result_symbol = end_symbol;
+                    return true;
+                }
+            }
         }
         advance(lexer);
         has_content = true;
