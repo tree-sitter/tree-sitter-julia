@@ -1,4 +1,5 @@
 #include "tree_sitter/alloc.h"
+#include "tree_sitter/array.h"
 #include "tree_sitter/parser.h"
 #include <string.h> // memcpy
 #include <wctype.h>
@@ -37,48 +38,31 @@ enum TokenType {
 typedef char Delimiter;
 
 // We use a stack to keep track of the string and command delimiters.
-typedef struct {
-    Delimiter *arr;
-    unsigned len;
-} Stack;
+typedef Array(Delimiter) Stack;
 
 static Stack *new_stack() {
-    Delimiter *arr = ts_malloc(TREE_SITTER_SERIALIZATION_BUFFER_SIZE);
-    if (arr == NULL) abort();
+    Delimiter *contents = ts_malloc(TREE_SITTER_SERIALIZATION_BUFFER_SIZE);
+    if (contents == NULL) abort();
     Stack *stack = ts_malloc(sizeof(Stack));
     if (stack == NULL) abort();
-    stack->arr = arr;
-    stack->len = 0;
+    stack->contents = contents;
+    stack->capacity = TREE_SITTER_SERIALIZATION_BUFFER_SIZE;
+    stack->size = 0;
     return stack;
 }
 
-static void free_stack(Stack *stack) {
-    ts_free(stack->arr);
-    ts_free(stack);
-}
-
-static void push(Stack *stack, char c, bool triple) {
-    if (stack->len >= TREE_SITTER_SERIALIZATION_BUFFER_SIZE) abort();
-    stack->arr[stack->len++] = triple ? (c + 1) : c;
-}
-
-static Delimiter pop(Stack *stack) {
-    if (stack->len == 0) abort();
-    return stack->arr[stack->len--];
-}
-
 static unsigned serialize_stack(Stack *stack, char *buffer) {
-    unsigned len = stack->len;
-    memcpy(buffer, stack->arr, len);
-    return len;
+    unsigned size = stack->size;
+    memcpy(buffer, stack->contents, size);
+    return size;
 }
 
-static void deserialize_stack(Stack *stack, const char *buffer, unsigned len) {
-    if (len > 0) {
-        memcpy(stack->arr, buffer, len);
-        stack->len = len;
+static void deserialize_stack(Stack *stack, const char *buffer, unsigned size) {
+    if (size > 0) {
+        memcpy(stack->contents, buffer, size);
+        stack->size = size;
     } else {
-        stack->len = 0;
+        stack->size = 0;
     }
 }
 
@@ -95,19 +79,19 @@ static bool scan_string_start(TSLexer *lexer, Stack *stack, char start_char) {
     for (unsigned count = 1; count < 3; count++) {
         if (lexer->lookahead != start_char) {
             // It's not a triple quoted delimiter.
-            push(stack, start_char, false);
+            array_push(stack, start_char);
             return true;
         }
         advance(lexer);
     }
     mark_end(lexer);
-    push(stack, start_char, true);
+    array_push(stack, start_char + 1);
     return true;
 }
 
 static bool scan_string_content(TSLexer *lexer, Stack *stack, bool interp) {
-    if (stack->len == 0) return false;               // Stack is empty. We're not in a string.
-    Delimiter end_char = stack->arr[stack->len - 1]; // peek
+    if (stack->size == 0) return false;      // Stack is empty. We're not in a string.
+    Delimiter end_char = *array_back(stack); // peek
     bool is_triple = false;
     bool has_content = false;
     if (end_char % 2 != 0) {
@@ -140,7 +124,7 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack, bool interp) {
             if (has_content) {
                 lexer->result_symbol = end_content;
             } else {
-                pop(stack);
+                array_pop(stack);
                 advance(lexer);
                 mark_end(lexer);
                 lexer->result_symbol = end_symbol;
@@ -250,7 +234,8 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
 void *tree_sitter_julia_external_scanner_create() { return new_stack(); }
 
 void tree_sitter_julia_external_scanner_destroy(void *payload) {
-    free_stack(payload);
+    array_delete(payload);
+    ts_free(payload);
 }
 
 unsigned tree_sitter_julia_external_scanner_serialize(void *payload, char *buffer) {
