@@ -1,5 +1,6 @@
+#include "tree_sitter/alloc.h"
+#include "tree_sitter/parser.h"
 #include <string.h> // memcpy
-#include <tree_sitter/parser.h>
 #include <wctype.h>
 
 enum TokenType {
@@ -42,9 +43,9 @@ typedef struct {
 } Stack;
 
 static Stack *new_stack() {
-    Delimiter *arr = malloc(TREE_SITTER_SERIALIZATION_BUFFER_SIZE);
+    Delimiter *arr = ts_malloc(TREE_SITTER_SERIALIZATION_BUFFER_SIZE);
     if (arr == NULL) abort();
-    Stack *stack = malloc(sizeof(Stack));
+    Stack *stack = ts_malloc(sizeof(Stack));
     if (stack == NULL) abort();
     stack->arr = arr;
     stack->len = 0;
@@ -52,8 +53,8 @@ static Stack *new_stack() {
 }
 
 static void free_stack(Stack *stack) {
-    free(stack->arr);
-    free(stack);
+    ts_free(stack->arr);
+    ts_free(stack);
 }
 
 static void push(Stack *stack, char c, bool triple) {
