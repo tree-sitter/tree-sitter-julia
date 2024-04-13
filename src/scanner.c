@@ -112,7 +112,7 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack, bool interp) {
     TSSymbol end_symbol = (end_char == '"') ? STRING_END : COMMAND_END;
     TSSymbol content_symbol = interp ? STRING_CONTENT : STRING_CONTENT_NO_INTERP;
     bool has_content = false;
-    char next;
+    int32_t next;
     while ((next = lexer->lookahead)) {
         mark_end(lexer);
         if (next == '\\') {
