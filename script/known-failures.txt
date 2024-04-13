@@ -1,4 +1,3 @@
-examples/Flux.jl/test/optimise.jl
 examples/Flux.jl/test/utils.jl
 examples/Flux.jl/src/train.jl
 examples/Gadfly.jl/test/testscripts/unitful_basic.jl
