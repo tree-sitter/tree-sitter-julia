@@ -318,6 +318,8 @@ import Base: show, @kwdef, +, (*)
 
 import LinearAlgebra as la
 
+import Base: @view as @v
+
 
 ---
 
@@ -344,7 +346,11 @@ import LinearAlgebra as la
       (operator)))
 
   ;; Alias
-  (import_statement (import_alias (identifier) (identifier))))
+  (import_statement (import_alias (identifier) (identifier)))
+  (import_statement
+    (selected_import
+      (identifier)
+      (import_alias (macro_identifier (identifier)) (macro_identifier (identifier))))))
 
 
 ===============================

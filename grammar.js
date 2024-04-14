@@ -462,7 +462,7 @@ module.exports = grammar({
       ),
     )),
 
-    import_alias: $ => seq($._importable, 'as', $.identifier),
+    import_alias: $ => seq($._importable, 'as', $._exportable),
 
     import_path: $ => seq(
       token(repeat1('.')),
@@ -477,7 +477,7 @@ module.exports = grammar({
       $.macro_identifier,
       $.operator,
       $.interpolation_expression,
-      parenthesize(choice($.identifier, $.operator)),
+      parenthesize($._exportable),
     ),
 
     _importable: $ => choice(
