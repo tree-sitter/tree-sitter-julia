@@ -214,6 +214,31 @@ end
 
 
 ==============================
+for outer statements
+==============================
+
+n = 1
+for outer n in range
+  body
+end
+
+for outer x = iter1, outer y = iter2
+  body
+end
+
+---
+(source_file
+  (assignment (identifier) (operator) (integer_literal))
+  (for_statement
+    (for_binding (identifier) (identifier))
+    (identifier))
+  (for_statement
+    (for_binding (identifier) (identifier))
+    (for_binding (identifier) (identifier))
+    (identifier)))
+
+
+==============================
 while statements
 ==============================
 

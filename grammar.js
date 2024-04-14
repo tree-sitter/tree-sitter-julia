@@ -569,6 +569,7 @@ module.exports = grammar({
     )),
 
     for_binding: $ => prec(1, seq(
+      optional('outer'),
       choice(
         $.identifier,
         $.tuple_expression,
