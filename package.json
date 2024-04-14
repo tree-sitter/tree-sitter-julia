@@ -4,10 +4,7 @@
   "description": "Julia grammar for tree-sitter",
   "main": "bindings/node",
   "types": "bindings/node",
-  "keywords": [
-    "parser",
-    "julia"
-  ],
+  "keywords": ["parser", "julia"],
   "files": [
     "grammar.js",
     "binding.gyp",
@@ -31,7 +28,7 @@
     }
   },
   "devDependencies": {
-    "tree-sitter-cli": "^0.20.7",
+    "tree-sitter-cli": "^0.22.5",
     "prebuildify": "^6.0.0"
   },
   "scripts": {
@@ -43,9 +40,7 @@
   },
   "tree-sitter": [
     {
-      "file-types": [
-        "jl"
-      ],
+      "file-types": ["jl"],
       "scope": "source.julia"
     }
   ]
