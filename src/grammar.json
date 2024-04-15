@@ -1615,7 +1615,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "identifier"
+          "name": "_exportable"
         }
       ]
     },
@@ -1674,17 +1674,8 @@
               "value": "("
             },
             {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "identifier"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "operator"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "_exportable"
             },
             {
               "type": "STRING",
@@ -2138,6 +2129,18 @@
       "content": {
         "type": "SEQ",
         "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "outer"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
           {
             "type": "CHOICE",
             "members": [
