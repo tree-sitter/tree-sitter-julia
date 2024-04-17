@@ -3246,6 +3246,10 @@
     "named": false
   },
   {
+    "type": "outer",
+    "named": false
+  },
+  {
     "type": "primitive",
     "named": false
   },

@@ -6,9 +6,9 @@
 [![crates][crates]](https://crates.io/crates/tree-sitter-julia)
 [![npm][npm]](https://www.npmjs.com/package/tree-sitter-julia)
 
-Julia grammar for [tree-sitter](https://github.com/tree-sitter/tree-sitter).
+A [tree-sitter](https://github.com/tree-sitter/tree-sitter) parser for [Julia](https://julialang.org/).
 
-### References
+## References
 
 - [The Julia Parser](https://github.com/JuliaLang/julia/blob/master/src/julia-parser.scm)
 - [Julia ASTs documentation](https://docs.julialang.org/en/v1/devdocs/ast/)

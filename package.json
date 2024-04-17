@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-julia",
-  "version": "0.20.0",
+  "version": "0.22.0",
   "description": "Julia grammar for tree-sitter",
   "main": "bindings/node",
   "types": "bindings/node",
@@ -33,8 +33,7 @@
   },
   "scripts": {
     "build": "tree-sitter generate && node-gyp build",
-    "test": "tree-sitter test && script/parse-examples",
-    "test-windows": "tree-sitter test",
+    "test": "tree-sitter test",
     "install": "node-gyp-build",
     "prebuildify": "prebuildify --napi --strip"
   },

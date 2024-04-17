@@ -5,7 +5,6 @@ examples/Gadfly.jl/test/testscripts/unitful_geoms.jl
 examples/Gadfly.jl/test/testscripts/unitful_color.jl
 examples/Pluto.jl/test/ExpressionExplorer.jl
 examples/Pluto.jl/test/React.jl
-examples/Pluto.jl/sample/test_pkg_bubble.jl
 examples/Pluto.jl/sample/test1.jl
 examples/Pluto.jl/sample/test_go_to_definition.jl
 examples/Pluto.jl/src/analysis/FunctionDependencies.jl

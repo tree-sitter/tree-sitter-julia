@@ -214,6 +214,31 @@ end
 
 
 ==============================
+for outer statements
+==============================
+
+n = 1
+for outer n in range
+  body
+end
+
+for outer x = iter1, outer y = iter2
+  body
+end
+
+---
+(source_file
+  (assignment (identifier) (operator) (integer_literal))
+  (for_statement
+    (for_binding (identifier) (identifier))
+    (identifier))
+  (for_statement
+    (for_binding (identifier) (identifier))
+    (for_binding (identifier) (identifier))
+    (identifier)))
+
+
+==============================
 while statements
 ==============================
 
@@ -293,6 +318,8 @@ import Base: show, @kwdef, +, (*)
 
 import LinearAlgebra as la
 
+import Base: @view as @v
+
 
 ---
 
@@ -319,7 +346,11 @@ import LinearAlgebra as la
       (operator)))
 
   ;; Alias
-  (import_statement (import_alias (identifier) (identifier))))
+  (import_statement (import_alias (identifier) (identifier)))
+  (import_statement
+    (selected_import
+      (identifier)
+      (import_alias (macro_identifier (identifier)) (macro_identifier (identifier))))))
 
 
 ===============================
