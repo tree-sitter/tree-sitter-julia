@@ -58,7 +58,8 @@ void tree_sitter_julia_external_scanner_destroy(void *payload) {
 
 unsigned tree_sitter_julia_external_scanner_serialize(void *payload, char *buffer) {
     Stack *stack = payload;
-    unsigned size = stack->size;
+    // Truncate size to avoid overflows
+    unsigned size = stack->size > TREE_SITTER_SERIALIZATION_BUFFER_SIZE ? TREE_SITTER_SERIALIZATION_BUFFER_SIZE : stack->size;
     memcpy(buffer, stack->contents, size);
     return size;
 }
