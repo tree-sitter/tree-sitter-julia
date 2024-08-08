@@ -1158,7 +1158,7 @@ function addDots(operatorString) {
 }
 
 function numeral(range) {
-  return RegExp(`[${range}]|([${range}][${range}_]*[${range}])`);
+  return RegExp(`[${range}]([${range}]|_[${range}])*`);
 }
 
 function parenthesize(...rules) {
