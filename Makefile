@@ -104,7 +104,7 @@ uninstall:
 clean:
 	$(RM) $(OBJS) $(LANGUAGE_NAME).pc lib$(LANGUAGE_NAME).a lib$(LANGUAGE_NAME).$(SOEXT)
 
-test: $(SRC_DIR)/parser.c
+test: $(SRC_DIR)/*
 	$(TS) test
 	./script/parse-examples
 
