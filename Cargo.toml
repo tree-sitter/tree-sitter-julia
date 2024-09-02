@@ -1,12 +1,14 @@
 [package]
 name = "tree-sitter-julia"
-description = "julia grammar for the tree-sitter parsing library"
+description = "Julia grammar for tree-sitter"
 version = "0.22.6"
+authors = ["Max Brunsfeld <maxbrunsfeld@gmail.com>"]
+license = "MIT"
 keywords = ["incremental", "parsing", "tree-sitter", "julia"]
 categories = ["parsing", "text-editors"]
 repository = "https://github.com/tree-sitter/tree-sitter-julia"
 edition = "2021"
-license = "MIT"
+autoexamples = false
 
 build = "bindings/rust/build.rs"
 include = ["bindings/rust/*", "grammar.js", "queries/*", "src/*"]
@@ -15,7 +17,10 @@ include = ["bindings/rust/*", "grammar.js", "queries/*", "src/*"]
 path = "bindings/rust/lib.rs"
 
 [dependencies]
-tree-sitter = "0.22"
+tree-sitter-language = "0.1.0"
 
 [build-dependencies]
-cc = "1.0"
+cc = "1.1.15"
+
+[dev-dependencies]
+tree-sitter = "0.23"
