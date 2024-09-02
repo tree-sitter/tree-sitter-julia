@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-julia",
-  "version": "0.22.6",
+  "version": "0.23.0",
   "description": "Julia grammar for tree-sitter",
   "repository": "github:tree-sitter/tree-sitter-julia",
   "license": "MIT",
