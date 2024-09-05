@@ -1,7 +1,3 @@
-; Guidelines:
-; - No highlighting is better than ambiguous highlighting.
-; - Only names defined in `Core` should be highlighted as `builtin`.
-;
 ; Identifiers
 (identifier) @variable
 
@@ -290,14 +286,9 @@
 ((identifier) @constant.builtin
   (#any-of? @constant.builtin "nothing" "missing"))
 
-; begin/end indices
 ((identifier) @variable.builtin
   (#any-of? @variable.builtin "begin" "end")
   (#has-ancestor? @variable.builtin index_expression))
-
-((identifier) @variable.builtin
-  (#any-of? @variable.builtin "begin" "end")
-  (#has-ancestor? @variable.builtin range_expression))
 
 ; Literals
 (boolean_literal) @boolean
