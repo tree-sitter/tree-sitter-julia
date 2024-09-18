@@ -26,7 +26,7 @@ const PREC = [
 }, {});
 
 PREC.array = -1;
-PREC.tuple = -1; // open_tuple
+PREC.tuple = -1;
 PREC.assign = -2;
 PREC.stmt = -3;
 PREC.macro_arg = -4;
@@ -185,6 +185,11 @@ module.exports = grammar({
       $.open_tuple,
     ),
 
+    open_tuple: $ => prec(PREC.tuple, seq(
+      $._expression,
+      repeat1(seq(',', $._expression))
+    )),
+
     // assignments inside blocks (including top-level)
     assignment: $ => prec.right(PREC.assign, seq(
       choice(
@@ -209,11 +214,6 @@ module.exports = grammar({
         $._expression,
         alias($._closed_assignment, $.assignment),
       ),
-    )),
-
-    open_tuple: $ => prec(PREC.tuple, seq(
-      $._expression,
-      repeat1(prec(PREC.tuple, seq(',', $._expression))),
     )),
 
     _expression: $ => choice(
