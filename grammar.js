@@ -127,6 +127,7 @@ module.exports = grammar({
   word: $ => $._word_identifier,
 
   inline: $ => [
+    $._top_level,
     $._terminator,
     $._definition,
     $._statement,
@@ -174,12 +175,14 @@ module.exports = grammar({
     source_file: $ => optional($._block),
 
     _block: $ => seq(
-      sep1($._terminator, choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      )),
-      optional($._terminator),
+      sep1($._terminator, $._top_level),
+      optional($._terminator)
+    ),
+
+    _top_level: $ => choice(
+      $._expression,
+      $.assignment,
+      $.open_tuple,
     ),
 
     // assignments inside blocks (including top-level)
@@ -191,11 +194,7 @@ module.exports = grammar({
         $.operator,
       ),
       alias('=', $.operator),
-      choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      ),
+      $._top_level,
     )),
 
     // assignments inside brackets
@@ -432,11 +431,7 @@ module.exports = grammar({
 
     return_statement: $ => prec.right(PREC.stmt, seq(
       'return',
-      optional(choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      )),
+      optional($._top_level),
     )),
 
     const_statement: $ => prec.right(PREC.stmt, seq(
@@ -446,20 +441,12 @@ module.exports = grammar({
 
     global_statement: $ => prec.right(PREC.stmt, seq(
       'global',
-      choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      ),
+      $._top_level,
     )),
 
     local_statement: $ => prec.right(PREC.stmt, seq(
       'local',
-      choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      ),
+      $._top_level,
     )),
 
     import_alias: $ => seq($._importable, 'as', $._exportable),
@@ -716,11 +703,7 @@ module.exports = grammar({
       optional($.macro_argument_list),
     )),
 
-    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, choice(
-      $._expression,
-      $.assignment,
-      $.open_tuple,
-    )))),
+    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._top_level))),
 
     argument_list: $ => parenthesize(
       optional(';'),
