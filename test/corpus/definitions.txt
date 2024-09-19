@@ -333,14 +333,6 @@ end
 
 function g(; x, y::Int, z = 1, kwargs...) nothing end
 
-function s(n)::MyInt
-    MyInt(n + 1)
-end
-
-function bar(f, xs::Foo.Bar)::Foo.Bar
-    map(f, xs)
-end
-
 ---
 
 (source_file
@@ -362,7 +354,8 @@ end
     (signature
       (argument_list
         (unary_typed_expression
-          (parametrized_type_expression (identifier)
+          (parametrized_type_expression
+            (identifier)
             (curly_expression (identifier))))
         (named_argument
           (typed_expression
@@ -396,31 +389,45 @@ end
             (identifier))
           (named_argument (identifier) (operator) (integer_literal))
           (splat_expression (identifier)))))
-      (identifier))
+    (identifier)))
 
-  ;; Return types
+
+==================================================
+function definition return types
+==================================================
+
+function s(n)::MyInt
+    MyInt(n + 1)
+end
+
+function bar(f, xs::Foo.Bar)::Foo.Bar
+    map(f, xs)
+end
+
+---
+(source_file
   (function_definition
     (signature
-      (call_expression
-        (identifier)
-        (argument_list (identifier)))
-      return_type: (unary_typed_expression (identifier)))
-      (call_expression
-        (identifier)
-        (argument_list
-          (binary_expression (identifier) (operator) (integer_literal)))))
-
-  ;; Important: "scoped" return types are still parsed as field expressions.
-  (function_definition
-    (signature
-      (call_expression
-        (identifier)
-        (argument_list
+      (typed_expression
+        (call_expression
           (identifier)
-          (typed_expression
+          (argument_list (identifier)))
+        (identifier)))
+    (call_expression
+      (identifier)
+      (argument_list
+        (binary_expression (identifier) (operator) (integer_literal)))))
+  (function_definition
+    (signature
+      (typed_expression
+        (call_expression
+          (identifier)
+          (argument_list
             (identifier)
-            (field_expression value: (identifier) (identifier)))))
-      return_type: (unary_typed_expression (field_expression value: (identifier) (identifier))))
+            (typed_expression
+              (identifier)
+              (field_expression (identifier) (identifier)))))
+        (field_expression (identifier) (identifier))))
     (call_expression
       (identifier)
       (argument_list
@@ -468,15 +475,16 @@ end
 
   (function_definition
     (signature
-      (call_expression
-        (identifier)
-        (argument_list
-          (typed_expression
-            (tuple_expression (identifier) (identifier))
-            (parametrized_type_expression
-              (identifier)
-              (curly_expression (identifier) (identifier))))))
-      (where_clause (identifier)))
+      (where_expression
+        (call_expression
+          (identifier)
+          (argument_list
+            (typed_expression
+              (tuple_expression (identifier) (identifier))
+              (parametrized_type_expression
+                (identifier)
+                (curly_expression (identifier) (identifier))))))
+        (identifier)))
     (identifier)))
 
 
@@ -507,24 +515,25 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
   ;; `where` without brackets
   (function_definition
     (signature
-      (call_expression
-        (identifier)
-        (argument_list
-          (typed_expression
-            (identifier)
-            (identifier))))
-      (where_clause (identifier))))
+      (where_expression
+        (call_expression
+          (identifier)
+          (argument_list
+            (typed_expression
+              (identifier)
+              (identifier))))
+        (identifier))))
 
   ;; `where`
   (function_definition
     (signature
-      (call_expression
-        (identifier)
-        (argument_list
-          (typed_expression
-            (identifier)
-            (identifier))))
-      (where_clause
+      (where_expression
+        (call_expression
+          (identifier)
+          (argument_list
+            (typed_expression
+              (identifier)
+              (identifier))))
         (curly_expression
           (binary_expression
             (identifier)
@@ -600,13 +609,13 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
           (prefixed_string_literal prefix: (identifier)))
         (typed_expression (identifier) (identifier))
         (splat_expression (identifier))))
-      (operator)
-      (call_expression
+    (operator)
+    (call_expression
+      (identifier)
+      (argument_list
         (identifier)
-        (argument_list
-          (identifier)
-          (identifier)
-          (identifier)))))
+        (identifier)
+        (identifier)))))
 
 
 ==============================

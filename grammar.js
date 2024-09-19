@@ -282,6 +282,14 @@ module.exports = grammar({
       'end',
     ),
 
+    signature: $ => prec(PREC.stmt, choice(
+      $.identifier, // zero-method definition
+      $.call_expression,
+      $.argument_list, // anonymous function
+      $.typed_expression,
+      $.where_expression,
+    )),
+
     function_definition: $ => seq(
       'function',
       $.signature,
@@ -297,21 +305,6 @@ module.exports = grammar({
       optional($._block),
       'end',
     ),
-
-    signature: $ => prec.right(choice(
-      $.identifier, // zero-method definition
-      seq(
-        choice(
-          $.call_expression,
-          $.argument_list, // anonymous function
-        ),
-        field('return_type', optional($.unary_typed_expression)),
-        optional($.where_clause),
-      ),
-    )),
-
-    // TODO: Remove
-    where_clause: $ => seq('where', $._expression),
 
 
     // Statements
@@ -863,12 +856,12 @@ module.exports = grammar({
     typed_expression: $ => prec(PREC.decl, seq(
       $._expression,
       '::',
-      choice($._primary_expression),
+      $._primary_expression,
     )),
 
     unary_typed_expression: $ => prec.right(PREC.prefix, seq(
       '::',
-      choice($._primary_expression),
+      $._primary_expression,
     )),
 
     function_expression: $ => prec.right(PREC.afunc, seq(
