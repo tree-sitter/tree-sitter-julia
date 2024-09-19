@@ -66,13 +66,6 @@
 (where_expression
   (_) @type .)
 
-(where_clause
-  (identifier) @type)
-
-(where_clause
-  (curly_expression
-    (_) @type))
-
 (binary_expression
   (_) @type
   (operator) @operator
@@ -280,9 +273,6 @@
 
 (for_binding
   "in" @keyword.operator)
-
-(where_clause
-  "where" @keyword.operator)
 
 (where_expression
   "where" @keyword.operator)
