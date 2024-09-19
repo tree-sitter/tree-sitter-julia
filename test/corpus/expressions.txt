@@ -405,8 +405,9 @@ end
 
   (line_comment)
   (struct_definition
-    (interpolation_expression
-      (parenthesized_expression (identifier)))
+    (type_head
+      (interpolation_expression
+        (parenthesized_expression (identifier))))
     (interpolation_expression
       (parenthesized_expression (splat_expression (identifier)))))
   (function_definition

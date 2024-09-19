@@ -45,21 +45,7 @@
     "setglobal!" "setglobalonce!" "swapfield!" "swapglobal!" "throw" "tuple" "typeassert" "typeof"))
 
 ; Type definitions
-(abstract_definition
-  name: (identifier) @type.definition) @keyword
-
-(primitive_definition
-  name: (identifier) @type.definition) @keyword
-
-(struct_definition
-  name: (identifier) @type.definition)
-
-(type_clause
-  [
-    (identifier) @type
-    (field_expression
-      (identifier) @type .)
-  ])
+(type_head (_) @type.definition)
 
 ; Type annotations
 (parametrized_type_expression
@@ -71,14 +57,14 @@
   (curly_expression
     (_) @type))
 
-(type_parameter_list
-  (identifier) @type)
-
 (typed_expression
   (identifier) @type .)
 
 (unary_typed_expression
   (identifier) @type .)
+
+(where_expression
+  (_) @type .)
 
 (where_clause
   (identifier) @type)
@@ -86,6 +72,12 @@
 (where_clause
   (curly_expression
     (_) @type))
+
+(binary_expression
+  (_) @type
+  (operator) @operator
+  (_) @type
+  (#any-of? @operator "<:" ">:"))
 
 ; Built-in types
 ; filter(name -> typeof(Base.eval(Core, name)) in [DataType, UnionAll], names(Core))
@@ -234,6 +226,19 @@
     "end"
   ] @keyword.type)
 
+(abstract_definition
+  [
+    "abstract"
+    "type"
+    "end"
+  ] @keyword.type)
+
+(primitive_definition
+  [
+    "primitive"
+    "type"
+    "end"
+  ] @keyword.type)
 
 ; Operators & Punctuation
 [

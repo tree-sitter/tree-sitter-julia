@@ -21,12 +21,8 @@ end
 
 
 ==============================
-type definitions
+abstract type definitions
 ==============================
-
-primitive type T 8 end
-primitive type T <: S 16 end
-primitive type Ptr{T} 32 end
 
 abstract type T end
 abstract type T <: S end
@@ -35,33 +31,51 @@ abstract type T{S} <: U end
 ---
 
 (source_file
-  (primitive_definition
-    (identifier)
-    (integer_literal))
-
-  (primitive_definition
-    (identifier)
-    (type_clause (operator) (identifier))
-    (integer_literal))
-
-  (primitive_definition
-    (identifier)
-    (type_parameter_list
-      (identifier))
-    (integer_literal))
-
   (abstract_definition
-    (identifier))
-
+    (type_head (identifier)))
   (abstract_definition
-    (identifier)
-    (type_clause (operator) (identifier)))
-
+    (type_head
+      (binary_expression
+        (identifier)
+        (operator)
+        (identifier))))
   (abstract_definition
-    (identifier)
-    (type_parameter_list
-      (identifier))
-    (type_clause (operator) (identifier))))
+    (type_head
+      (binary_expression
+        (parametrized_type_expression
+          (identifier)
+          (curly_expression (identifier)))
+        (operator)
+        (identifier)))))
+
+
+==============================
+primitive type definitions
+==============================
+
+primitive type T 8 end
+primitive type T <: S 16 end
+primitive type Ptr{T} 32 end
+
+---
+
+(source_file
+  (primitive_definition
+    (type_head (identifier))
+    (integer_literal))
+  (primitive_definition
+    (type_head
+      (binary_expression
+        (identifier)
+        (operator)
+        (identifier)))
+     (integer_literal))
+  (primitive_definition
+    (type_head
+      (parametrized_type_expression
+        (identifier)
+        (curly_expression (identifier))))
+    (integer_literal)))
 
 
 ==============================
@@ -76,6 +90,28 @@ mutable struct Foo
   bar
   baz::Float64
 end
+
+---
+
+(source_file
+  (struct_definition
+    (type_head (identifier)))
+
+  (struct_definition
+    (type_head (identifier))
+    (typed_expression
+      (identifier)
+      (identifier)))
+
+  (struct_definition
+    (type_head (identifier))
+    (identifier)
+    (typed_expression (identifier) (identifier))))
+
+
+==============================
+parametric struct definitions
+==============================
 
 struct Point{T}
   x::T
@@ -95,44 +131,38 @@ end
 
 (source_file
   (struct_definition
-    (identifier))
-
-  (struct_definition
-    (identifier)
-    (typed_expression
-      (identifier)
-      (identifier)))
-
-  (struct_definition
-    (identifier)
-    (identifier)
-    (typed_expression (identifier) (identifier)))
-
-  ;; Parametric types
-  (struct_definition
-    (identifier)
-    (type_parameter_list (identifier))
+    (type_head
+      (parametrized_type_expression
+        (identifier)
+        (curly_expression (identifier))))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
 
   ;; Parametric subtypes
   (struct_definition
-    (identifier)
-    (type_parameter_list
-      (binary_expression (identifier) (operator) (identifier)))
-    (type_clause (operator) (identifier))
+    (type_head
+      (binary_expression
+        (parametrized_type_expression
+          (identifier)
+          (curly_expression (binary_expression (identifier) (operator) (identifier))))
+        (operator)
+        (identifier)))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
 
   ;; Parametric fields
   (struct_definition
-    (identifier)
-    (type_clause (operator) (identifier))
+    (type_head
+      (binary_expression
+        (identifier)
+        (operator)
+        (identifier)))
     (typed_expression
       (identifier)
       (parametrized_type_expression
         (identifier)
         (curly_expression (identifier))))))
+
 
 
 ==============================
