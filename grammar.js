@@ -252,21 +252,23 @@ module.exports = grammar({
       'end',
     ),
 
+    // TODO: Rename
+    type_head: $ => prec(PREC.stmt, choice(
+      $._primary_expression,
+      $.binary_expression,
+    )),
+
     abstract_definition: $ => seq(
       'abstract',
       'type',
-      field('name', choice($.identifier, $.interpolation_expression)),
-      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-      optional($.type_clause),
+      $.type_head,
       'end',
     ),
 
     primitive_definition: $ => seq(
       'primitive',
       'type',
-      field('name', choice($.identifier, $.interpolation_expression)),
-      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-      optional($.type_clause),
+      $.type_head,
       $.integer_literal,
       'end',
     ),
@@ -274,16 +276,11 @@ module.exports = grammar({
     struct_definition: $ => seq(
       optional('mutable'),
       'struct',
-      field('name', choice($.identifier, $.interpolation_expression)),
-      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-      optional($.type_clause),
+      $.type_head,
       optional($._terminator),
       optional($._block),
       'end',
     ),
-
-    // Just for type definitions
-    type_clause: $ => seq(alias('<:', $.operator), $._primary_expression),
 
     function_definition: $ => seq(
       'function',
