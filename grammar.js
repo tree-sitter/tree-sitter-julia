@@ -550,12 +550,12 @@ module.exports = grammar({
 
     _comprehension_clause: $ => seq(
       $.for_clause,
-      optional('\n'),
-      sep(optional('\n'), choice(
+      optional($._newline),
+      sep(optional($._newline), choice(
         $.for_clause,
         $.if_clause
       )),
-      optional('\n'),
+      optional($._newline),
     ),
 
     if_clause: $ => seq(
@@ -584,11 +584,11 @@ module.exports = grammar({
       '[',
       choice(
         // Must allow newlines even if there's already a semicolon.
-        seq($.matrix_row, $._terminator, optional('\n')),
-        sep1(seq($._terminator, optional('\n')), $.matrix_row),
+        seq($.matrix_row, $._terminator, optional($._newline)),
+        sep1(seq($._terminator, optional($._newline)), $.matrix_row),
       ),
       optional($._terminator),
-      optional('\n'),
+      optional($._newline),
       ']'
     )),
 
@@ -1137,8 +1137,9 @@ module.exports = grammar({
 
     _syntactic_operator: _ => token(choice('$', '.', '...', '->', '?')),
 
+    _newline: _ => /\r?\n/,
 
-    _terminator: _ => choice('\n', /;+/),
+    _terminator: $ => choice($._newline, /;+/),
 
     line_comment: _ => token(seq('#', /.*/))
   }
