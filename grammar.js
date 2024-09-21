@@ -553,7 +553,7 @@ module.exports = grammar({
         $.typed_expression,
         $.interpolation_expression,
       ),
-      choice('in', '=', '∈'),
+      alias(choice('in', '=', '∈'), $.operator),
       $._expression,
     )),
 

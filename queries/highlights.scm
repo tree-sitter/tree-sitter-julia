@@ -236,8 +236,6 @@
 ; Operators & Punctuation
 [
   "->"
-  "="
-  "∈"
   (operator)
 ] @operator
 
@@ -270,9 +268,6 @@
 ; Keyword operators
 ((operator) @keyword.operator
   (#any-of? @keyword.operator "in" "isa"))
-
-(for_binding
-  "in" @keyword.operator)
 
 (where_expression
   "where" @keyword.operator)
