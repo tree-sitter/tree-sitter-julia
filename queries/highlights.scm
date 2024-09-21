@@ -234,16 +234,16 @@
   ] @keyword.type)
 
 ; Operators & Punctuation
-[
-  "->"
-  (operator)
-] @operator
+(operator) @operator
 
 (adjoint_expression
   "'" @operator)
 
 (range_expression
   ":" @operator)
+
+(arrow_function_expression
+  "->" @operator)
 
 [
   "."
