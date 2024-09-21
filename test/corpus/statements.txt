@@ -192,23 +192,27 @@ end
   (for_statement
     (for_binding
       (identifier)
+      (operator)
       (identifier)))
 
   (for_statement
     (for_binding
       (identifier)
+      (operator)
       (identifier))
     (call_expression (identifier) (argument_list (identifier))))
 
   (for_statement
     (for_binding
       (identifier)
+      (operator)
       (vector_expression (integer_literal) (integer_literal) (integer_literal)))
     (call_expression (identifier) (argument_list (identifier))))
 
   (for_statement
     (for_binding
       (tuple_expression (identifier) (identifier))
+      (operator)
       (identifier))
     (call_expression (identifier) (argument_list (identifier) (identifier)))))
 
@@ -230,11 +234,11 @@ end
 (source_file
   (assignment (identifier) (operator) (integer_literal))
   (for_statement
-    (for_binding (identifier) (identifier))
+    (for_binding (identifier) (operator) (identifier))
     (identifier))
   (for_statement
-    (for_binding (identifier) (identifier))
-    (for_binding (identifier) (identifier))
+    (for_binding (identifier) (operator) (identifier))
+    (for_binding (identifier) (operator) (identifier))
     (identifier)))
 
 
