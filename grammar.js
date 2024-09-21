@@ -223,7 +223,7 @@ module.exports = grammar({
       $._operation,
       $.compound_assignment_expression,
       $.macrocall_expression,
-      $.function_expression,
+      $.arrow_function_expression,
       $.juxtaposition_expression,
       $.ternary_expression,
       $.operator,
@@ -864,7 +864,7 @@ module.exports = grammar({
       $._primary_expression,
     )),
 
-    function_expression: $ => prec.right(PREC.afunc, seq(
+    arrow_function_expression: $ => prec.right(PREC.afunc, seq(
       choice(
         $.identifier,
         $.argument_list,
@@ -873,7 +873,7 @@ module.exports = grammar({
       '->',
       choice(
         $._expression,
-        $.assignment,
+        alias($._closed_assignment, $.assignment),
       ),
     )),
 

@@ -515,14 +515,15 @@ x -> x^2
 (x,y,z)-> 2*x + y - z
 ()->3
 () -> (sleep(0.1); i += 1; l)
+a -> a = 2, 3
 
 ---
 
 (source_file
-  (function_expression
+  (arrow_function_expression
     (identifier)
     (binary_expression (identifier) (operator) (integer_literal)))
-  (function_expression
+  (arrow_function_expression
     (argument_list (identifier) (identifier) (identifier))
     (binary_expression
       (binary_expression
@@ -531,13 +532,18 @@ x -> x^2
         (identifier))
       (operator)
       (identifier)))
-  (function_expression
+  (arrow_function_expression
     (argument_list)
     (integer_literal))
-  (function_expression
+  (arrow_function_expression
     (argument_list)
     (parenthesized_expression
       (call_expression (identifier) (argument_list (float_literal)))
       (compound_assignment_expression (identifier) (operator) (integer_literal))
-      (identifier))))
+      (identifier)))
+  (open_tuple
+    (arrow_function_expression
+      (identifier)
+      (assignment (identifier) (operator) (integer_literal)))
+    (integer_literal)))
 
