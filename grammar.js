@@ -135,7 +135,7 @@ module.exports = grammar({
   ],
 
   externals: $ => [
-    $.block_comment,
+    $._block_comment_rest,
     $._immediate_paren,
     $._immediate_bracket,
     $._immediate_brace,
@@ -1113,7 +1113,10 @@ module.exports = grammar({
 
     _terminator: _ => choice('\n', /;+/),
 
-    line_comment: _ => token(seq('#', /.*/)),
+    block_comment: $ => seq(/#=/, $._block_comment_rest),
+
+    // FIXME: This is currently a seq to avoid conflicts with block_comment
+    line_comment: _ => seq(/#/, /.*/),
   },
 });
 

@@ -15,7 +15,7 @@
 ///    sequences, but you can always write \" and \`.
 /// All of the above also applies to command literals.
 enum TokenType {
-    BLOCK_COMMENT,
+    BLOCK_COMMENT_REST,
     IMMEDIATE_PAREN,
     IMMEDIATE_BRACKET,
     IMMEDIATE_BRACE,
@@ -155,11 +155,7 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack, bool interp) {
 }
 
 static bool scan_block_comment(TSLexer *lexer) {
-    if (lexer->lookahead != '#') return false;
-    advance(lexer);
-    if (lexer->lookahead != '=') return false;
-    advance(lexer);
-
+    // NOTE: The first `#=` is scanned by tree-sitter
     bool after_eq = false;
     unsigned nesting_depth = 1;
     for (;;) {
@@ -174,14 +170,14 @@ static bool scan_block_comment(TSLexer *lexer) {
                     after_eq = false;
                     nesting_depth--;
                     if (nesting_depth == 0) {
-                        lexer->result_symbol = BLOCK_COMMENT;
+                        lexer->result_symbol = BLOCK_COMMENT_REST;
                         return true;
                     }
                 } else {
                     after_eq = false;
                     if (lexer->lookahead == '=') {
-                        nesting_depth++;
                         advance(lexer);
+                        nesting_depth++;
                     }
                 }
                 break;
@@ -226,6 +222,10 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
         return true;
     }
 
+    if (valid_symbols[BLOCK_COMMENT_REST] && scan_block_comment(lexer)) {
+        return true;
+    }
+
     // Ignore whitespace
     while (iswspace(lexer->lookahead)) {
         lexer->advance(lexer, true);
@@ -238,10 +238,6 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
 
     if (valid_symbols[COMMAND_START] && scan_string_start(lexer, payload, '`')) {
         lexer->result_symbol = COMMAND_START;
-        return true;
-    }
-
-    if (valid_symbols[BLOCK_COMMENT] && scan_block_comment(lexer)) {
         return true;
     }
 
