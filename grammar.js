@@ -139,15 +139,18 @@ module.exports = grammar({
     $._immediate_paren,
     $._immediate_bracket,
     $._immediate_brace,
-
-    $._string_start,
-    $._command_start,
     $._immediate_string_start,
     $._immediate_command_start,
-    $._string_end,
-    $._command_end,
-    $._string_content,
-    $._string_content_no_interp,
+    $._content_cmd_1,
+    $._content_cmd_1_raw,
+    $._content_cmd_3,
+    $._content_cmd_3_raw,
+    $._content_str_1,
+    $._content_str_1_raw,
+    $._content_str_3,
+    $._content_str_3_raw,
+    $._end_cmd,
+    $._end_str,
   ],
 
   conflicts: $ => [
@@ -1012,31 +1015,70 @@ module.exports = grammar({
       '\'',
     )),
 
-    string_literal: $ => seq(
-      $._string_start,
-      repeat(choice($._string_content, $.string_interpolation, $.escape_sequence)),
-      $._string_end,
+    _delimiter_str_1: _ => '"',
+    _delimiter_str_3: _ => '"""',
+    _delimiter_cmd_1: _ => '`',
+    _delimiter_cmd_3: _ => '```',
+
+    string_literal: $ => choice(
+      seq(
+        $._delimiter_str_1,
+        repeat(choice($._content_str_1, $.string_interpolation, $.escape_sequence)),
+        $._end_str,
+      ),
+      seq(
+        $._delimiter_str_3,
+        repeat(choice($._content_str_3, $.string_interpolation, $.escape_sequence)),
+        $._end_str,
+      ),
     ),
 
-    command_literal: $ => seq(
-      $._command_start,
-      repeat(choice($._string_content, $.string_interpolation, $.escape_sequence)),
-      $._command_end,
+    command_literal: $ => choice(
+      seq(
+        $._delimiter_cmd_1,
+        repeat(choice($._content_cmd_1, $.string_interpolation, $.escape_sequence)),
+        $._end_cmd,
+      ),
+      seq(
+        $._delimiter_cmd_3,
+        repeat(choice($._content_cmd_3, $.string_interpolation, $.escape_sequence)),
+        $._end_cmd,
+      ),
     ),
 
     prefixed_string_literal: $ => prec.left(seq(
       field('prefix', $.identifier),
       $._immediate_string_start,
-      repeat(choice($._string_content_no_interp, $.escape_sequence)),
-      $._string_end,
+      choice(
+        seq(
+          $._delimiter_str_1,
+          repeat(choice($._content_str_1_raw, $.escape_sequence)),
+          $._end_str,
+        ),
+        seq(
+          $._delimiter_str_3,
+          repeat(choice($._content_str_3_raw, $.escape_sequence)),
+          $._end_str,
+        ),
+      ),
       optional(field('suffix', $.identifier)),
     )),
 
     prefixed_command_literal: $ => prec.left(seq(
       field('prefix', $.identifier),
       $._immediate_command_start,
-      repeat(choice($._string_content_no_interp, $.escape_sequence)),
-      $._command_end,
+      choice(
+        seq(
+          $._delimiter_cmd_1,
+          repeat(choice($._content_cmd_1_raw, $.escape_sequence)),
+          $._end_cmd,
+        ),
+        seq(
+          $._delimiter_cmd_3,
+          repeat(choice($._content_cmd_3_raw, $.escape_sequence)),
+          $._end_cmd,
+        ),
+      ),
       optional(field('suffix', $.identifier)),
     )),
 

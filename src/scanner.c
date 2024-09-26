@@ -1,8 +1,4 @@
-#include "tree_sitter/alloc.h"
-#include "tree_sitter/array.h"
 #include "tree_sitter/parser.h"
-#include <string.h> // memcpy
-#include <wctype.h>
 
 /// Block comments and immediate parentheses are easy to parse, but strings
 /// require extra-attention.
@@ -19,60 +15,29 @@ enum TokenType {
     IMMEDIATE_PAREN,
     IMMEDIATE_BRACKET,
     IMMEDIATE_BRACE,
-    STRING_START,
-    COMMAND_START,
     IMMEDIATE_STRING_START,
     IMMEDIATE_COMMAND_START,
-    STRING_END,
-    COMMAND_END,
-    STRING_CONTENT,
-    STRING_CONTENT_NO_INTERP,
+    CONTENT_CMD_1,
+    CONTENT_CMD_1_RAW,
+    CONTENT_CMD_3,
+    CONTENT_CMD_3_RAW,
+    CONTENT_STR_1,
+    CONTENT_STR_1_RAW,
+    CONTENT_STR_3,
+    CONTENT_STR_3_RAW,
+    END_CMD,
+    END_STR,
 };
 
-/// To efficiently store a delimiter, we take advantage of the fact that:
-///     (int)'"' % 2 == 0
-///     (int)'`' % 2 == 0
-/// Since " and ` have an even numeric representation,
-/// we store a triple quoted delimiter as (delimiter + 1).
-typedef char Delimiter;
-
-/// Use a stack to keep track of string and command delimiters.
-typedef Array(Delimiter) Stack;
-
 void *tree_sitter_julia_external_scanner_create() {
-    unsigned capacity = TREE_SITTER_SERIALIZATION_BUFFER_SIZE;
-    Delimiter *contents = ts_malloc(capacity);
-    if (contents == NULL) abort();
-    Stack *stack = ts_malloc(sizeof(Stack));
-    if (stack == NULL) abort();
-    stack->contents = contents;
-    stack->capacity = capacity;
-    stack->size = 0;
-    return stack;
+    return NULL;
 }
 
-void tree_sitter_julia_external_scanner_destroy(void *payload) {
-    array_delete(payload);
-    ts_free(payload);
-}
+void tree_sitter_julia_external_scanner_destroy(void *payload) {}
 
-unsigned tree_sitter_julia_external_scanner_serialize(void *payload, char *buffer) {
-    Stack *stack = payload;
-    // Truncate size to avoid overflows
-    unsigned size = stack->size > TREE_SITTER_SERIALIZATION_BUFFER_SIZE ? TREE_SITTER_SERIALIZATION_BUFFER_SIZE : stack->size;
-    memcpy(buffer, stack->contents, size);
-    return size;
-}
+unsigned tree_sitter_julia_external_scanner_serialize(void *payload, char *buffer) { return 0; }
 
-void tree_sitter_julia_external_scanner_deserialize(void *payload, const char *buffer, unsigned size) {
-    Stack *stack = payload;
-    if (size > 0) {
-        memcpy(stack->contents, buffer, size);
-        stack->size = size;
-    } else {
-        stack->size = 0;
-    }
-}
+void tree_sitter_julia_external_scanner_deserialize(void *payload, const char *buffer, unsigned size) {}
 
 // Scanner functions
 
@@ -80,61 +45,24 @@ static void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static void mark_end(TSLexer *lexer) { lexer->mark_end(lexer); }
 
-static bool scan_string_start(TSLexer *lexer, Stack *stack, char start_char) {
-    if (lexer->lookahead != start_char) return false;
-    advance(lexer);
-    mark_end(lexer);
-    bool is_triple = true;
-    for (unsigned i = 1; i < 3; i++) {
-        if (lexer->lookahead == start_char) {
-            advance(lexer);
-        } else {
-            is_triple = false;
-            break;
-        }
-    }
-    if (is_triple) {
-        mark_end(lexer);
-        array_push(stack, start_char + 1);
-    } else {
-        array_push(stack, start_char);
-    }
-    return true;
-}
-
-static bool scan_string_content(TSLexer *lexer, Stack *stack, bool interp) {
-    if (stack->size == 0) return false;      // Stack is empty, so we're not in a string
-    Delimiter end_char = *array_back(stack); // peek
-    bool is_triple = false;
-    if (end_char % 2 != 0) {
-        is_triple = true;
-        end_char--;
-    }
-    TSSymbol end_symbol = (end_char == '"') ? STRING_END : COMMAND_END;
-    TSSymbol content_symbol = interp ? STRING_CONTENT : STRING_CONTENT_NO_INTERP;
+static bool scan_content(TSLexer *lexer, TSSymbol content_symbol, char end_char, unsigned n_delim, bool interp) {
+    TSSymbol end_symbol = (end_char == '"') ? END_STR : END_CMD;
     bool has_content = false;
     int32_t next;
     while ((next = lexer->lookahead)) {
         mark_end(lexer);
-        if (next == '\\') {
+        if (next == '\\' || (next == '$' && interp)) {
             lexer->result_symbol = content_symbol;
             return has_content;
-        } else if (next == '$' && interp) {
-            lexer->result_symbol = content_symbol;
-            return has_content;
-        } else if (next == end_char) {
+        } else {
             bool is_end_delimiter = true;
-            if (is_triple) {
-                for (unsigned i = 0; i < 3; i++) {
-                    if (lexer->lookahead == end_char) {
-                        advance(lexer);
-                    } else {
-                        is_end_delimiter = false;
-                        break;
-                    }
+            for (unsigned i = 1; i <= n_delim; i++) {
+                if (lexer->lookahead == end_char) {
+                    advance(lexer);
+                } else {
+                    is_end_delimiter = false;
+                    break;
                 }
-            } else {
-                advance(lexer);
             }
             if (is_end_delimiter) {
                 if (has_content) {
@@ -142,7 +70,6 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack, bool interp) {
                     return true;
                 } else {
                     mark_end(lexer);
-                    array_pop(stack);
                     lexer->result_symbol = end_symbol;
                     return true;
                 }
@@ -201,24 +128,11 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
     } else if (valid_symbols[IMMEDIATE_BRACE] && lexer->lookahead == '{') {
         lexer->result_symbol = IMMEDIATE_BRACE;
         return true;
-    }
-
-    if (valid_symbols[IMMEDIATE_STRING_START] && scan_string_start(lexer, payload, '"')) {
+    } else if (valid_symbols[IMMEDIATE_STRING_START] && lexer->lookahead == '"') {
         lexer->result_symbol = IMMEDIATE_STRING_START;
         return true;
-    }
-
-    if (valid_symbols[IMMEDIATE_COMMAND_START] && scan_string_start(lexer, payload, '`')) {
+    } else if (valid_symbols[IMMEDIATE_COMMAND_START] && lexer->lookahead == '`') {
         lexer->result_symbol = IMMEDIATE_COMMAND_START;
-        return true;
-    }
-
-    // content or end
-    if (valid_symbols[STRING_CONTENT] && scan_string_content(lexer, payload, true)) {
-        return true;
-    }
-
-    if (valid_symbols[STRING_CONTENT_NO_INTERP] && scan_string_content(lexer, payload, false)) {
         return true;
     }
 
@@ -226,18 +140,35 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
         return true;
     }
 
-    // Ignore whitespace
-    while (iswspace(lexer->lookahead)) {
-        lexer->advance(lexer, true);
-    }
-
-    if (valid_symbols[STRING_START] && scan_string_start(lexer, payload, '"')) {
-        lexer->result_symbol = STRING_START;
+    if (valid_symbols[CONTENT_STR_1] && scan_content(lexer, CONTENT_STR_1, '"', 1, true)) {
         return true;
     }
 
-    if (valid_symbols[COMMAND_START] && scan_string_start(lexer, payload, '`')) {
-        lexer->result_symbol = COMMAND_START;
+    if (valid_symbols[CONTENT_STR_3] && scan_content(lexer, CONTENT_STR_3, '"', 3, true)) {
+        return true;
+    }
+
+    if (valid_symbols[CONTENT_CMD_1] && scan_content(lexer, CONTENT_CMD_1, '`', 1, true)) {
+        return true;
+    }
+
+    if (valid_symbols[CONTENT_CMD_3] && scan_content(lexer, CONTENT_CMD_3, '`', 3, true)) {
+        return true;
+    }
+
+    if (valid_symbols[CONTENT_STR_1_RAW] && scan_content(lexer, CONTENT_STR_1_RAW, '"', 1, false)) {
+        return true;
+    }
+
+    if (valid_symbols[CONTENT_STR_3_RAW] && scan_content(lexer, CONTENT_STR_3_RAW, '"', 3, false)) {
+        return true;
+    }
+
+    if (valid_symbols[CONTENT_CMD_1_RAW] && scan_content(lexer, CONTENT_CMD_1_RAW, '`', 1, false)) {
+        return true;
+    }
+
+    if (valid_symbols[CONTENT_CMD_3_RAW] && scan_content(lexer, CONTENT_CMD_3_RAW, '`', 3, false)) {
         return true;
     }
 
