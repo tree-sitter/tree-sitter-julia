@@ -232,7 +232,6 @@ module.exports = grammar({
       $.operator,
       $.integer_literal,
       $.float_literal,
-      prec(-1, alias(':', $.operator)),
       prec(-1, alias('begin', $.identifier)),
     ),
 
@@ -1095,6 +1094,7 @@ module.exports = grammar({
       $._pipe_left_operator,
       $._pipe_right_operator,
       $._ellipsis_operator,
+      ':',
       $._plus_operator,
       $._times_operator,
       $._rational_operator,
@@ -1106,45 +1106,45 @@ module.exports = grammar({
       $._unary_plus_operator,
     ),
 
-    _assignment_operator: _ => token(choice(':=', '$=', '.=', addDots(OPERATORS.assignment))),
+    _assignment_operator: _ => choice(':=', '$=', '.=', addDot(OPERATORS.assignment)),
 
-    _pair_operator: _ => token(addDots('=>')),
+    _pair_operator: _ => addDot('=>'),
 
-    _arrow_operator: _ => token(addDots(OPERATORS.arrow)),
+    _arrow_operator: _ => addDot(OPERATORS.arrow),
 
-    _lazy_or_operator: _ => token(addDots('||')),
+    _lazy_or_operator: _ => addDot('||'),
 
-    _lazy_and_operator: _ => token(addDots('&&')),
+    _lazy_and_operator: _ => addDot('&&'),
 
-    _comparison_operator: _ => token(addDots(OPERATORS.comparison)),
+    _comparison_operator: _ => addDot(OPERATORS.comparison),
 
-    _pipe_right_operator: _ => token(addDots('|>')),
+    _pipe_right_operator: _ => addDot('|>'),
 
-    _pipe_left_operator: _ => token(addDots('<|')),
+    _pipe_left_operator: _ => addDot('<|'),
 
-    _ellipsis_operator: _ => token(choice('..', addDots(OPERATORS.ellipsis))),
+    _ellipsis_operator: _ => token(choice('..', addDot(OPERATORS.ellipsis))),
 
-    _plus_operator: _ => token(addDots(OPERATORS.plus)),
+    _plus_operator: _ => addDot(OPERATORS.plus),
 
-    _times_operator: _ => token(addDots(OPERATORS.times)),
+    _times_operator: _ => addDot(OPERATORS.times),
 
-    _rational_operator: _ => token(addDots('//')),
+    _rational_operator: _ => addDot('//'),
 
-    _bitshift_operator: _ => token(addDots(OPERATORS.bitshift)),
+    _bitshift_operator: _ => addDot(OPERATORS.bitshift),
 
-    _power_operator: _ => token(addDots(OPERATORS.power)),
-
-
-    _tilde_operator: _ => token(addDots('~')), // unary or assignment
-
-    _type_order_operator: _ => token(addDots('<: >:')), // unary or comparison
-
-    _unary_operator: _ => token(addDots(OPERATORS.unary)),
-
-    _unary_plus_operator: _ => token(addDots(OPERATORS.unary_plus)),
+    _power_operator: _ => addDot(OPERATORS.power),
 
 
-    _syntactic_operator: _ => token(choice('$', '.', '...', '->', '?')),
+    _tilde_operator: _ => addDot('~'), // unary or assignment
+
+    _type_order_operator: _ => addDot('<: >:'), // unary or comparison
+
+    _unary_operator: _ => addDot(OPERATORS.unary),
+
+    _unary_plus_operator: _ => addDot(OPERATORS.unary_plus),
+
+
+    _syntactic_operator: _ => choice('$', '.', '...', '->', '?'),
 
 
     _terminator: _ => choice(/\r?\n/, /;+/),
@@ -1178,9 +1178,9 @@ function sep1(separator, rule) {
  *
  * @param {string} operatorString
  */
-function addDots(operatorString) {
+function addDot(operatorString) {
   const operators = operatorString.trim().split(/\s+/);
-  return seq(optional('.'), choice(...operators));
+  return token(seq(optional('.'), choice(...operators)));
 }
 
 /**
