@@ -297,13 +297,20 @@ export statements
 export a
 export a, b, +, (*)
 export @macroMcAtface
+public a
+public a, b, +, (*)
+public @macroMcAtface
+
 
 ---
 
 (source_file
   (export_statement (identifier))
   (export_statement (identifier) (identifier) (operator) (operator))
-  (export_statement (macro_identifier (identifier))))
+  (export_statement (macro_identifier (identifier)))
+  (public_statement (identifier))
+  (public_statement (identifier) (identifier) (operator) (operator))
+  (public_statement (macro_identifier (identifier))))
 
 
 ==============================
@@ -330,10 +337,10 @@ import Base: @view as @v
 (source_file
   ;; Simple import
   (import_statement (identifier))
-  (import_statement (identifier))
+  (using_statement (identifier))
 
   ;; Relative paths
-  (import_statement
+  (using_statement
     (import_path (identifier))
     (import_path (identifier)))
 

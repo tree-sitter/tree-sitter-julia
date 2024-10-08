@@ -329,6 +329,8 @@ module.exports = grammar({
       $.local_statement,
       $.export_statement,
       $.import_statement,
+      $.public_statement,
+      $.using_statement,
     ),
 
     compound_statement: $ => seq('begin', optional($._terminator), optional($._block), 'end'),
@@ -476,19 +478,25 @@ module.exports = grammar({
       $._import_list,
     ),
 
-    export_statement: $ => seq(
-      'export',
-      prec.right(sep1(',', $._exportable)),
-    ),
+    export_statement: $ => seq('export', prec.right(sep1(',', $._exportable))),
+
+    public_statement: $ => seq('public', prec.right(sep1(',', $._exportable))),
 
     import_statement: $ => seq(
-      choice('import', 'using'),
+      'import',
       choice(
         $._import_list,
         $.selected_import,
       ),
     ),
 
+    using_statement: $ => seq(
+      'using',
+      choice(
+        $._import_list,
+        $.selected_import,
+      ),
+    ),
 
     // Primary expressions can be called, indexed, accessed, and type parametrized.
     _primary_expression: $ => choice(
