@@ -398,7 +398,7 @@ end
       (integer_literal)
       (integer_literal)))
   (interpolation_expression (string_literal))
-  (import_statement
+  (using_statement
     (selected_import
       (interpolation_expression (identifier))
       (interpolation_expression (parenthesized_expression (identifier)))))

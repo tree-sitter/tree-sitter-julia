@@ -200,11 +200,14 @@
 (export_statement
   "export" @keyword.import)
 
+(public_statement
+  "public" @keyword.import)
+
 (import_statement
-  [
-    "import"
-    "using"
-  ] @keyword.import)
+  "import" @keyword.import)
+
+(using_statement
+  "using" @keyword.import)
 
 (import_alias
   "as" @keyword.import)
