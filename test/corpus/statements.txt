@@ -192,23 +192,27 @@ end
   (for_statement
     (for_binding
       (identifier)
+      (operator)
       (identifier)))
 
   (for_statement
     (for_binding
       (identifier)
+      (operator)
       (identifier))
     (call_expression (identifier) (argument_list (identifier))))
 
   (for_statement
     (for_binding
       (identifier)
+      (operator)
       (vector_expression (integer_literal) (integer_literal) (integer_literal)))
     (call_expression (identifier) (argument_list (identifier))))
 
   (for_statement
     (for_binding
       (tuple_expression (identifier) (identifier))
+      (operator)
       (identifier))
     (call_expression (identifier) (argument_list (identifier) (identifier)))))
 
@@ -230,11 +234,11 @@ end
 (source_file
   (assignment (identifier) (operator) (integer_literal))
   (for_statement
-    (for_binding (identifier) (identifier))
+    (for_binding (identifier) (operator) (identifier))
     (identifier))
   (for_statement
-    (for_binding (identifier) (identifier))
-    (for_binding (identifier) (identifier))
+    (for_binding (identifier) (operator) (identifier))
+    (for_binding (identifier) (operator) (identifier))
     (identifier)))
 
 
@@ -293,13 +297,20 @@ export statements
 export a
 export a, b, +, (*)
 export @macroMcAtface
+public a
+public a, b, +, (*)
+public @macroMcAtface
+
 
 ---
 
 (source_file
   (export_statement (identifier))
   (export_statement (identifier) (identifier) (operator) (operator))
-  (export_statement (macro_identifier (identifier))))
+  (export_statement (macro_identifier (identifier)))
+  (public_statement (identifier))
+  (public_statement (identifier) (identifier) (operator) (operator))
+  (public_statement (macro_identifier (identifier))))
 
 
 ==============================
@@ -326,10 +337,10 @@ import Base: @view as @v
 (source_file
   ;; Simple import
   (import_statement (identifier))
-  (import_statement (identifier))
+  (using_statement (identifier))
 
   ;; Relative paths
-  (import_statement
+  (using_statement
     (import_path (identifier))
     (import_path (identifier)))
 

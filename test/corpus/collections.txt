@@ -166,18 +166,18 @@ f(1, 2, i for i in iter)
 (source_file
   (comprehension_expression
     (identifier)
-    (for_clause (for_binding (identifier) (identifier))))
+    (for_clause (for_binding (identifier) (operator) (identifier))))
 
   (comprehension_expression
     (identifier)
-    (for_clause (for_binding (identifier) (identifier)))
+    (for_clause (for_binding (identifier) (operator) (identifier)))
     (if_clause (binary_expression (identifier) (operator) (integer_literal))))
   (index_expression
     (identifier)
     (comprehension_expression
       (call_expression (identifier) (argument_list (identifier) (identifier)))
-      (for_clause (for_binding (identifier) (identifier)))
-      (for_clause (for_binding (identifier) (identifier)))))
+      (for_clause (for_binding (identifier) (operator) (identifier)))
+      (for_clause (for_binding (identifier) (operator) (identifier)))))
 
   (call_expression
     (identifier)
@@ -185,11 +185,11 @@ f(1, 2, i for i in iter)
       (integer_literal)
       (integer_literal)
       (identifier)
-      (for_clause (for_binding (identifier) (identifier)))))
+      (for_clause (for_binding (identifier) (operator) (identifier)))))
   (parenthesized_expression
     (call_expression (identifier) (argument_list (identifier) (identifier)))
     (for_clause
-      (for_binding (identifier) (identifier))
-      (for_binding (identifier) (integer_literal)))
+      (for_binding (identifier) (operator) (identifier))
+      (for_binding (identifier) (operator) (integer_literal)))
     (if_clause (identifier))))
 
