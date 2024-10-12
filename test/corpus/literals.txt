@@ -109,24 +109,40 @@ band = "Interpol"
 
 (source_file
   (string_literal)
-  (string_literal (escape_sequence))
-  (string_literal)
-  (string_literal (escape_sequence) (escape_sequence))
-  (string_literal)
+  (string_literal
+    (string_content
+      (escape_sequence)))
+  (string_literal
+    (string_content))
+  (string_literal
+    (string_content
+      (escape_sequence)
+      (escape_sequence)))
+  (string_literal
+    (string_content))
   (assignment
     (identifier)
     (operator)
-    (string_literal))
+    (string_literal
+      (string_content)))
   (string_literal
-    (string_interpolation (identifier)))
+    (string_content
+      (string_interpolation
+        (identifier))))
   (string_literal
-    (string_interpolation (juxtaposition_expression (integer_literal) (identifier))))
+    (string_content
+      (string_interpolation
+        (juxtaposition_expression
+          (integer_literal)
+          (identifier)))))
   (string_literal
-    (string_interpolation
-      (string_literal
-        (string_interpolation
-          (string_literal))))))
-
+    (string_content
+      (string_interpolation
+        (string_literal
+          (string_content
+            (string_interpolation
+              (string_literal
+                (string_content)))))))))
 
 ==============================
 command string literals
@@ -143,15 +159,23 @@ echo "\033[31mred\033[m"
 ---
 
 (source_file
-  (command_literal)
-  (prefixed_command_literal
-    prefix: (identifier))
-  (command_literal (string_interpolation (identifier)))
-  (command_literal (escape_sequence) (escape_sequence))
   (command_literal
-   (escape_sequence)
-   (escape_sequence)))
-
+    (string_content))
+  (prefixed_command_literal
+    prefix: (identifier)
+    (raw_string_content))
+  (command_literal
+    (string_content
+      (string_interpolation
+        (identifier))))
+  (command_literal
+    (string_content
+      (escape_sequence)
+      (escape_sequence)))
+  (command_literal
+    (string_content
+      (escape_sequence)
+      (escape_sequence))))
 
 ==============================
 non-standard string literals
@@ -168,17 +192,19 @@ K"\\"
     (identifier)
     (operator)
     (prefixed_string_literal
-        prefix: (identifier)
-        (escape_sequence)))
+      prefix: (identifier)
+      (raw_string_content
+        (escape_sequence))))
   (assignment
     (identifier)
     (operator)
     (prefixed_string_literal
-        prefix: (identifier)))
+      prefix: (identifier)
+      (raw_string_content)))
   (prefixed_string_literal
     prefix: (identifier)
-    (escape_sequence)))
-
+    (raw_string_content
+      (escape_sequence))))
 
 ==============================
 comments

@@ -1041,20 +1041,22 @@ module.exports = grammar({
 
     string_literal: $ => seq(
       $._string_start,
-      repeat(choice($._string_content, $.string_interpolation, $.escape_sequence)),
+      optional($.string_content),
       $._string_end,
     ),
 
     command_literal: $ => seq(
       $._command_start,
-      repeat(choice($._string_content, $.string_interpolation, $.escape_sequence)),
+      optional($.string_content),
       $._command_end,
     ),
+
+    string_content: $ => repeat1(choice($._string_content, $.string_interpolation, $.escape_sequence)),
 
     prefixed_string_literal: $ => prec.left(seq(
       field('prefix', $.identifier),
       $._immediate_string_start,
-      repeat(choice($._string_content_no_interp, $.escape_sequence)),
+      optional($.raw_string_content),
       $._string_end,
       optional(field('suffix', $.identifier)),
     )),
@@ -1062,10 +1064,12 @@ module.exports = grammar({
     prefixed_command_literal: $ => prec.left(seq(
       field('prefix', $.identifier),
       $._immediate_command_start,
-      repeat(choice($._string_content_no_interp, $.escape_sequence)),
+      optional($.raw_string_content),
       $._command_end,
       optional(field('suffix', $.identifier)),
     )),
+
+    raw_string_content: $ => repeat1(choice($._string_content_no_interp, $.escape_sequence)),
 
     string_interpolation: $ => seq(
       '$',
