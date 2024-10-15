@@ -2,9 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - master
-      - main
+    branches: [master]
     paths:
       - grammar.js
       - src/**
@@ -25,11 +23,12 @@ concurrency:
 
 jobs:
   test:
+    name: Test parser
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-14]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,4 +37,8 @@ jobs:
       - name: Run tests
         uses: tree-sitter/parser-test-action@v2
         with:
-          test-library: ${{runner.os == 'Linux'}}
+          test-rust: true
+          test-node: true
+          test-python: true
+          test-go: true
+          test-swift: true
