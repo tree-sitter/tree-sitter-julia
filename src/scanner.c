@@ -51,9 +51,17 @@ static bool scan_content(TSLexer *lexer, TSSymbol content_symbol, char end_char,
     int32_t next;
     while ((next = lexer->lookahead)) {
         mark_end(lexer);
-        if (next == '\\' || (next == '$' && interp)) {
+        if (interp && (next == '$' || next == '\\')) {
             lexer->result_symbol = content_symbol;
             return has_content;
+        } else if (next == '\\') {
+            // Parse backslash in raw strings (check escaped delimiters and '\\')
+            advance(lexer);
+            next = lexer->lookahead;
+            if (next == end_char || next == '\\') {
+                lexer->result_symbol = content_symbol;
+                return has_content;
+            }
         } else {
             bool is_end_delimiter = true;
             for (unsigned i = 1; i <= n_delim; i++) {

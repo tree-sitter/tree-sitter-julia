@@ -179,7 +179,6 @@ K"\\"
     (operator)
     (prefixed_string_literal
         prefix: (identifier)
-        (escape_sequence)
         (content)))
   (assignment
     (identifier)
