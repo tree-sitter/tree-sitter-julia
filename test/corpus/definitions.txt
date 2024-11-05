@@ -21,12 +21,8 @@ end
 
 
 ==============================
-type definitions
+abstract type definitions
 ==============================
-
-primitive type T 8 end
-primitive type T <: S 16 end
-primitive type Ptr{T} 32 end
 
 abstract type T end
 abstract type T <: S end
@@ -35,33 +31,51 @@ abstract type T{S} <: U end
 ---
 
 (source_file
-  (primitive_definition
-    (identifier)
-    (integer_literal))
-
-  (primitive_definition
-    (identifier)
-    (type_clause (operator) (identifier))
-    (integer_literal))
-
-  (primitive_definition
-    (identifier)
-    (type_parameter_list
-      (identifier))
-    (integer_literal))
-
   (abstract_definition
-    (identifier))
-
+    (type_head (identifier)))
   (abstract_definition
-    (identifier)
-    (type_clause (operator) (identifier)))
-
+    (type_head
+      (binary_expression
+        (identifier)
+        (operator)
+        (identifier))))
   (abstract_definition
-    (identifier)
-    (type_parameter_list
-      (identifier))
-    (type_clause (operator) (identifier))))
+    (type_head
+      (binary_expression
+        (parametrized_type_expression
+          (identifier)
+          (curly_expression (identifier)))
+        (operator)
+        (identifier)))))
+
+
+==============================
+primitive type definitions
+==============================
+
+primitive type T 8 end
+primitive type T <: S 16 end
+primitive type Ptr{T} 32 end
+
+---
+
+(source_file
+  (primitive_definition
+    (type_head (identifier))
+    (integer_literal))
+  (primitive_definition
+    (type_head
+      (binary_expression
+        (identifier)
+        (operator)
+        (identifier)))
+     (integer_literal))
+  (primitive_definition
+    (type_head
+      (parametrized_type_expression
+        (identifier)
+        (curly_expression (identifier))))
+    (integer_literal)))
 
 
 ==============================
@@ -76,6 +90,28 @@ mutable struct Foo
   bar
   baz::Float64
 end
+
+---
+
+(source_file
+  (struct_definition
+    (type_head (identifier)))
+
+  (struct_definition
+    (type_head (identifier))
+    (typed_expression
+      (identifier)
+      (identifier)))
+
+  (struct_definition
+    (type_head (identifier))
+    (identifier)
+    (typed_expression (identifier) (identifier))))
+
+
+==============================
+parametric struct definitions
+==============================
 
 struct Point{T}
   x::T
@@ -95,44 +131,38 @@ end
 
 (source_file
   (struct_definition
-    (identifier))
-
-  (struct_definition
-    (identifier)
-    (typed_expression
-      (identifier)
-      (identifier)))
-
-  (struct_definition
-    (identifier)
-    (identifier)
-    (typed_expression (identifier) (identifier)))
-
-  ;; Parametric types
-  (struct_definition
-    (identifier)
-    (type_parameter_list (identifier))
+    (type_head
+      (parametrized_type_expression
+        (identifier)
+        (curly_expression (identifier))))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
 
   ;; Parametric subtypes
   (struct_definition
-    (identifier)
-    (type_parameter_list
-      (binary_expression (identifier) (operator) (identifier)))
-    (type_clause (operator) (identifier))
+    (type_head
+      (binary_expression
+        (parametrized_type_expression
+          (identifier)
+          (curly_expression (binary_expression (identifier) (operator) (identifier))))
+        (operator)
+        (identifier)))
     (typed_expression (identifier) (identifier))
     (typed_expression (identifier) (identifier)))
 
   ;; Parametric fields
   (struct_definition
-    (identifier)
-    (type_clause (operator) (identifier))
+    (type_head
+      (binary_expression
+        (identifier)
+        (operator)
+        (identifier)))
     (typed_expression
       (identifier)
       (parametrized_type_expression
         (identifier)
         (curly_expression (identifier))))))
+
 
 
 ==============================
@@ -303,14 +333,6 @@ end
 
 function g(; x, y::Int, z = 1, kwargs...) nothing end
 
-function s(n)::MyInt
-    MyInt(n + 1)
-end
-
-function bar(f, xs::Foo.Bar)::Foo.Bar
-    map(f, xs)
-end
-
 ---
 
 (source_file
@@ -332,7 +354,8 @@ end
     (signature
       (argument_list
         (unary_typed_expression
-          (parametrized_type_expression (identifier)
+          (parametrized_type_expression
+            (identifier)
             (curly_expression (identifier))))
         (named_argument
           (typed_expression
@@ -366,31 +389,45 @@ end
             (identifier))
           (named_argument (identifier) (operator) (integer_literal))
           (splat_expression (identifier)))))
-      (identifier))
+    (identifier)))
 
-  ;; Return types
+
+==================================================
+function definition return types
+==================================================
+
+function s(n)::MyInt
+    MyInt(n + 1)
+end
+
+function bar(f, xs::Foo.Bar)::Foo.Bar
+    map(f, xs)
+end
+
+---
+(source_file
   (function_definition
     (signature
-      (call_expression
-        (identifier)
-        (argument_list (identifier)))
-      return_type: (unary_typed_expression (identifier)))
-      (call_expression
-        (identifier)
-        (argument_list
-          (binary_expression (identifier) (operator) (integer_literal)))))
-
-  ;; Important: "scoped" return types are still parsed as field expressions.
-  (function_definition
-    (signature
-      (call_expression
-        (identifier)
-        (argument_list
+      (typed_expression
+        (call_expression
           (identifier)
-          (typed_expression
+          (argument_list (identifier)))
+        (identifier)))
+    (call_expression
+      (identifier)
+      (argument_list
+        (binary_expression (identifier) (operator) (integer_literal)))))
+  (function_definition
+    (signature
+      (typed_expression
+        (call_expression
+          (identifier)
+          (argument_list
             (identifier)
-            (field_expression value: (identifier) (identifier)))))
-      return_type: (unary_typed_expression (field_expression value: (identifier) (identifier))))
+            (typed_expression
+              (identifier)
+              (field_expression (identifier) (identifier)))))
+        (field_expression (identifier) (identifier))))
     (call_expression
       (identifier)
       (argument_list
@@ -438,15 +475,16 @@ end
 
   (function_definition
     (signature
-      (call_expression
-        (identifier)
-        (argument_list
-          (typed_expression
-            (tuple_expression (identifier) (identifier))
-            (parametrized_type_expression
-              (identifier)
-              (curly_expression (identifier) (identifier))))))
-      (where_clause (identifier)))
+      (where_expression
+        (call_expression
+          (identifier)
+          (argument_list
+            (typed_expression
+              (tuple_expression (identifier) (identifier))
+              (parametrized_type_expression
+                (identifier)
+                (curly_expression (identifier) (identifier))))))
+        (identifier)))
     (identifier)))
 
 
@@ -477,24 +515,25 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
   ;; `where` without brackets
   (function_definition
     (signature
-      (call_expression
-        (identifier)
-        (argument_list
-          (typed_expression
-            (identifier)
-            (identifier))))
-      (where_clause (identifier))))
+      (where_expression
+        (call_expression
+          (identifier)
+          (argument_list
+            (typed_expression
+              (identifier)
+              (identifier))))
+        (identifier))))
 
   ;; `where`
   (function_definition
     (signature
-      (call_expression
-        (identifier)
-        (argument_list
-          (typed_expression
-            (identifier)
-            (identifier))))
-      (where_clause
+      (where_expression
+        (call_expression
+          (identifier)
+          (argument_list
+            (typed_expression
+              (identifier)
+              (identifier))))
         (curly_expression
           (binary_expression
             (identifier)
@@ -567,16 +606,18 @@ Base.show(io::IO, ::MIME"text/plain", m::Method; kwargs...) = show_method(io, m,
       (argument_list
         (typed_expression (identifier) (identifier))
         (unary_typed_expression
-          (prefixed_string_literal prefix: (identifier)))
+          (prefixed_string_literal
+            prefix: (identifier)
+            (content)))
         (typed_expression (identifier) (identifier))
         (splat_expression (identifier))))
-      (operator)
-      (call_expression
+    (operator)
+    (call_expression
+      (identifier)
+      (argument_list
         (identifier)
-        (argument_list
-          (identifier)
-          (identifier)
-          (identifier)))))
+        (identifier)
+        (identifier)))))
 
 
 ==============================

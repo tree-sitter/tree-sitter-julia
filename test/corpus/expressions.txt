@@ -77,7 +77,7 @@ df."a"
 
   (field_expression
     (identifier)
-    (string_literal)))
+    (string_literal (content))))
 
 
 ==============================
@@ -102,7 +102,7 @@ a[1, :]
       (integer_literal)
       (operator)))
   (index_expression
-    (string_literal)
+    (string_literal (content))
     (vector_expression (integer_literal))))
 
 
@@ -155,7 +155,7 @@ new{typeof(xs)}(xs)
 
 (source_file
   (call_expression (identifier) (argument_list))
-  (call_expression (identifier) (argument_list (string_literal) (integer_literal)))
+  (call_expression (identifier) (argument_list (string_literal (content)) (integer_literal)))
   (call_expression (identifier) (argument_list (splat_expression (identifier))))
 
   (call_expression
@@ -224,12 +224,12 @@ Meta.@dump x = 1
     (macro_identifier (identifier))
     (macro_argument_list
       (binary_expression (identifier) (operator) (identifier))
-      (string_literal)))
+      (string_literal (content))))
 
   (macrocall_expression
     (macro_identifier (identifier))
     (macro_argument_list
-      (string_literal)
+      (string_literal (content))
       (compound_statement (assignment (identifier) (operator) (identifier)))))
 
   (macrocall_expression
@@ -245,7 +245,7 @@ Meta.@dump x = 1
     (identifier)
     (argument_list
       (macrocall_expression (macro_identifier (identifier)))
-      (string_literal)))
+      (string_literal (content))))
 
   ; Nested macros
   (macrocall_expression
@@ -397,16 +397,17 @@ end
     (vector_expression
       (integer_literal)
       (integer_literal)))
-  (interpolation_expression (string_literal))
-  (import_statement
+  (interpolation_expression (string_literal (content)))
+  (using_statement
     (selected_import
       (interpolation_expression (identifier))
       (interpolation_expression (parenthesized_expression (identifier)))))
 
   (line_comment)
   (struct_definition
-    (interpolation_expression
-      (parenthesized_expression (identifier)))
+    (type_head
+      (interpolation_expression
+        (parenthesized_expression (identifier))))
     (interpolation_expression
       (parenthesized_expression (splat_expression (identifier)))))
   (function_definition
@@ -481,7 +482,7 @@ x'x
     (field_expression (identifier) (identifier)))
   (juxtaposition_expression
     (integer_literal)
-    (prefixed_string_literal (identifier)))
+    (prefixed_string_literal (identifier) (content)))
   (juxtaposition_expression
     (adjoint_expression (identifier))
     (identifier))
@@ -514,14 +515,15 @@ x -> x^2
 (x,y,z)-> 2*x + y - z
 ()->3
 () -> (sleep(0.1); i += 1; l)
+a -> a = 2, 3
 
 ---
 
 (source_file
-  (function_expression
+  (arrow_function_expression
     (identifier)
     (binary_expression (identifier) (operator) (integer_literal)))
-  (function_expression
+  (arrow_function_expression
     (argument_list (identifier) (identifier) (identifier))
     (binary_expression
       (binary_expression
@@ -530,13 +532,18 @@ x -> x^2
         (identifier))
       (operator)
       (identifier)))
-  (function_expression
+  (arrow_function_expression
     (argument_list)
     (integer_literal))
-  (function_expression
+  (arrow_function_expression
     (argument_list)
     (parenthesized_expression
       (call_expression (identifier) (argument_list (float_literal)))
       (compound_assignment_expression (identifier) (operator) (integer_literal))
-      (identifier))))
+      (identifier)))
+  (open_tuple
+    (arrow_function_expression
+      (identifier)
+      (assignment (identifier) (operator) (integer_literal)))
+    (integer_literal)))
 

@@ -26,7 +26,7 @@ const PREC = [
 }, {});
 
 PREC.array = -1;
-PREC.tuple = -1; // open_tuple
+PREC.tuple = -1;
 PREC.assign = -2;
 PREC.stmt = -3;
 PREC.macro_arg = -4;
@@ -127,6 +127,7 @@ module.exports = grammar({
   word: $ => $._word_identifier,
 
   inline: $ => [
+    $._top_level,
     $._terminator,
     $._definition,
     $._statement,
@@ -134,19 +135,22 @@ module.exports = grammar({
   ],
 
   externals: $ => [
-    $.block_comment,
+    $._block_comment_rest,
     $._immediate_paren,
     $._immediate_bracket,
     $._immediate_brace,
-
-    $._string_start,
-    $._command_start,
     $._immediate_string_start,
     $._immediate_command_start,
-    $._string_end,
-    $._command_end,
-    $._string_content,
-    $._string_content_no_interp,
+    $._content_cmd_1,
+    $._content_cmd_1_raw,
+    $._content_cmd_3,
+    $._content_cmd_3_raw,
+    $._content_str_1,
+    $._content_str_1_raw,
+    $._content_str_3,
+    $._content_str_3_raw,
+    $._end_cmd,
+    $._end_str,
   ],
 
   conflicts: $ => [
@@ -174,13 +178,20 @@ module.exports = grammar({
     source_file: $ => optional($._block),
 
     _block: $ => seq(
-      sep1($._terminator, choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      )),
-      optional($._terminator),
+      sep1($._terminator, $._top_level),
+      optional($._terminator)
     ),
+
+    _top_level: $ => choice(
+      $._expression,
+      $.assignment,
+      $.open_tuple,
+    ),
+
+    open_tuple: $ => prec(PREC.tuple, seq(
+      $._expression,
+      repeat1(seq(',', $._expression))
+    )),
 
     // assignments inside blocks (including top-level)
     assignment: $ => prec.right(PREC.assign, seq(
@@ -191,11 +202,7 @@ module.exports = grammar({
         $.operator,
       ),
       alias('=', $.operator),
-      choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      ),
+      $._top_level,
     )),
 
     // assignments inside brackets
@@ -212,11 +219,6 @@ module.exports = grammar({
       ),
     )),
 
-    open_tuple: $ => prec(PREC.tuple, seq(
-      $._expression,
-      repeat1(prec(PREC.tuple, seq(',', $._expression))),
-    )),
-
     _expression: $ => choice(
       $._definition,
       $._statement,
@@ -224,13 +226,12 @@ module.exports = grammar({
       $._operation,
       $.compound_assignment_expression,
       $.macrocall_expression,
-      $.function_expression,
+      $.arrow_function_expression,
       $.juxtaposition_expression,
       $.ternary_expression,
       $.operator,
       $.integer_literal,
       $.float_literal,
-      prec(-1, alias(':', $.operator)),
       prec(-1, alias('begin', $.identifier)),
     ),
 
@@ -253,21 +254,23 @@ module.exports = grammar({
       'end',
     ),
 
+    // TODO: Rename
+    type_head: $ => prec(PREC.stmt, choice(
+      $._primary_expression,
+      $.binary_expression,
+    )),
+
     abstract_definition: $ => seq(
       'abstract',
       'type',
-      field('name', choice($.identifier, $.interpolation_expression)),
-      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-      optional($.type_clause),
+      $.type_head,
       'end',
     ),
 
     primitive_definition: $ => seq(
       'primitive',
       'type',
-      field('name', choice($.identifier, $.interpolation_expression)),
-      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-      optional($.type_clause),
+      $.type_head,
       $.integer_literal,
       'end',
     ),
@@ -275,16 +278,19 @@ module.exports = grammar({
     struct_definition: $ => seq(
       optional('mutable'),
       'struct',
-      field('name', choice($.identifier, $.interpolation_expression)),
-      optional(seq($._immediate_brace, alias($.curly_expression, $.type_parameter_list))),
-      optional($.type_clause),
+      $.type_head,
       optional($._terminator),
       optional($._block),
       'end',
     ),
 
-    // Just for type definitions
-    type_clause: $ => seq(alias('<:', $.operator), $._primary_expression),
+    signature: $ => prec(PREC.stmt, choice(
+      $.identifier, // zero-method definition
+      $.call_expression,
+      $.argument_list, // anonymous function
+      $.typed_expression,
+      $.where_expression,
+    )),
 
     function_definition: $ => seq(
       'function',
@@ -301,21 +307,6 @@ module.exports = grammar({
       optional($._block),
       'end',
     ),
-
-    signature: $ => prec.right(choice(
-      $.identifier, // zero-method definition
-      seq(
-        choice(
-          $.call_expression,
-          $.argument_list, // anonymous function
-        ),
-        field('return_type', optional($.unary_typed_expression)),
-        optional($.where_clause),
-      ),
-    )),
-
-    // TODO: Remove
-    where_clause: $ => seq('where', $._expression),
 
 
     // Statements
@@ -338,6 +329,8 @@ module.exports = grammar({
       $.local_statement,
       $.export_statement,
       $.import_statement,
+      $.public_statement,
+      $.using_statement,
     ),
 
     compound_statement: $ => seq('begin', optional($._terminator), optional($._block), 'end'),
@@ -432,11 +425,7 @@ module.exports = grammar({
 
     return_statement: $ => prec.right(PREC.stmt, seq(
       'return',
-      optional(choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      )),
+      optional($._top_level),
     )),
 
     const_statement: $ => prec.right(PREC.stmt, seq(
@@ -446,20 +435,12 @@ module.exports = grammar({
 
     global_statement: $ => prec.right(PREC.stmt, seq(
       'global',
-      choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      ),
+      $._top_level,
     )),
 
     local_statement: $ => prec.right(PREC.stmt, seq(
       'local',
-      choice(
-        $._expression,
-        $.assignment,
-        $.open_tuple,
-      ),
+      $._top_level,
     )),
 
     import_alias: $ => seq($._importable, 'as', $._exportable),
@@ -497,19 +478,25 @@ module.exports = grammar({
       $._import_list,
     ),
 
-    export_statement: $ => seq(
-      'export',
-      prec.right(sep1(',', $._exportable)),
-    ),
+    export_statement: $ => seq('export', prec.right(sep1(',', $._exportable))),
+
+    public_statement: $ => seq('public', prec.right(sep1(',', $._exportable))),
 
     import_statement: $ => seq(
-      choice('import', 'using'),
+      'import',
       choice(
         $._import_list,
         $.selected_import,
       ),
     ),
 
+    using_statement: $ => seq(
+      'using',
+      choice(
+        $._import_list,
+        $.selected_import,
+      ),
+    ),
 
     // Primary expressions can be called, indexed, accessed, and type parametrized.
     _primary_expression: $ => choice(
@@ -550,12 +537,10 @@ module.exports = grammar({
 
     _comprehension_clause: $ => seq(
       $.for_clause,
-      optional('\n'),
-      sep(optional('\n'), choice(
+      repeat(choice(
         $.for_clause,
         $.if_clause,
       )),
-      optional('\n'),
     ),
 
     if_clause: $ => seq(
@@ -576,19 +561,15 @@ module.exports = grammar({
         $.typed_expression,
         $.interpolation_expression,
       ),
-      choice('in', '=', '∈'),
+      alias(choice('in', '=', '∈'), $.operator),
       $._expression,
     )),
 
     matrix_expression: $ => prec(PREC.array, seq(
       '[',
-      choice(
-        // Must allow newlines even if there's already a semicolon.
-        seq($.matrix_row, $._terminator, optional('\n')),
-        sep1(seq($._terminator, optional('\n')), $.matrix_row),
-      ),
+      $.matrix_row,
+      repeat(seq($._terminator, $.matrix_row)),
       optional($._terminator),
-      optional('\n'),
       ']',
     )),
 
@@ -716,11 +697,7 @@ module.exports = grammar({
       optional($.macro_argument_list),
     )),
 
-    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, choice(
-      $._expression,
-      $.assignment,
-      $.open_tuple,
-    )))),
+    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._top_level))),
 
     argument_list: $ => parenthesize(
       optional(';'),
@@ -883,15 +860,15 @@ module.exports = grammar({
     typed_expression: $ => prec(PREC.decl, seq(
       $._expression,
       '::',
-      choice($._primary_expression),
+      $._primary_expression,
     )),
 
     unary_typed_expression: $ => prec.right(PREC.prefix, seq(
       '::',
-      choice($._primary_expression),
+      $._primary_expression,
     )),
 
-    function_expression: $ => prec.right(PREC.afunc, seq(
+    arrow_function_expression: $ => prec.right(PREC.afunc, seq(
       choice(
         $.identifier,
         $.argument_list,
@@ -900,7 +877,7 @@ module.exports = grammar({
       '->',
       choice(
         $._expression,
-        $.assignment,
+        alias($._closed_assignment, $.assignment),
       ),
     )),
 
@@ -1039,31 +1016,70 @@ module.exports = grammar({
       '\'',
     )),
 
-    string_literal: $ => seq(
-      $._string_start,
-      repeat(choice($._string_content, $.string_interpolation, $.escape_sequence)),
-      $._string_end,
+    _delimiter_str_1: _ => '"',
+    _delimiter_str_3: _ => '"""',
+    _delimiter_cmd_1: _ => '`',
+    _delimiter_cmd_3: _ => '```',
+
+    string_literal: $ => choice(
+      seq(
+        $._delimiter_str_1,
+        repeat(choice(alias($._content_str_1, $.content), $.string_interpolation, $.escape_sequence)),
+        $._end_str,
+      ),
+      seq(
+        $._delimiter_str_3,
+        repeat(choice(alias($._content_str_3, $.content), $.string_interpolation, $.escape_sequence)),
+        $._end_str,
+      ),
     ),
 
-    command_literal: $ => seq(
-      $._command_start,
-      repeat(choice($._string_content, $.string_interpolation, $.escape_sequence)),
-      $._command_end,
+    command_literal: $ => choice(
+      seq(
+        $._delimiter_cmd_1,
+        repeat(choice(alias($._content_cmd_1, $.content), $.string_interpolation, $.escape_sequence)),
+        $._end_cmd,
+      ),
+      seq(
+        $._delimiter_cmd_3,
+        repeat(choice(alias($._content_cmd_3, $.content), $.string_interpolation, $.escape_sequence)),
+        $._end_cmd,
+      ),
     ),
 
     prefixed_string_literal: $ => prec.left(seq(
       field('prefix', $.identifier),
       $._immediate_string_start,
-      repeat(choice($._string_content_no_interp, $.escape_sequence)),
-      $._string_end,
+      choice(
+        seq(
+          $._delimiter_str_1,
+          repeat(choice(alias($._content_str_1_raw, $.content), $.escape_sequence)),
+          $._end_str,
+        ),
+        seq(
+          $._delimiter_str_3,
+          repeat(choice(alias($._content_str_3_raw, $.content), $.escape_sequence)),
+          $._end_str,
+        ),
+      ),
       optional(field('suffix', $.identifier)),
     )),
 
     prefixed_command_literal: $ => prec.left(seq(
       field('prefix', $.identifier),
       $._immediate_command_start,
-      repeat(choice($._string_content_no_interp, $.escape_sequence)),
-      $._command_end,
+      choice(
+        seq(
+          $._delimiter_cmd_1,
+          repeat(choice(alias($._content_cmd_1_raw, $.content), $.escape_sequence)),
+          $._end_cmd,
+        ),
+        seq(
+          $._delimiter_cmd_3,
+          repeat(choice(alias($._content_cmd_3_raw, $.content), $.escape_sequence)),
+          $._end_cmd,
+        ),
+      ),
       optional(field('suffix', $.identifier)),
     )),
 
@@ -1086,6 +1102,7 @@ module.exports = grammar({
       $._pipe_left_operator,
       $._pipe_right_operator,
       $._ellipsis_operator,
+      ':',
       $._plus_operator,
       $._times_operator,
       $._rational_operator,
@@ -1097,50 +1114,53 @@ module.exports = grammar({
       $._unary_plus_operator,
     ),
 
-    _assignment_operator: _ => token(choice(':=', '$=', '.=', addDots(OPERATORS.assignment))),
+    _assignment_operator: _ => choice(':=', '$=', '.=', addDot(OPERATORS.assignment)),
 
-    _pair_operator: _ => token(addDots('=>')),
+    _pair_operator: _ => addDot('=>'),
 
-    _arrow_operator: _ => token(addDots(OPERATORS.arrow)),
+    _arrow_operator: _ => addDot(OPERATORS.arrow),
 
-    _lazy_or_operator: _ => token(addDots('||')),
+    _lazy_or_operator: _ => addDot('||'),
 
-    _lazy_and_operator: _ => token(addDots('&&')),
+    _lazy_and_operator: _ => addDot('&&'),
 
-    _comparison_operator: _ => token(addDots(OPERATORS.comparison)),
+    _comparison_operator: _ => addDot(OPERATORS.comparison),
 
-    _pipe_right_operator: _ => token(addDots('|>')),
+    _pipe_right_operator: _ => addDot('|>'),
 
-    _pipe_left_operator: _ => token(addDots('<|')),
+    _pipe_left_operator: _ => addDot('<|'),
 
-    _ellipsis_operator: _ => token(choice('..', addDots(OPERATORS.ellipsis))),
+    _ellipsis_operator: _ => token(choice('..', addDot(OPERATORS.ellipsis))),
 
-    _plus_operator: _ => token(addDots(OPERATORS.plus)),
+    _plus_operator: _ => addDot(OPERATORS.plus),
 
-    _times_operator: _ => token(addDots(OPERATORS.times)),
+    _times_operator: _ => addDot(OPERATORS.times),
 
-    _rational_operator: _ => token(addDots('//')),
+    _rational_operator: _ => addDot('//'),
 
-    _bitshift_operator: _ => token(addDots(OPERATORS.bitshift)),
+    _bitshift_operator: _ => addDot(OPERATORS.bitshift),
 
-    _power_operator: _ => token(addDots(OPERATORS.power)),
-
-
-    _tilde_operator: _ => token(addDots('~')), // unary or assignment
-
-    _type_order_operator: _ => token(addDots('<: >:')), // unary or comparison
-
-    _unary_operator: _ => token(addDots(OPERATORS.unary)),
-
-    _unary_plus_operator: _ => token(addDots(OPERATORS.unary_plus)),
+    _power_operator: _ => addDot(OPERATORS.power),
 
 
-    _syntactic_operator: _ => token(choice('$', '.', '...', '->', '?')),
+    _tilde_operator: _ => addDot('~'), // unary or assignment
+
+    _type_order_operator: _ => addDot('<: >:'), // unary or comparison
+
+    _unary_operator: _ => addDot(OPERATORS.unary),
+
+    _unary_plus_operator: _ => addDot(OPERATORS.unary_plus),
 
 
-    _terminator: _ => choice('\n', /;+/),
+    _syntactic_operator: _ => choice('$', '.', '...', '->', '?'),
 
-    line_comment: _ => token(seq('#', /.*/)),
+
+    _terminator: _ => choice(/\r?\n/, /;+/),
+
+    block_comment: $ => seq(/#=/, $._block_comment_rest),
+
+    // FIXME: This is currently a seq to avoid conflicts with block_comment
+    line_comment: _ => seq(/#/, /.*/),
   },
 });
 
@@ -1166,9 +1186,9 @@ function sep1(separator, rule) {
  *
  * @param {string} operatorString
  */
-function addDots(operatorString) {
+function addDot(operatorString) {
   const operators = operatorString.trim().split(/\s+/);
-  return seq(optional('.'), choice(...operators));
+  return token(seq(optional('.'), choice(...operators)));
 }
 
 /**

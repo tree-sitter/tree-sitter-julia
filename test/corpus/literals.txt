@@ -110,22 +110,26 @@ band = "Interpol"
 (source_file
   (string_literal)
   (string_literal (escape_sequence))
-  (string_literal)
-  (string_literal (escape_sequence) (escape_sequence))
-  (string_literal)
+  (string_literal (content))
+  (string_literal (content) (escape_sequence) (content) (escape_sequence) (content))
+  (string_literal (content))
   (assignment
     (identifier)
     (operator)
-    (string_literal))
+    (string_literal (content)))
   (string_literal
-    (string_interpolation (identifier)))
+    (string_interpolation (identifier))
+    (content))
   (string_literal
-    (string_interpolation (juxtaposition_expression (integer_literal) (identifier))))
+    (string_interpolation (juxtaposition_expression (integer_literal) (identifier)))
+    (content))
   (string_literal
+    (content)
     (string_interpolation
       (string_literal
+        (content)
         (string_interpolation
-          (string_literal))))))
+          (string_literal (content)))))))
 
 
 ==============================
@@ -143,20 +147,25 @@ echo "\033[31mred\033[m"
 ---
 
 (source_file
-  (command_literal)
+  (command_literal (content))
   (prefixed_command_literal
-    prefix: (identifier))
-  (command_literal (string_interpolation (identifier)))
-  (command_literal (escape_sequence) (escape_sequence))
+    prefix: (identifier)
+    (content))
+  (command_literal (content) (string_interpolation (identifier)))
+  (command_literal (content) (escape_sequence) (content) (escape_sequence))
   (command_literal
+   (content)
    (escape_sequence)
-   (escape_sequence)))
+   (content)
+   (escape_sequence)
+   (content)))
 
 
 ==============================
 non-standard string literals
 ==============================
 
+# FIXME: \s shouldn't be an escape_sequence here
 trailing_ws = r"\s+$"
 version = v"1.0"
 K"\\"
@@ -164,17 +173,19 @@ K"\\"
 ---
 
 (source_file
+  (line_comment)
   (assignment
     (identifier)
     (operator)
     (prefixed_string_literal
         prefix: (identifier)
-        (escape_sequence)))
+        (content)))
   (assignment
     (identifier)
     (operator)
     (prefixed_string_literal
-        prefix: (identifier)))
+        prefix: (identifier)
+        (content)))
   (prefixed_string_literal
     prefix: (identifier)
     (escape_sequence)))
