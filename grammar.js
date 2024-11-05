@@ -1024,12 +1024,12 @@ module.exports = grammar({
     string_literal: $ => choice(
       seq(
         $._delimiter_str_1,
-        repeat(choice($._content_str_1, $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_str_1, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_str,
       ),
       seq(
         $._delimiter_str_3,
-        repeat(choice($._content_str_3, $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_str_3, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_str,
       ),
     ),
@@ -1037,12 +1037,12 @@ module.exports = grammar({
     command_literal: $ => choice(
       seq(
         $._delimiter_cmd_1,
-        repeat(choice($._content_cmd_1, $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_cmd_1, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_cmd,
       ),
       seq(
         $._delimiter_cmd_3,
-        repeat(choice($._content_cmd_3, $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_cmd_3, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_cmd,
       ),
     ),
@@ -1053,12 +1053,12 @@ module.exports = grammar({
       choice(
         seq(
           $._delimiter_str_1,
-          repeat(choice($._content_str_1_raw, $.escape_sequence)),
+          repeat(choice(alias($._content_str_1_raw, $.content), $.escape_sequence)),
           $._end_str,
         ),
         seq(
           $._delimiter_str_3,
-          repeat(choice($._content_str_3_raw, $.escape_sequence)),
+          repeat(choice(alias($._content_str_3_raw, $.content), $.escape_sequence)),
           $._end_str,
         ),
       ),
@@ -1071,12 +1071,12 @@ module.exports = grammar({
       choice(
         seq(
           $._delimiter_cmd_1,
-          repeat(choice($._content_cmd_1_raw, $.escape_sequence)),
+          repeat(choice(alias($._content_cmd_1_raw, $.content), $.escape_sequence)),
           $._end_cmd,
         ),
         seq(
           $._delimiter_cmd_3,
-          repeat(choice($._content_cmd_3_raw, $.escape_sequence)),
+          repeat(choice(alias($._content_cmd_3_raw, $.content), $.escape_sequence)),
           $._end_cmd,
         ),
       ),
