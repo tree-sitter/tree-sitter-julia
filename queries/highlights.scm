@@ -252,7 +252,7 @@
   "."
   "..."
   "::"
-] @punctuation.special
+] @punctuation
 
 [
   ","
