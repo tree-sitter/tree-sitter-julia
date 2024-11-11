@@ -1155,7 +1155,7 @@ module.exports = grammar({
     _syntactic_operator: _ => choice('$', '.', '...', '->', '?'),
 
 
-    _terminator: _ => choice(/\r?\n/, /;+/),
+    _terminator: _ => choice(/\r?\n/, seq(';', repeat(token.immediate(';')))),
 
     block_comment: $ => seq(/#=/, $._block_comment_rest),
 
@@ -1188,7 +1188,7 @@ function sep1(separator, rule) {
  */
 function addDot(operatorString) {
   const operators = operatorString.trim().split(/\s+/);
-  return token(seq(optional('.'), choice(...operators)));
+  return token(seq(optional('.'), operators.length > 1 ? choice(...operators) : operators[0]));
 }
 
 /**
