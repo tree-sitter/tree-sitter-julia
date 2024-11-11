@@ -2,19 +2,23 @@
   "name": "tree-sitter-julia",
   "version": "0.23.0",
   "description": "Julia grammar for tree-sitter",
-  "repository": "github:tree-sitter/tree-sitter-julia",
+  "repository": "https://github.com/tree-sitter/tree-sitter-julia",
   "license": "MIT",
-  "author": "Max Brunsfeld <maxbrunsfeld@gmail.com>",
+  "author": {
+    "name": "Max Brunsfeld",
+    "email": "maxbrunsfeld@gmail.com"
+  },
   "main": "bindings/node",
   "types": "bindings/node",
   "keywords": [
     "incremental",
     "parsing",
     "tree-sitter",
-    "javascript"
+    "julia"
   ],
   "files": [
     "grammar.js",
+    "tree-sitter.json",
     "binding.gyp",
     "prebuilds/**",
     "bindings/node/*",
@@ -23,8 +27,14 @@
     "*.wasm"
   ],
   "dependencies": {
-    "node-addon-api": "^8.2.1",
+    "node-addon-api": "^8.2.2",
     "node-gyp-build": "^4.8.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.14.0",
+    "eslint-config-treesitter": "^1.0.2",
+    "prebuildify": "^6.0.1",
+    "tree-sitter-cli": "^0.24.4"
   },
   "peerDependencies": {
     "tree-sitter": "^0.21.1"
@@ -33,12 +43,6 @@
     "tree-sitter": {
       "optional": true
     }
-  },
-  "devDependencies": {
-    "eslint": "^9.12.0",
-    "eslint-config-treesitter": "^1.0.2",
-    "prebuildify": "^6.0.1",
-    "tree-sitter-cli": "^0.24.3"
   },
   "scripts": {
     "install": "node-gyp-build",
