@@ -28,7 +28,9 @@
     (identifier) @function.call .))
 
 ; Macros
-(macro_identifier) @function.macro
+(macro_identifier
+  "@" @function.macro
+  (_) @function.macro)
 
 (macro_definition
   (signature
