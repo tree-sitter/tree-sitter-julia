@@ -589,12 +589,12 @@ module.exports = grammar({
     ),
 
     parenthesized_expression: $ => parenthesize(
-      sep1(';', choice(
+      sep1($._semicolon, choice(
         $._expression,
         alias($._closed_assignment, $.assignment),
       )),
       optional($._comprehension_clause),
-      optional(';'),
+      optional($._semicolon),
     ),
 
     tuple_expression: $ => parenthesize(optional(
@@ -612,10 +612,10 @@ module.exports = grammar({
             ',',
           )),
         ),
-        ';', // Empty NamedTuple
+        $._semicolon, // Empty NamedTuple
         // NamedTuple with leading semicolon
         seq(
-          ';',
+          $._semicolon,
           sep1(',', choice($._expression, $.named_field)),
           optional(','),
         ),
@@ -700,8 +700,8 @@ module.exports = grammar({
     macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._top_level))),
 
     argument_list: $ => parenthesize(
-      optional(';'),
-      sep(choice(',', ';'), choice(
+      optional($._semicolon),
+      sep(choice(',', $._semicolon), choice(
         $._expression,
         alias($._closed_assignment, $.named_argument),
         seq($._expression, $._comprehension_clause),
@@ -1155,7 +1155,9 @@ module.exports = grammar({
     _syntactic_operator: _ => choice('$', '.', '...', '->', '?'),
 
 
-    _terminator: _ => choice(/\r?\n/, seq(';', repeat(token.immediate(';')))),
+    _semicolon: _ => seq(';', repeat(token.immediate(';'))),
+
+    _terminator: $ => choice(/\r?\n/, $._semicolon),
 
     block_comment: $ => seq(/#=/, $._block_comment_rest),
 
