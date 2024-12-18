@@ -20,13 +20,6 @@
   (field_expression
     (identifier) @function.call .))
 
-(broadcast_call_expression
-  (identifier) @function.call)
-
-(broadcast_call_expression
-  (field_expression
-    (identifier) @function.call .))
-
 ; Macros
 (macro_identifier
   "@" @function.macro

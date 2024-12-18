@@ -508,7 +508,6 @@ module.exports = grammar({
       $._array,
       $._string,
       $.adjoint_expression,
-      $.broadcast_call_expression,
       $.call_expression,
       alias($._closed_macrocall_expression, $.macrocall_expression),
       $.parametrized_type_expression,
@@ -661,15 +660,10 @@ module.exports = grammar({
     ),
 
     call_expression: $ => prec(PREC.call, seq(
-      choice($._primary_expression, $.operator),
-      $._immediate_paren,
-      $.argument_list,
-      optional($.do_clause),
-    )),
-
-    broadcast_call_expression: $ => prec(PREC.call, seq(
-      $._primary_expression,
-      token.immediate('.'),
+      choice(
+        seq($._primary_expression, optional(token.immediate('.'))),
+        $.operator
+      ),
       $._immediate_paren,
       $.argument_list,
       optional($.do_clause),

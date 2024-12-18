@@ -176,6 +176,17 @@ new{typeof(xs)}(xs)
 
 
 ========================================
+function broadcast call expressions
+========================================
+
+f.(x)
+
+---
+(source_file
+  (call_expression (identifier) (argument_list (identifier))))
+
+
+========================================
 function call expressions with do blocks
 ========================================
 
