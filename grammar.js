@@ -15,10 +15,8 @@ const PREC = [
   'rational',
   'bitshift',
   'prefix',
-  'postfix',
   'power',
   'decl',
-  'call',
   'dot',
 ].reduce((result, name, index) => {
   result[name] = index + 10;
@@ -631,10 +629,10 @@ module.exports = grammar({
       '}',
     ),
 
-    adjoint_expression: $ => prec(PREC.postfix, seq(
+    adjoint_expression: $ => seq(
       $._primary_expression,
       token.immediate('\''),
-    )),
+    ),
 
     field_expression: $ => prec(PREC.dot, seq(
       field('value', $._primary_expression),
@@ -659,7 +657,7 @@ module.exports = grammar({
       $.curly_expression,
     ),
 
-    call_expression: $ => prec(PREC.call, seq(
+    call_expression: $ => seq(
       choice(
         seq($._primary_expression, optional(token.immediate('.'))),
         $.operator
@@ -667,9 +665,9 @@ module.exports = grammar({
       $._immediate_paren,
       $.argument_list,
       optional($.do_clause),
-    )),
+    ),
 
-    _closed_macrocall_expression: $ => prec(PREC.call, seq(
+    _closed_macrocall_expression: $ => seq(
       optional(seq(
         $._primary_expression,
         token.immediate('.'),
@@ -680,7 +678,7 @@ module.exports = grammar({
         seq($._immediate_bracket, $._array),
         seq($._immediate_paren, $.argument_list, optional($.do_clause)),
       ),
-    )),
+    ),
 
     macrocall_expression: $ => prec.right(seq(
       optional(seq(
