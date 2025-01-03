@@ -165,7 +165,6 @@ echo "\033[31mred\033[m"
 non-standard string literals
 ==============================
 
-# FIXME: \s shouldn't be an escape_sequence here
 trailing_ws = r"\s+$"
 version = v"1.0"
 K"\\"
