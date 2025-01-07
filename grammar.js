@@ -1,3 +1,13 @@
+/**
+ * @file Julia grammar for tree-sitter
+ * @author Max Brunsfeld <maxbrunsfeld@gmail.com>
+ * @author Sergio A. Vargas <savargasqu+git@unal.edu.co>
+ * @license MIT
+ */
+
+/// <reference types="tree-sitter-cli/dsl" />
+// @ts-check
+
 const PREC = [
   'afunc',
   'pair',
