@@ -445,7 +445,7 @@ module.exports = grammar({
       token(repeat1('.')),
       choice(
         $.identifier,
-        $.scoped_identifier,
+        $._scoped_identifier,
       ),
     ),
 
@@ -459,7 +459,7 @@ module.exports = grammar({
 
     _importable: $ => choice(
       $._exportable,
-      $.scoped_identifier,
+      alias($._scoped_identifier, $.import_path),
       $.import_path,
     ),
 
@@ -640,12 +640,19 @@ module.exports = grammar({
       optional($.do_clause),
     ),
 
-    _closed_macrocall_expression: $ => seq(
-      optional(seq(
-        $._primary_expression,
-        token.immediate('.'),
-      )),
+    _qualified_macro_identifier: $ => seq(
+      $._primary_expression,
+      token.immediate('.'),
       $.macro_identifier,
+    ),
+
+    _macro_head: $ => choice(
+      alias($._qualified_macro_identifier, $.field_expression),
+      $.macro_identifier,
+    ),
+
+    _closed_macrocall_expression: $ => seq(
+      $._macro_head,
       choice(
         seq($._immediate_brace, $.curly_expression),
         seq($._immediate_bracket, $._array),
@@ -657,14 +664,7 @@ module.exports = grammar({
       ),
     ),
 
-    macrocall_expression: $ => prec.right(seq(
-      optional(seq(
-        $._primary_expression,
-        token.immediate('.'),
-      )),
-      $.macro_identifier,
-      optional($.macro_argument_list),
-    )),
+    macrocall_expression: $ => prec.right(seq($._macro_head, optional($.macro_argument_list))),
 
     macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._block_form))),
 
@@ -841,18 +841,18 @@ module.exports = grammar({
 
     macro_identifier: $ => seq('@', choice(
       $.identifier,
-      $.scoped_identifier,
       $.operator,
       alias($._syntactic_operator, $.operator),
+      alias($._scoped_identifier, $.field_expression),
     )),
 
-    scoped_identifier: $ => seq(
-      choice($.identifier, $.scoped_identifier),
-      token.immediate('.'),
-      choice(
-        $.identifier,
-        $.interpolation_expression,
-        $.quote_expression,
+    _scoped_identifier: $ => seq(
+      choice($.identifier, $.interpolation_expression),
+      repeat1(
+        seq(
+          token.immediate('.'),
+          choice($.identifier, $.interpolation_expression),
+        ),
       ),
     ),
 

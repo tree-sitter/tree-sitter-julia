@@ -213,11 +213,7 @@ joinpath(@__DIR__, "grammar.js")
 
 @macroexpand @async accept(socket)
 
-@Meta.dump 1, 2
-Meta.@dump x = 1
-
 ---
-
 (source_file
   (macrocall_expression
     (macro_identifier (identifier))
@@ -253,16 +249,27 @@ Meta.@dump x = 1
       (macrocall_expression
         (macro_identifier (identifier))
         (macro_argument_list
-          (call_expression (identifier) (argument_list (identifier)))))))
+          (call_expression (identifier) (argument_list (identifier))))))))
 
-  ; Scoped macro identifiers
+
+==============================
+Qualified macro identifiers
+==============================
+
+@Meta.dump f()
+Meta.@dump x = 1
+
+---
+(source_file
   (macrocall_expression
-    (macro_identifier (scoped_identifier (identifier) (identifier)))
+    (macro_identifier
+      (field_expression (identifier) (identifier)))
     (macro_argument_list
-      (open_tuple (integer_literal) (integer_literal))))
+      (call_expression (identifier) (argument_list))))
   (macrocall_expression
-    (identifier)
-    (macro_identifier (identifier))
+    (field_expression
+      (identifier)
+      (macro_identifier (identifier)))
     (macro_argument_list
       (assignment (identifier) (operator) (integer_literal)))))
 
