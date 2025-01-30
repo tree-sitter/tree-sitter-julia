@@ -1,0 +1,118 @@
+==============================
+macro call expressions
+==============================
+
+@assert x == y "a message"
+
+@testset "a" begin
+  b = c
+end
+
+@. a * x + b
+
+joinpath(@__DIR__, "grammar.js")
+
+@macroexpand @async accept(socket)
+
+---
+(source_file
+  (macrocall_expression
+    (macro_identifier (identifier))
+    (macro_argument_list
+      (binary_expression (identifier) (operator) (identifier))
+      (string_literal (content))))
+
+  (macrocall_expression
+    (macro_identifier (identifier))
+    (macro_argument_list
+      (string_literal (content))
+      (compound_statement (assignment (identifier) (operator) (identifier)))))
+
+  (macrocall_expression
+    (macro_identifier (operator))
+    (macro_argument_list
+      (binary_expression
+        (binary_expression (identifier) (operator) (identifier))
+        (operator)
+        (identifier))))
+
+  ; Macros as arguments
+  (call_expression
+    (identifier)
+    (argument_list
+      (macrocall_expression (macro_identifier (identifier)))
+      (string_literal (content))))
+
+  ; Nested macros
+  (macrocall_expression
+    (macro_identifier (identifier))
+    (macro_argument_list
+      (macrocall_expression
+        (macro_identifier (identifier))
+        (macro_argument_list
+          (call_expression (identifier) (argument_list (identifier))))))))
+
+
+==============================
+Qualified macro identifiers
+==============================
+
+@Meta.dump f()
+Meta.@dump x = 1
+
+---
+(source_file
+  (macrocall_expression
+    (macro_identifier
+      (field_expression (identifier) (identifier)))
+    (macro_argument_list
+      (call_expression (identifier) (argument_list))))
+  (macrocall_expression
+    (field_expression
+      (identifier)
+      (macro_identifier (identifier)))
+    (macro_argument_list
+      (assignment (identifier) (operator) (integer_literal)))))
+
+
+==============================
+closed macro call expressions
+==============================
+
+@enum(Light, red, yellow, green)
+f(@nospecialize(x)) = x
+
+@m[1, 2] + 1
+@m [1, 2] + 1
+
+---
+(source_file
+  (macrocall_expression
+    (macro_identifier (identifier))
+    (argument_list (identifier) (identifier) (identifier) (identifier)))
+
+  ; Macros as parameters
+  (assignment
+    (call_expression
+      (identifier)
+      (argument_list
+        (macrocall_expression
+          (macro_identifier (identifier))
+          (argument_list (identifier)))))
+    (operator)
+    (identifier))
+
+  ; Open vs closed macros
+  (binary_expression
+    (macrocall_expression
+      (macro_identifier (identifier))
+      (vector_expression (integer_literal) (integer_literal)))
+    (operator)
+    (integer_literal))
+  (macrocall_expression
+    (macro_identifier (identifier))
+    (macro_argument_list
+      (binary_expression
+        (vector_expression (integer_literal) (integer_literal))
+        (operator)
+        (integer_literal)))))
