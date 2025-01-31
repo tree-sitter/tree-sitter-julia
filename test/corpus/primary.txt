@@ -1,0 +1,344 @@
+==============================
+identifiers
+==============================
+
+abc_123_ABC
+_fn!
+ρ; φ; z
+ℝ
+x′
+θ̄
+logŷ
+ϵ
+ŷ
+🙋
+🦀
+
+---
+(source_file
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier)
+  (identifier))
+
+
+==============================
+field expressions
+==============================
+
+foo.x
+bar.x.y.z
+
+(a[1].b().c).d
+
+Base.:+
+
+df."a"
+
+---
+(source_file
+  (field_expression
+    (identifier)
+    (identifier))
+  (field_expression
+    (field_expression
+      (field_expression
+        (identifier)
+        (identifier))
+      (identifier))
+      (identifier))
+
+  (field_expression
+    (parenthesized_expression
+      (field_expression
+        (call_expression
+          (field_expression
+            (index_expression (identifier) (vector_expression (integer_literal)))
+            (identifier))
+          (argument_list))
+        (identifier)))
+    (identifier))
+
+  (field_expression
+    (identifier)
+    (quote_expression
+      (operator)))
+
+  (field_expression
+    (identifier)
+    (string_literal (content))))
+
+
+==============================
+index expressions
+==============================
+
+a[1, 2, 3]
+a[1, :]
+"foo"[1]
+
+---
+(source_file
+  (index_expression
+    (identifier)
+    (vector_expression
+      (integer_literal)
+      (integer_literal)
+      (integer_literal)))
+  (index_expression
+    (identifier)
+    (vector_expression
+      (integer_literal)
+      (operator)))
+  (index_expression
+    (string_literal (content))
+    (vector_expression (integer_literal))))
+
+
+==============================
+type parametrized expressions
+==============================
+
+Vector{Int}
+Vector{<:Number}
+$(usertype){T}
+
+{:x} ~ normal(0, 1)
+
+---
+(source_file
+  (parametrized_type_expression
+    (identifier)
+    (curly_expression (identifier)))
+  (parametrized_type_expression
+    (identifier)
+    (curly_expression (unary_expression (operator) (identifier))))
+  (parametrized_type_expression
+    (interpolation_expression (parenthesized_expression (identifier)))
+    (curly_expression (identifier)))
+
+  ; Gen.jl example
+  (compound_assignment_expression
+    (curly_expression (quote_expression (identifier)))
+    (operator)
+    (call_expression
+      (identifier)
+      (argument_list (integer_literal) (integer_literal)))))
+
+
+==============================
+function call expressions
+==============================
+
+f()
+g("hi", 2)
+h(d...)
+
+f(e; f = g)
+g(arg; kwarg)
+
+new{typeof(xs)}(xs)
+
+---
+(source_file
+  (call_expression (identifier) (argument_list))
+  (call_expression (identifier) (argument_list (string_literal (content)) (integer_literal)))
+  (call_expression (identifier) (argument_list (splat_expression (identifier))))
+
+  (call_expression
+    (identifier)
+    (argument_list
+      (identifier)
+      (named_argument (identifier) (operator) (identifier))))
+  (call_expression
+    (identifier)
+    (argument_list (identifier) (identifier)))
+
+  (call_expression
+    (parametrized_type_expression
+      (identifier)
+      (curly_expression
+        (call_expression (identifier) (argument_list (identifier)))))
+    (argument_list (identifier))))
+
+
+========================================
+function broadcast call expressions
+========================================
+
+f.(x)
+
+---
+(source_file
+  (call_expression (identifier) (argument_list (identifier))))
+
+
+========================================
+function call expressions with do blocks
+========================================
+
+reduce(xs) do x, y
+  f(x, y)
+end
+
+---
+(source_file
+  (call_expression
+    (identifier)
+    (argument_list (identifier))
+    (do_clause
+      (argument_list
+        (identifier)
+        (identifier))
+      (call_expression
+        (identifier)
+        (argument_list (identifier) (identifier))))))
+
+
+==============================
+quote expressions
+==============================
+
+:foo
+:const
+
+:(x; y)
+:(x, y)
+:[x, y, z]
+
+:+
+:->
+:(::)
+
+---
+(source_file
+  (quote_expression (identifier))
+  (quote_expression (identifier))
+
+  (quote_expression
+    (parenthesized_expression
+      (identifier)
+      (identifier)))
+  (quote_expression
+    (tuple_expression
+      (identifier)
+      (identifier)))
+  (quote_expression
+    (vector_expression
+      (identifier)
+      (identifier)
+      (identifier)))
+  ; Operator
+  (quote_expression (operator))
+  ; Syntactic operators
+  (quote_expression (operator))
+  (quote_expression (operator)))
+
+
+==============================
+interpolation expressions
+==============================
+
+$foo
+$obj.field
+$(obj.field)
+$f(x)
+$f[1, 2]
+$"foo"
+
+using $Package: $(name)
+
+# Similar definitions in Gadfly/src/varset.jl
+mutable struct $(name)
+  $(vars...)
+end
+function $(name)($(parameters_expr))
+    $(name)($(parsed_vars...))
+end
+
+---
+(source_file
+  (interpolation_expression
+    (identifier))
+  (field_expression
+    (interpolation_expression
+      (identifier))
+    (identifier))
+  (interpolation_expression
+    (parenthesized_expression
+      (field_expression
+        (identifier)
+        (identifier))))
+  (call_expression
+    (interpolation_expression
+      (identifier))
+    (argument_list
+      (identifier)))
+  (index_expression
+    (interpolation_expression
+      (identifier))
+    (vector_expression
+      (integer_literal)
+      (integer_literal)))
+  (interpolation_expression (string_literal (content)))
+  (using_statement
+    (selected_import
+      (interpolation_expression (identifier))
+      (interpolation_expression (parenthesized_expression (identifier)))))
+
+  (line_comment)
+  (struct_definition
+    (type_head
+      (interpolation_expression
+        (parenthesized_expression (identifier))))
+    (interpolation_expression
+      (parenthesized_expression (splat_expression (identifier)))))
+  (function_definition
+    (signature
+      (call_expression
+        (interpolation_expression
+          (parenthesized_expression (identifier)))
+        (argument_list
+          (interpolation_expression
+            (parenthesized_expression (identifier))))))
+      (call_expression
+        (interpolation_expression
+          (parenthesized_expression (identifier)))
+        (argument_list
+          (interpolation_expression
+            (parenthesized_expression (splat_expression (identifier))))))))
+
+
+==============================
+adjoint expressions
+==============================
+
+[u, v]'
+A'[i]
+(x, y)'
+f'(x)
+:a'
+
+---
+(source_file
+  (adjoint_expression
+    (vector_expression (identifier) (identifier)))
+  (index_expression
+    (adjoint_expression (identifier))
+    (vector_expression (identifier)))
+  (adjoint_expression
+    (tuple_expression (identifier) (identifier)))
+  (call_expression
+    (adjoint_expression (identifier))
+    (argument_list (identifier)))
+  (adjoint_expression
+    (quote_expression (identifier))))

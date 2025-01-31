@@ -1,3 +1,13 @@
+/**
+ * @file Julia grammar for tree-sitter
+ * @author Max Brunsfeld <maxbrunsfeld@gmail.com>
+ * @author Sergio A. Vargas <savargasqu+git@unal.edu.co>
+ * @license MIT
+ */
+
+/// <reference types="tree-sitter-cli/dsl" />
+// @ts-check
+
 const PREC = [
   'afunc',
   'pair',
@@ -15,10 +25,8 @@ const PREC = [
   'rational',
   'bitshift',
   'prefix',
-  'postfix',
   'power',
   'decl',
-  'call',
   'dot',
 ].reduce((result, name, index) => {
   result[name] = index + 10;
@@ -61,8 +69,8 @@ const OPERATORS = {
 
   plus: `
     ++ |
-    − ¦ ⊕ ⊖ ⊞ ⊟ ∪ ∨ ⊔ ± ∓ ∔ ∸ ≏ ⊎ ⊻ ⊽ ⋎ ⋓ ⟇ ⧺ ⧻ ⨈ ⨢ ⨣ ⨤ ⨥ ⨦ ⨧ ⨨ ⨩ ⨪ ⨫ ⨬ ⨭ ⨮ ⨹ ⨺ ⩁
-    ⩂ ⩅ ⩊ ⩌ ⩏ ⩐ ⩒ ⩔ ⩖ ⩗ ⩛ ⩝ ⩡ ⩢ ⩣
+    − ¦ ⊕ ⊖ ⊞ ⊟ ∪ ∨ ⊔ ∔ ∸ ≏ ⊎ ⊻ ⊽ ⋎ ⋓ ⟇ ⧺ ⧻ ⨈ ⨢ ⨣ ⨤ ⨥ ⨦ ⨧ ⨨ ⨩ ⨪ ⨫ ⨬ ⨭ ⨮ ⨹ ⨺ ⩁ ⩂ ⩅
+    ⩊ ⩌ ⩏ ⩐ ⩒ ⩔ ⩖ ⩗ ⩛ ⩝ ⩡ ⩢ ⩣
   `,
 
   times: `
@@ -430,7 +438,7 @@ module.exports = grammar({
 
     const_statement: $ => prec.right(PREC.stmt, seq(
       'const',
-      $.assignment,
+      $._top_level,
     )),
 
     global_statement: $ => prec.right(PREC.stmt, seq(
@@ -449,7 +457,7 @@ module.exports = grammar({
       token(repeat1('.')),
       choice(
         $.identifier,
-        $.scoped_identifier,
+        $._scoped_identifier,
       ),
     ),
 
@@ -463,7 +471,7 @@ module.exports = grammar({
 
     _importable: $ => choice(
       $._exportable,
-      $.scoped_identifier,
+      alias($._scoped_identifier, $.import_path),
       $.import_path,
     ),
 
@@ -508,7 +516,6 @@ module.exports = grammar({
       $._array,
       $._string,
       $.adjoint_expression,
-      $.broadcast_call_expression,
       $.call_expression,
       alias($._closed_macrocall_expression, $.macrocall_expression),
       $.parametrized_type_expression,
@@ -589,12 +596,12 @@ module.exports = grammar({
     ),
 
     parenthesized_expression: $ => parenthesize(
-      sep1(';', choice(
+      sep1($._semicolon, choice(
         $._expression,
         alias($._closed_assignment, $.assignment),
       )),
       optional($._comprehension_clause),
-      optional(';'),
+      optional($._semicolon),
     ),
 
     tuple_expression: $ => parenthesize(optional(
@@ -612,10 +619,10 @@ module.exports = grammar({
             ',',
           )),
         ),
-        ';', // Empty NamedTuple
+        $._semicolon, // Empty NamedTuple
         // NamedTuple with leading semicolon
         seq(
-          ';',
+          $._semicolon,
           sep1(',', choice($._expression, $.named_field)),
           optional(','),
         ),
@@ -632,10 +639,10 @@ module.exports = grammar({
       '}',
     ),
 
-    adjoint_expression: $ => prec(PREC.postfix, seq(
+    adjoint_expression: $ => seq(
       $._primary_expression,
       token.immediate('\''),
-    )),
+    ),
 
     field_expression: $ => prec(PREC.dot, seq(
       field('value', $._primary_expression),
@@ -660,48 +667,43 @@ module.exports = grammar({
       $.curly_expression,
     ),
 
-    call_expression: $ => prec(PREC.call, seq(
-      choice($._primary_expression, $.operator),
+    call_expression: $ => seq(
+      choice(
+        seq($._primary_expression, optional(token.immediate('.'))),
+        $.operator
+      ),
       $._immediate_paren,
       $.argument_list,
       optional($.do_clause),
-    )),
+    ),
 
-    broadcast_call_expression: $ => prec(PREC.call, seq(
+    _qualified_macro_identifier: $ => seq(
       $._primary_expression,
       token.immediate('.'),
-      $._immediate_paren,
-      $.argument_list,
-      optional($.do_clause),
-    )),
-
-    _closed_macrocall_expression: $ => prec(PREC.call, seq(
-      optional(seq(
-        $._primary_expression,
-        token.immediate('.'),
-      )),
       $.macro_identifier,
+    ),
+
+    _macro_head: $ => choice(
+      alias($._qualified_macro_identifier, $.field_expression),
+      $.macro_identifier,
+    ),
+
+    _closed_macrocall_expression: $ => seq(
+      $._macro_head,
       choice(
         seq($._immediate_brace, $.curly_expression),
         seq($._immediate_bracket, $._array),
         seq($._immediate_paren, $.argument_list, optional($.do_clause)),
       ),
-    )),
+    ),
 
-    macrocall_expression: $ => prec.right(seq(
-      optional(seq(
-        $._primary_expression,
-        token.immediate('.'),
-      )),
-      $.macro_identifier,
-      optional($.macro_argument_list),
-    )),
+    macrocall_expression: $ => prec.right(seq($._macro_head, optional($.macro_argument_list))),
 
     macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._top_level))),
 
     argument_list: $ => parenthesize(
-      optional(';'),
-      sep(choice(',', ';'), choice(
+      optional($._semicolon),
+      sep(choice(',', $._semicolon), choice(
         $._expression,
         alias($._closed_assignment, $.named_argument),
         seq($._expression, $._comprehension_clause),
@@ -907,18 +909,18 @@ module.exports = grammar({
 
     macro_identifier: $ => seq('@', choice(
       $.identifier,
-      $.scoped_identifier,
       $.operator,
       alias($._syntactic_operator, $.operator),
+      alias($._scoped_identifier, $.field_expression),
     )),
 
-    scoped_identifier: $ => seq(
-      choice($.identifier, $.scoped_identifier),
-      token.immediate('.'),
-      choice(
-        $.identifier,
-        $.interpolation_expression,
-        $.quote_expression,
+    _scoped_identifier: $ => seq(
+      choice($.identifier, $.interpolation_expression),
+      repeat1(
+        seq(
+          token.immediate('.'),
+          choice($.identifier, $.interpolation_expression),
+        ),
       ),
     ),
 
@@ -1155,7 +1157,9 @@ module.exports = grammar({
     _syntactic_operator: _ => choice('$', '.', '...', '->', '?'),
 
 
-    _terminator: _ => choice(/\r?\n/, seq(';', repeat(token.immediate(';')))),
+    _semicolon: _ => seq(';', repeat(token.immediate(';'))),
+
+    _terminator: $ => choice(/\r?\n/, $._semicolon),
 
     block_comment: $ => seq(/#=/, $._block_comment_rest),
 
