@@ -172,7 +172,6 @@ K"\\"
 ---
 
 (source_file
-  (line_comment)
   (assignment
     (identifier)
     (operator)
