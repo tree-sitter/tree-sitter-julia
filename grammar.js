@@ -127,7 +127,7 @@ module.exports = grammar({
   word: $ => $._word_identifier,
 
   inline: $ => [
-    $._top_level,
+    $._block_form,
     $._terminator,
     $._definition,
     $._statement,
@@ -178,11 +178,11 @@ module.exports = grammar({
     source_file: $ => optional($._block),
 
     _block: $ => seq(
-      sep1($._terminator, $._top_level),
+      sep1($._terminator, $._block_form),
       optional($._terminator)
     ),
 
-    _top_level: $ => choice(
+    _block_form: $ => choice(
       $._expression,
       $.assignment,
       $.open_tuple,
@@ -193,7 +193,7 @@ module.exports = grammar({
       repeat1(seq(',', $._expression))
     )),
 
-    // assignments inside blocks (including top-level)
+    // assignments inside blocks
     assignment: $ => prec.right(PREC.assign, seq(
       choice(
         $._primary_expression,
@@ -202,7 +202,7 @@ module.exports = grammar({
         $.operator,
       ),
       alias('=', $.operator),
-      $._top_level,
+      $._block_form,
     )),
 
     // assignments inside brackets
@@ -425,7 +425,7 @@ module.exports = grammar({
 
     return_statement: $ => prec.right(PREC.stmt, seq(
       'return',
-      optional($._top_level),
+      optional($._block_form),
     )),
 
     const_statement: $ => prec.right(PREC.stmt, seq(
@@ -435,12 +435,12 @@ module.exports = grammar({
 
     global_statement: $ => prec.right(PREC.stmt, seq(
       'global',
-      $._top_level,
+      $._block_form,
     )),
 
     local_statement: $ => prec.right(PREC.stmt, seq(
       'local',
-      $._top_level,
+      $._block_form,
     )),
 
     import_alias: $ => seq($._importable, 'as', $._exportable),
@@ -697,7 +697,7 @@ module.exports = grammar({
       optional($.macro_argument_list),
     )),
 
-    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._top_level))),
+    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._block_form))),
 
     argument_list: $ => parenthesize(
       optional(';'),
