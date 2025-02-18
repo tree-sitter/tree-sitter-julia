@@ -40,18 +40,18 @@ named tuple collections
     (assignment (identifier) (operator) (integer_literal)))
   (line_comment)
   (tuple_expression
-    (named_field (identifier) (integer_literal)))
+    (assignment (identifier) (operator) (integer_literal)))
   (tuple_expression
-    (named_field (identifier) (integer_literal))
-    (named_field (identifier) (integer_literal)))
+    (assignment (identifier) (operator) (integer_literal))
+    (assignment (identifier) (operator) (integer_literal)))
   (tuple_expression)
   (tuple_expression
     (identifier))
   (tuple_expression
-    (named_field (identifier) (integer_literal)))
+    (assignment (identifier) (operator) (integer_literal)))
   (tuple_expression
-    (named_field (identifier) (integer_literal))
-    (named_field (identifier) (integer_literal)))
+    (assignment (identifier) (operator) (integer_literal))
+    (assignment (identifier) (operator) (integer_literal)))
   (tuple_expression
     (identifier)
     (field_expression (identifier) (identifier))))

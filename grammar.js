@@ -157,9 +157,7 @@ module.exports = grammar({
     [$.juxtaposition_expression, $._primary_expression], // adjoint
     [$.juxtaposition_expression, $._expression],
     [$.matrix_row, $.comprehension_expression], // Comprehensions with newlines
-    [$.argument_list, $.tuple_expression],
-    [$.argument_list, $.parenthesized_expression],
-    [$.named_field, $._primary_expression],
+    [$.parenthesized_expression, $.tuple_expression],
   ],
 
   supertypes: $ => [
@@ -287,7 +285,7 @@ module.exports = grammar({
     signature: $ => prec(PREC.stmt, choice(
       $.identifier, // zero-method definition
       $.call_expression,
-      $.argument_list, // anonymous function
+      alias($.tuple_expression, $.argument_list), // anonymous function
       $.typed_expression,
       $.where_expression,
     )),
@@ -588,39 +586,24 @@ module.exports = grammar({
       ']',
     ),
 
-    parenthesized_expression: $ => parenthesize(
+    parenthesized_expression: $ => prec.dynamic(1, parenthesize(
       sep1(';', choice(
         $._expression,
         alias($._closed_assignment, $.assignment),
       )),
       optional($._comprehension_clause),
       optional(';'),
-    ),
-
-    tuple_expression: $ => parenthesize(optional(
-      choice(
-        // Singleton requires comma
-        seq(
-          choice($._expression, $.named_field),
-          ',',
-        ),
-        seq(
-          choice($._expression, $.named_field),
-          repeat1(seq(',', choice($._expression, $.named_field))),
-          optional(choice(
-            $._comprehension_clause,
-            ',',
-          )),
-        ),
-        ';', // Empty NamedTuple
-        // NamedTuple with leading semicolon
-        seq(
-          ';',
-          sep1(',', choice($._expression, $.named_field)),
-          optional(','),
-        ),
-      ),
     )),
+
+    tuple_expression: $ => parenthesize(
+      optional(';'),
+      sep(choice(',', ';'), choice(
+        $._expression,
+        alias($._closed_assignment, $.assignment),
+        seq($._expression, $._comprehension_clause),
+      )),
+      optional(','),
+    ),
 
     curly_expression: $ => seq(
       '{',
@@ -663,7 +646,7 @@ module.exports = grammar({
     call_expression: $ => prec(PREC.call, seq(
       choice($._primary_expression, $.operator),
       $._immediate_paren,
-      $.argument_list,
+      alias($.tuple_expression, $.argument_list),
       optional($.do_clause),
     )),
 
@@ -671,7 +654,7 @@ module.exports = grammar({
       $._primary_expression,
       token.immediate('.'),
       $._immediate_paren,
-      $.argument_list,
+      alias($.tuple_expression, $.argument_list),
       optional($.do_clause),
     )),
 
@@ -684,7 +667,11 @@ module.exports = grammar({
       choice(
         seq($._immediate_brace, $.curly_expression),
         seq($._immediate_bracket, $._array),
-        seq($._immediate_paren, $.argument_list, optional($.do_clause)),
+        seq(
+          $._immediate_paren,
+          alias($.tuple_expression, $.argument_list),
+          optional($.do_clause)
+        ),
       ),
     )),
 
@@ -698,16 +685,6 @@ module.exports = grammar({
     )),
 
     macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._block_form))),
-
-    argument_list: $ => parenthesize(
-      optional(';'),
-      sep(choice(',', ';'), choice(
-        $._expression,
-        alias($._closed_assignment, $.named_argument),
-        seq($._expression, $._comprehension_clause),
-      )),
-      optional(','),
-    ),
 
     do_clause: $ => seq(
       'do',
@@ -871,7 +848,7 @@ module.exports = grammar({
     arrow_function_expression: $ => prec.right(PREC.afunc, seq(
       choice(
         $.identifier,
-        $.argument_list,
+        alias($.tuple_expression, $.argument_list),
         $.typed_expression,
       ),
       '->',

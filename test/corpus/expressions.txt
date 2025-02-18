@@ -162,7 +162,7 @@ new{typeof(xs)}(xs)
     (identifier)
     (argument_list
       (identifier)
-      (named_argument (identifier) (operator) (identifier))))
+      (assignment (identifier) (operator) (identifier))))
   (call_expression
     (identifier)
     (argument_list (identifier) (identifier)))
