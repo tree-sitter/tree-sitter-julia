@@ -190,9 +190,8 @@ end
     (identifier)
     (argument_list (identifier))
     (do_clause
-      (argument_list
-        (identifier)
-        (identifier))
+      (identifier)
+      (identifier)
       (call_expression
         (identifier)
         (argument_list (identifier) (identifier))))))

@@ -158,6 +158,7 @@ module.exports = grammar({
     [$.juxtaposition_expression, $._expression],
     [$.matrix_row, $.comprehension_expression], // Comprehensions with newlines
     [$.parenthesized_expression, $.tuple_expression],
+    [$._bracket_form, $.tuple_expression],
   ],
 
   supertypes: $ => [
@@ -186,6 +187,11 @@ module.exports = grammar({
       $.open_tuple,
     ),
 
+    _bracket_form: $ => choice(
+      $._expression,
+      alias($._closed_assignment, $.assignment),
+    ),
+
     open_tuple: $ => prec(PREC.tuple, seq(
       $._expression,
       repeat1(seq(',', $._expression))
@@ -211,10 +217,7 @@ module.exports = grammar({
         $.operator,
       ),
       alias('=', $.operator),
-      choice(
-        $._expression,
-        alias($._closed_assignment, $.assignment),
-      ),
+      $._bracket_form,
     )),
 
     _expression: $ => choice(
@@ -337,10 +340,7 @@ module.exports = grammar({
 
     let_statement: $ => seq(
       'let',
-      sep(',', choice(
-        $.identifier,
-        alias($._closed_assignment, $.let_binding),
-      )),
+      sep(',', $._bracket_form),
       $._terminator,
       optional($._block),
       'end',
@@ -524,10 +524,7 @@ module.exports = grammar({
 
     comprehension_expression: $ => prec(PREC.array, seq(
       '[',
-      choice(
-        $._expression,
-        alias($._closed_assignment, $.assignment),
-      ),
+      $._bracket_form,
       optional($._terminator),
       $._comprehension_clause,
       ']',
@@ -571,26 +568,17 @@ module.exports = grammar({
       ']',
     )),
 
-    matrix_row: $ => repeat1(prec(PREC.array, choice(
-      $._expression,
-      alias($._closed_assignment, $.assignment),
-    ))),
+    matrix_row: $ => repeat1(prec(PREC.array, $._bracket_form)),
 
     vector_expression: $ => seq(
       '[',
-      sep(',', choice(
-        $._expression,
-        alias($._closed_assignment, $.assignment),
-      )),
+      sep(',', $._bracket_form),
       optional(','),
       ']',
     ),
 
     parenthesized_expression: $ => prec.dynamic(1, parenthesize(
-      sep1(';', choice(
-        $._expression,
-        alias($._closed_assignment, $.assignment),
-      )),
+      sep1(';', $._bracket_form),
       optional($._comprehension_clause),
       optional(';'),
     )),
@@ -598,8 +586,7 @@ module.exports = grammar({
     tuple_expression: $ => parenthesize(
       optional(';'),
       sep(choice(',', ';'), choice(
-        $._expression,
-        alias($._closed_assignment, $.assignment),
+        $._bracket_form,
         seq($._expression, $._comprehension_clause),
       )),
       optional(','),
@@ -607,10 +594,7 @@ module.exports = grammar({
 
     curly_expression: $ => seq(
       '{',
-      sep(',', choice(
-        $._expression,
-        alias($._closed_assignment, $.assignment),
-      )),
+      sep(',', $._bracket_form),
       optional(','),
       '}',
     ),
@@ -688,26 +672,10 @@ module.exports = grammar({
 
     do_clause: $ => seq(
       'do',
-      alias($._do_parameter_list, $.argument_list),
+      sep(',', $._bracket_form),
+      $._terminator,
       optional($._block),
       'end',
-    ),
-
-    _do_parameter_list: $ => seq(
-      sep(',', choice(
-        $.identifier,
-        $.splat_expression,
-        $.typed_expression,
-        $.tuple_expression,
-        $.parenthesized_expression,
-      )),
-      $._terminator,
-    ),
-
-    named_field: $ => seq(
-      $.identifier,
-      '=',
-      $._expression,
     ),
 
     interpolation_expression: $ => prec.right(PREC.prefix, seq(
@@ -823,15 +791,9 @@ module.exports = grammar({
     ternary_expression: $ => prec.right(PREC.conditional, seq(
       $._expression,
       '?',
-      choice(
-        $._expression,
-        $.assignment,
-      ),
+      $._bracket_form,
       ':',
-      choice(
-        $._expression,
-        $.assignment,
-      ),
+      $._bracket_form,
     )),
 
     typed_expression: $ => prec(PREC.decl, seq(
@@ -852,10 +814,7 @@ module.exports = grammar({
         $.typed_expression,
       ),
       '->',
-      choice(
-        $._expression,
-        alias($._closed_assignment, $.assignment),
-      ),
+      $._bracket_form,
     )),
 
     juxtaposition_expression: $ => prec.left(seq(
@@ -1064,10 +1023,7 @@ module.exports = grammar({
       '$',
       choice(
         $.identifier,
-        seq($._immediate_paren, parenthesize(choice(
-          $._expression,
-          alias($.named_field, $.assignment),
-        ))),
+        seq($._immediate_paren, parenthesize($._bracket_form)),
       ),
     ),
 

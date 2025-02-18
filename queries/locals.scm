@@ -16,15 +16,6 @@
   (open_tuple
     (identifier) @local.definition))
 
-(let_binding
-  .
-  (identifier) @local.definition)
-
-(let_binding
-  .
-  (tuple_expression
-    (identifier) @local.definition))
-
 (for_binding
   .
   (identifier) @local.definition)

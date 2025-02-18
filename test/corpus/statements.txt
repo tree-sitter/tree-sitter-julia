@@ -59,9 +59,9 @@ end
 (source_file
   (let_statement)
   (let_statement
-    (let_binding (identifier) (operator) (identifier))
+    (assignment (identifier) (operator) (identifier))
     (identifier)
-    (let_binding (identifier) (operator) (identifier))
+    (assignment (identifier) (operator) (identifier))
     (identifier)))
 
 
