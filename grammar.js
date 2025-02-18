@@ -578,14 +578,14 @@ module.exports = grammar({
     ),
 
     parenthesized_expression: $ => prec.dynamic(1, parenthesize(
-      sep1(';', $._bracket_form),
+      sep1($._semicolon, $._bracket_form),
       optional($._comprehension_clause),
-      optional(';'),
+      optional($._semicolon),
     )),
 
     tuple_expression: $ => parenthesize(
-      optional(';'),
-      sep(choice(',', ';'), choice(
+      optional($._semicolon),
+      sep(choice(',', $._semicolon), choice(
         $._bracket_form,
         seq($._expression, $._comprehension_clause),
       )),
@@ -1088,7 +1088,9 @@ module.exports = grammar({
     _syntactic_operator: _ => choice('$', '.', '...', '->', '?'),
 
 
-    _terminator: _ => choice(/\r?\n/, seq(';', repeat(token.immediate(';')))),
+    _semicolon: _ => seq(';', repeat(token.immediate(';'))),
+
+    _terminator: $ => choice(/\r?\n/, $._semicolon),
 
     block_comment: $ => seq(/#=/, $._block_comment_rest),
 
