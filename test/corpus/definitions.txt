@@ -164,6 +164,21 @@ end
         (curly_expression (identifier))))))
 
 
+========================================
+struct definitions - const fields
+========================================
+
+struct Foo
+    const x::Int
+end
+
+---
+(source_file
+  (struct_definition
+    (type_head (identifier))
+    (const_statement
+      (typed_expression (identifier) (identifier)))))
+
 
 ==============================
 function definitions

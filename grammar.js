@@ -426,7 +426,7 @@ module.exports = grammar({
 
     const_statement: $ => prec.right(PREC.stmt, seq(
       'const',
-      $.assignment,
+      $._block_form,
     )),
 
     global_statement: $ => prec.right(PREC.stmt, seq(
