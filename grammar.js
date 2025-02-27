@@ -166,7 +166,6 @@ module.exports = grammar({
     [$.juxtaposition_expression, $._expression],
     [$.matrix_row, $.comprehension_expression], // Comprehensions with newlines
     [$.parenthesized_expression, $.tuple_expression],
-    [$._bracket_form, $.tuple_expression],
   ],
 
   supertypes: $ => [
@@ -534,11 +533,16 @@ module.exports = grammar({
       '[',
       $._bracket_form,
       optional($._terminator),
-      $._comprehension_clause,
+      $.for_clause,
+      repeat(choice(
+        $.for_clause,
+        $.if_clause,
+      )),
       ']',
     )),
 
-    _comprehension_clause: $ => seq(
+    generator: $ => seq(
+      $._bracket_form,
       $.for_clause,
       repeat(choice(
         $.for_clause,
@@ -586,8 +590,10 @@ module.exports = grammar({
     ),
 
     parenthesized_expression: $ => prec.dynamic(1, parenthesize(
-      sep1($._semicolon, $._bracket_form),
-      optional($._comprehension_clause),
+      sep1($._semicolon, choice(
+        $._bracket_form,
+        $.generator,
+      )),
       optional($._semicolon),
     )),
 
@@ -595,7 +601,7 @@ module.exports = grammar({
       optional($._semicolon),
       sep(choice(',', $._semicolon), choice(
         $._bracket_form,
-        seq($._expression, $._comprehension_clause),
+        $.generator,
       )),
       optional(','),
     ),
