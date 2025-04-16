@@ -388,15 +388,11 @@
           "named": true
         },
         {
-          "type": "for_clause",
+          "type": "assignment",
           "named": true
         },
         {
-          "type": "if_clause",
-          "named": true
-        },
-        {
-          "type": "named_argument",
+          "type": "generator",
           "named": true
         }
       ]
@@ -811,7 +807,15 @@
       "required": true,
       "types": [
         {
+          "type": "_expression",
+          "named": true
+        },
+        {
           "type": "assignment",
+          "named": true
+        },
+        {
+          "type": "open_tuple",
           "named": true
         }
       ]
@@ -842,14 +846,10 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "_expression",
-          "named": true
-        },
-        {
-          "type": "argument_list",
           "named": true
         },
         {
@@ -953,7 +953,7 @@
     "fields": {
       "value": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "adjoint_expression",
@@ -1047,9 +1047,25 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "adjoint_expression",
+          "named": true
+        },
+        {
+          "type": "boolean_literal",
+          "named": true
+        },
+        {
+          "type": "broadcast_call_expression",
+          "named": true
+        },
+        {
+          "type": "call_expression",
+          "named": true
+        },
         {
           "type": "character_literal",
           "named": true
@@ -1059,11 +1075,47 @@
           "named": true
         },
         {
+          "type": "comprehension_expression",
+          "named": true
+        },
+        {
+          "type": "curly_expression",
+          "named": true
+        },
+        {
+          "type": "field_expression",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
         {
+          "type": "index_expression",
+          "named": true
+        },
+        {
           "type": "interpolation_expression",
+          "named": true
+        },
+        {
+          "type": "macro_identifier",
+          "named": true
+        },
+        {
+          "type": "macrocall_expression",
+          "named": true
+        },
+        {
+          "type": "matrix_expression",
+          "named": true
+        },
+        {
+          "type": "parametrized_type_expression",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
           "named": true
         },
         {
@@ -1080,6 +1132,14 @@
         },
         {
           "type": "string_literal",
+          "named": true
+        },
+        {
+          "type": "tuple_expression",
+          "named": true
+        },
+        {
+          "type": "vector_expression",
           "named": true
         }
       ]
@@ -1192,6 +1252,33 @@
         },
         {
           "type": "signature",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "generator",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_expression",
+          "named": true
+        },
+        {
+          "type": "assignment",
+          "named": true
+        },
+        {
+          "type": "for_clause",
+          "named": true
+        },
+        {
+          "type": "if_clause",
           "named": true
         }
       ]
@@ -1315,10 +1402,6 @@
         {
           "type": "operator",
           "named": true
-        },
-        {
-          "type": "scoped_identifier",
-          "named": true
         }
       ]
     }
@@ -1328,7 +1411,7 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
@@ -1336,7 +1419,7 @@
           "named": true
         },
         {
-          "type": "scoped_identifier",
+          "type": "interpolation_expression",
           "named": true
         }
       ]
@@ -1372,10 +1455,6 @@
         },
         {
           "type": "operator",
-          "named": true
-        },
-        {
-          "type": "scoped_identifier",
           "named": true
         },
         {
@@ -1664,25 +1743,6 @@
     }
   },
   {
-    "type": "let_binding",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "_expression",
-          "named": true
-        },
-        {
-          "type": "assignment",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "let_statement",
     "named": true,
     "fields": {},
@@ -1696,10 +1756,6 @@
         },
         {
           "type": "assignment",
-          "named": true
-        },
-        {
-          "type": "let_binding",
           "named": true
         },
         {
@@ -1796,15 +1852,15 @@
       "required": true,
       "types": [
         {
+          "type": "field_expression",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
         {
           "type": "operator",
-          "named": true
-        },
-        {
-          "type": "scoped_identifier",
           "named": true
         }
       ]
@@ -1819,31 +1875,7 @@
       "required": true,
       "types": [
         {
-          "type": "adjoint_expression",
-          "named": true
-        },
-        {
           "type": "argument_list",
-          "named": true
-        },
-        {
-          "type": "boolean_literal",
-          "named": true
-        },
-        {
-          "type": "broadcast_call_expression",
-          "named": true
-        },
-        {
-          "type": "call_expression",
-          "named": true
-        },
-        {
-          "type": "character_literal",
-          "named": true
-        },
-        {
-          "type": "command_literal",
           "named": true
         },
         {
@@ -1863,18 +1895,6 @@
           "named": true
         },
         {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "index_expression",
-          "named": true
-        },
-        {
-          "type": "interpolation_expression",
-          "named": true
-        },
-        {
           "type": "macro_argument_list",
           "named": true
         },
@@ -1883,39 +1903,7 @@
           "named": true
         },
         {
-          "type": "macrocall_expression",
-          "named": true
-        },
-        {
           "type": "matrix_expression",
-          "named": true
-        },
-        {
-          "type": "parametrized_type_expression",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
-          "type": "prefixed_command_literal",
-          "named": true
-        },
-        {
-          "type": "prefixed_string_literal",
-          "named": true
-        },
-        {
-          "type": "quote_expression",
-          "named": true
-        },
-        {
-          "type": "string_literal",
-          "named": true
-        },
-        {
-          "type": "tuple_expression",
           "named": true
         },
         {
@@ -1992,40 +1980,6 @@
         },
         {
           "type": "open_tuple",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "named_argument",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "_expression",
-          "named": true
-        },
-        {
-          "type": "assignment",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "named_field",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "_expression",
           "named": true
         }
       ]
@@ -2167,11 +2121,7 @@
           "named": true
         },
         {
-          "type": "for_clause",
-          "named": true
-        },
-        {
-          "type": "if_clause",
+          "type": "generator",
           "named": true
         }
       ]
@@ -2436,33 +2386,6 @@
     }
   },
   {
-    "type": "scoped_identifier",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "interpolation_expression",
-          "named": true
-        },
-        {
-          "type": "quote_expression",
-          "named": true
-        },
-        {
-          "type": "scoped_identifier",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "selected_import",
     "named": true,
     "fields": {},
@@ -2492,10 +2415,6 @@
         },
         {
           "type": "operator",
-          "named": true
-        },
-        {
-          "type": "scoped_identifier",
           "named": true
         }
       ]
@@ -2707,15 +2626,11 @@
           "named": true
         },
         {
-          "type": "for_clause",
+          "type": "assignment",
           "named": true
         },
         {
-          "type": "if_clause",
-          "named": true
-        },
-        {
-          "type": "named_field",
+          "type": "generator",
           "named": true
         }
       ]
@@ -2986,10 +2901,6 @@
           "named": true
         },
         {
-          "type": "scoped_identifier",
-          "named": true
-        },
-        {
           "type": "selected_import",
           "named": true
         }
@@ -3126,10 +3037,6 @@
   },
   {
     "type": ";",
-    "named": false
-  },
-  {
-    "type": "=",
     "named": false
   },
   {

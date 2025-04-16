@@ -164,6 +164,21 @@ end
         (curly_expression (identifier))))))
 
 
+========================================
+struct definitions - const fields
+========================================
+
+struct Foo
+    const x::Int
+end
+
+---
+(source_file
+  (struct_definition
+    (type_head (identifier))
+    (const_statement
+      (typed_expression (identifier) (identifier)))))
+
 
 ==============================
 function definitions
@@ -346,7 +361,7 @@ function g(; x, y::Int, z = 1, kwargs...) nothing end
           (typed_expression
             (identifier)
             (identifier))
-          (named_argument (identifier) (operator) (integer_literal))
+          (assignment (identifier) (operator) (integer_literal))
           (splat_expression (identifier))))))
 
   ;; Typed parameters
@@ -357,7 +372,7 @@ function g(; x, y::Int, z = 1, kwargs...) nothing end
           (parametrized_type_expression
             (identifier)
             (curly_expression (identifier))))
-        (named_argument
+        (assignment
           (typed_expression
             (identifier)
             (identifier))
@@ -387,7 +402,7 @@ function g(; x, y::Int, z = 1, kwargs...) nothing end
           (typed_expression
             (identifier)
             (identifier))
-          (named_argument (identifier) (operator) (integer_literal))
+          (assignment (identifier) (operator) (integer_literal))
           (splat_expression (identifier)))))
     (identifier)))
 
@@ -467,7 +482,7 @@ end
       (call_expression
         (identifier)
         (argument_list
-          (named_argument
+          (assignment
             (tuple_expression (identifier) (identifier))
             (operator)
             (tuple_expression (integer_literal) (integer_literal))))))

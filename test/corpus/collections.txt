@@ -40,18 +40,18 @@ named tuple collections
     (assignment (identifier) (operator) (integer_literal)))
   (line_comment)
   (tuple_expression
-    (named_field (identifier) (integer_literal)))
+    (assignment (identifier) (operator) (integer_literal)))
   (tuple_expression
-    (named_field (identifier) (integer_literal))
-    (named_field (identifier) (integer_literal)))
+    (assignment (identifier) (operator) (integer_literal))
+    (assignment (identifier) (operator) (integer_literal)))
   (tuple_expression)
   (tuple_expression
     (identifier))
   (tuple_expression
-    (named_field (identifier) (integer_literal)))
+    (assignment (identifier) (operator) (integer_literal)))
   (tuple_expression
-    (named_field (identifier) (integer_literal))
-    (named_field (identifier) (integer_literal)))
+    (assignment (identifier) (operator) (integer_literal))
+    (assignment (identifier) (operator) (integer_literal)))
   (tuple_expression
     (identifier)
     (field_expression (identifier) (identifier))))
@@ -158,11 +158,7 @@ comprehension array collections
 ]
 UInt[b(c, e) for c in d for e in f]
 
-f(1, 2, i for i in iter)
-(b(c, e) for c in d, e = 5 if e)
-
 ---
-
 (source_file
   (comprehension_expression
     (identifier)
@@ -177,19 +173,30 @@ f(1, 2, i for i in iter)
     (comprehension_expression
       (call_expression (identifier) (argument_list (identifier) (identifier)))
       (for_clause (for_binding (identifier) (operator) (identifier)))
-      (for_clause (for_binding (identifier) (operator) (identifier)))))
+      (for_clause (for_binding (identifier) (operator) (identifier))))))
 
+
+========================================
+generators
+========================================
+
+f(1, 2, i for i in iter)
+(b(c, e) for c in d, e = 5 if e)
+
+---
+(source_file
   (call_expression
-    (identifier)
-    (argument_list
-      (integer_literal)
-      (integer_literal)
       (identifier)
-      (for_clause (for_binding (identifier) (operator) (identifier)))))
-  (parenthesized_expression
-    (call_expression (identifier) (argument_list (identifier) (identifier)))
-    (for_clause
-      (for_binding (identifier) (operator) (identifier))
-      (for_binding (identifier) (operator) (integer_literal)))
-    (if_clause (identifier))))
-
+      (argument_list
+        (integer_literal)
+        (integer_literal)
+        (generator
+          (identifier)
+          (for_clause (for_binding (identifier) (operator) (identifier))))))
+    (parenthesized_expression
+      (generator
+        (call_expression (identifier) (argument_list (identifier) (identifier)))
+        (for_clause
+          (for_binding (identifier) (operator) (identifier))
+          (for_binding (identifier) (operator) (integer_literal)))
+        (if_clause (identifier)))))
