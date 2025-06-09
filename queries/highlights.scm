@@ -39,12 +39,10 @@
       (identifier) @function.macro)))
 
 ; Built-in functions
-; filter(name -> Base.eval(Core, name) isa Core.Builtin, names(Core))
+; print.("\"", filter(name -> getglobal(Core, name) isa Core.Builtin, names(Core)), "\" ");
 ((identifier) @function.builtin
   (#any-of? @function.builtin
-    "applicable" "fieldtype" "getfield" "getglobal" "invoke" "isa" "isdefined" "modifyfield!"
-    "modifyglobal!" "nfields" "replacefield!" "replaceglobal!" "setfield!" "setfieldonce!"
-    "setglobal!" "setglobalonce!" "swapfield!" "swapglobal!" "throw" "tuple" "typeassert" "typeof"))
+    "applicable" "fieldtype" "getfield" "getglobal" "invoke" "isa" "isdefined" "isdefinedglobal" "modifyfield!" "modifyglobal!" "nfields" "replacefield!" "replaceglobal!" "setfield!" "setfieldonce!" "setglobal!" "setglobalonce!" "swapfield!" "swapglobal!" "throw" "tuple" "typeassert" "typeof"))
 
 ; Type definitions
 (type_head (_) @type.definition)
