@@ -26,6 +26,10 @@
       {
         "type": "struct_definition",
         "named": true
+      },
+      {
+        "type": "typegroup_definition",
+        "named": true
       }
     ]
   },
@@ -2680,6 +2684,21 @@
     }
   },
   {
+    "type": "typegroup_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "unary_expression",
     "named": true,
     "fields": {},
@@ -3126,6 +3145,10 @@
   },
   {
     "type": "type",
+    "named": false
+  },
+  {
+    "type": "typegroup",
     "named": false
   },
   {

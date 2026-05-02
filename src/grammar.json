@@ -328,6 +328,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "typegroup_definition"
+        },
+        {
+          "type": "SYMBOL",
           "name": "function_definition"
         },
         {
@@ -484,6 +488,43 @@
         {
           "type": "SYMBOL",
           "name": "type_head"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_terminator"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "block"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": "end"
+        }
+      ]
+    },
+    "typegroup_definition": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "typegroup"
         },
         {
           "type": "CHOICE",
@@ -2915,6 +2956,10 @@
                       {
                         "type": "STRING",
                         "value": "struct"
+                      },
+                      {
+                        "type": "STRING",
+                        "value": "typegroup"
                       },
                       {
                         "type": "STRING",

@@ -169,6 +169,57 @@ end
           (curly_expression (identifier)))))))
 
 
+==============================
+typegroup definitions
+==============================
+
+typegroup
+    struct A end
+end
+
+typegroup
+    struct Node
+        edges::Vector{Edge}
+    end
+
+    struct Edge
+        from::Node
+        to::Node
+    end
+end
+
+typegroup struct A end end
+
+---
+
+(source_file
+  (typegroup_definition
+    (block
+      (struct_definition
+        (type_head (identifier)))))
+
+  (typegroup_definition
+    (block
+      (struct_definition
+        (type_head (identifier))
+        (block
+          (typed_expression
+            (identifier)
+            (parametrized_type_expression
+              (identifier)
+              (curly_expression (identifier))))))
+      (struct_definition
+        (type_head (identifier))
+        (block
+          (typed_expression (identifier) (identifier))
+          (typed_expression (identifier) (identifier))))))
+
+  (typegroup_definition
+    (block
+      (struct_definition
+        (type_head (identifier))))))
+
+
 ========================================
 struct definitions - const fields
 ========================================

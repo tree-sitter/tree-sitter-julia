@@ -261,6 +261,12 @@
     "end"
   ] @keyword.type)
 
+(typegroup_definition
+  [
+    "typegroup"
+    "end"
+  ] @keyword.type)
+
 ; Operators & Punctuation
 (operator) @operator
 
