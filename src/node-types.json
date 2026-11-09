@@ -1633,6 +1633,14 @@
           "named": true
         },
         {
+          "type": "arrow_function_expression",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
           "type": "boolean_literal",
           "named": true
         },
@@ -1650,6 +1658,10 @@
         },
         {
           "type": "command_literal",
+          "named": true
+        },
+        {
+          "type": "compound_assignment_expression",
           "named": true
         },
         {
@@ -1685,6 +1697,10 @@
           "named": true
         },
         {
+          "type": "juxtaposition_expression",
+          "named": true
+        },
+        {
           "type": "macrocall_expression",
           "named": true
         },
@@ -1713,7 +1729,19 @@
           "named": true
         },
         {
+          "type": "range_expression",
+          "named": true
+        },
+        {
+          "type": "splat_expression",
+          "named": true
+        },
+        {
           "type": "string_literal",
+          "named": true
+        },
+        {
+          "type": "ternary_expression",
           "named": true
         },
         {
@@ -1721,7 +1749,23 @@
           "named": true
         },
         {
+          "type": "typed_expression",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
+        },
+        {
+          "type": "unary_typed_expression",
+          "named": true
+        },
+        {
           "type": "vector_expression",
+          "named": true
+        },
+        {
+          "type": "where_expression",
           "named": true
         }
       ]

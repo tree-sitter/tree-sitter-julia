@@ -194,6 +194,7 @@ static const uint8_t jsk_juxtapose_next[JSK_NKINDS] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0};
+#define JSK_K_COLON 526
 #define JSK_K_DQUOTE 62
 #define JSK_K_TRIPLE_DQUOTE 63
 #define JSK_K_BACKTICK 64

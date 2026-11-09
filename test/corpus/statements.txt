@@ -446,9 +446,7 @@ import Base.CoreLogging:
         (identifier)
         (identifier))
       (identifier)
-      (prefixed_string_literal
-        (identifier)
-        (content)))))
+      (identifier))))
 
 
 ===============================

@@ -90,7 +90,7 @@ for (i, k) in enumerate(reinterpret(JS.Kind, UInt16(j)) for j in 0:n-1)
     print(i == 1 ? "" : ",", (i - 1) % 40 == 0 ? "\n" : "", Int(valid(k) && juxt(k)))
 end
 println("};")
-for (name, k) in [("DQUOTE", JS.K"\""), ("TRIPLE_DQUOTE", JS.K"\"\"\""), ("BACKTICK", JS.K"`"), ("TRIPLE_BACKTICK", JS.K"```"),
+for (name, k) in [("COLON", JS.K":"), ("DQUOTE", JS.K"\""), ("TRIPLE_DQUOTE", JS.K"\"\"\""), ("BACKTICK", JS.K"`"), ("TRIPLE_BACKTICK", JS.K"```"),
                   ("DOLLAR", JS.K"$"), ("PRIME", JS.K"'")]
     println("#define JSK_K_$name $(reinterpret(UInt16, k))")
 end

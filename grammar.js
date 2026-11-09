@@ -25,6 +25,7 @@ const PREC = [
   'rational',
   'bitshift',
   'prefix',
+  'juxtapose', // `2x`: tighter than prefix (`-2x` is `-(2x)`), looser than power (`2x^2` is `2(x^2)`)
   'power',
   'decl',
   'dot',
@@ -59,10 +60,9 @@ module.exports = grammar({
   externals: $ => require('./grammar-tokens.js')($),
 
   conflicts: $ => [
-    [$.juxtaposition_expression, $._primary_expression], // adjoint
-    [$.juxtaposition_expression, $._expression],
     [$.matrix_row, $.comprehension_expression], // Comprehensions with newlines
     [$.parenthesized_expression, $.tuple_expression],
+    [$.compound_statement, $._expression], // `a[begin+1]`: `begin` is firstindex inside indexing
     [$.macro_argument_list], // `[@m a b for x in xs]`: in brackets, where macro arguments end
   ],
 
@@ -145,7 +145,8 @@ module.exports = grammar({
       $.operator,
       $.integer_literal,
       $.float_literal,
-      prec(-1, alias('begin', $.identifier)),
+      // `a[begin]`: firstindex inside indexing (GLR, see conflicts); elsewhere the block wins
+      prec.dynamic(-1, alias('begin', $.identifier)),
     ),
 
     // Definitions
@@ -245,8 +246,8 @@ module.exports = grammar({
       $.global_statement,
       $.local_statement,
       $.export_statement,
-      $.import_statement,
       $.public_statement,
+      $.import_statement,
       $.using_statement,
     ),
 
@@ -400,11 +401,11 @@ module.exports = grammar({
       $.import_alias,
     ))),
 
-    selected_import: $ => seq(
+    selected_import: $ => prec(1, seq( // over a range on the import statement
       $._importable,
-      token.immediate(':'),
+      alias($._colon, ':'),
       $._import_list,
-    ),
+    )),
 
     export_statement: $ => seq('export', prec.right(sep1(',', $._exportable))),
 
@@ -610,7 +611,7 @@ module.exports = grammar({
       ),
     ),
 
-    macrocall_expression: $ => prec.right(seq($._macro_head, optional($.macro_argument_list))),
+    macrocall_expression: $ => prec.right(seq($._macro_head, optional($._macro_args_probe), optional($.macro_argument_list))),
 
     macro_argument_list: $ => repeat1(prec(PREC.macro_arg, seq($._block_form, optional($._space_sensitive_probe)))),
 
@@ -636,7 +637,7 @@ module.exports = grammar({
     )),
 
     quote_expression: $ => prec.right(PREC.prefix, seq(
-      ':',
+      alias($._quote_colon, ':'),
       choice(
         $.integer_literal,
         $.float_literal,
@@ -730,20 +731,23 @@ module.exports = grammar({
       )),
     ),
 
+    // `a:b`, `a : b`, `length(x) : -1 : 2` (the scanner applies JuliaSyntax's parse_range rule)
     range_expression: $ => prec.left(PREC.colon, seq(
       $._expression,
-      token.immediate(':'),
+      alias($._colon, ':'),
       $._expression,
     )),
 
     splat_expression: $ => prec(PREC.colon, seq($._expression, '...')),
 
+    // JuliaSyntax parses the middle branch with ranges switched off (parse_cond), so a `:` there ends it:
+    // the scanner emits `_ternary_colon` whenever that token is valid
     ternary_expression: $ => prec.right(PREC.conditional, seq(
       $._expression,
       '?',
-      $._bracket_form,
-      ':',
-      $._bracket_form,
+      choice($._expression, alias($._closed_assignment, $.assignment)),
+      alias($._ternary_colon, ':'),
+      choice($._expression, alias($._closed_assignment, $.assignment)),
     )),
 
     typed_expression: $ => prec(PREC.decl, seq(
@@ -758,22 +762,40 @@ module.exports = grammar({
     )),
 
     arrow_function_expression: $ => prec.right(PREC.afunc, seq(
-      choice(
+      choice( // JuliaSyntax: any expression; here the atoms that occur
         $.identifier,
         alias($.tuple_expression, $.argument_list),
         $.typed_expression,
+        alias($._closed_macrocall_expression, $.macrocall_expression), // `@nospecialize(a) -> …`
+        $.interpolation_expression, // `$var -> $body`
+        $.parametrized_type_expression, // `Tuple{Float64}->_`
+        $.boolean_literal, // `@breaking true -> …`
+        $.character_literal, // `@trigger '*' -> …`
+        $.integer_literal,
+        $.float_literal,
       ),
       '->',
       $._bracket_form,
     )),
 
-    juxtaposition_expression: $ => prec.left(seq(
+    // `2x`, `(n+1)ε`, `VT'Vecs`, `2(x)`, `1√x`: the scanner says when (JuliaSyntax's is_juxtapose)
+    // Like a binary operator (so its tokens are valid exactly where operators are, which keeps the parse
+    // table small), between prefix and power: `-2x` is `-(2x)`, `2x^2` is `2(x^2)`.
+    juxtaposition_expression: $ => prec.left(PREC.juxtapose, seq(
+      // what JuliaSyntax juxtaposes after: not an operator, a block form or a reserved word
       choice(
+        $._primary_expression,
+        $._operation,
+        $.compound_assignment_expression,
+        $.macrocall_expression,
+        $.arrow_function_expression,
+        $.juxtaposition_expression,
+        $.ternary_expression,
         $.integer_literal,
         $.float_literal,
-        $.adjoint_expression,
       ),
-      $._primary_expression,
+      $._juxtapose,
+      choice($._primary_expression, $.unary_expression),
     )),
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(

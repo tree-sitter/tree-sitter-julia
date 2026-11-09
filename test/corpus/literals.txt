@@ -154,10 +154,6 @@ echo "\033[31mred\033[m"
   (command_literal (content) (string_interpolation (identifier)))
   (command_literal (content) (escape_sequence) (content) (escape_sequence))
   (command_literal
-   (content)
-   (escape_sequence)
-   (content)
-   (escape_sequence)
    (content)))
 
 

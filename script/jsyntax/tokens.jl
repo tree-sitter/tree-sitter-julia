@@ -15,6 +15,7 @@ const SCANNER_TOKENS = [
     # `[x -y]`: a prefix `+`/`-` starting a new element (JuliaSyntax's space-sensitive rule)
     "_space_prefix_operator",
     "_space_sensitive_probe",  # never emitted: valid right after a matrix-row / macro-argument element
+    "_macro_args_probe",       # never emitted: valid right after a macro name, where arguments may start
     # JuliaSyntax's tokens
     "identifier", "integer_literal", "float_literal", "boolean_literal",
     # operators by JuliaSyntax precedence class (same order as kernel.jl CLASSES, ASSIGNMENT..UNARY)
@@ -25,6 +26,12 @@ const SCANNER_TOKENS = [
     "_newline",                # a newline where it terminates a statement or a matrix row
     "_import_dots",            # `using ..A`
     "_quoted_keyword",         # `:end`, `:true`
-    "_juxtapose",              # zero-width: `2x`, `(n+1)ε`, `VT'Vecs` (JuliaSyntax's is_juxtapose)
+    "_juxtapose",              # zero-width: `2x`, `(n+1)ε`, `VT'Vecs`, `2(x)`, `1√x` (JuliaSyntax's is_juxtapose)
+    # `:` (JuliaSyntax: parse_range, parse_cond, parse_atom)
+    # One token for the range and the ternary colon (a ternary-only token would duplicate every
+    # expression state inside `c ? … :`; the grammar tells them apart, GLR)
+    "_colon",                  # `a:b`, `a : b`, `c ? a : b`; not `[1 :a]` (space-sensitive: a quote)
+    "_quote_colon",            # `:x`, `:(a + b)`
+    "_ternary_colon",          # `:` ending a ternary's middle branch (JuliaSyntax: ranges off there)
 ]
 const SCANNER_STRINGS = ["∈" => "ELEMENT_OF"]  # the iteration operator in `for x ∈ xs`

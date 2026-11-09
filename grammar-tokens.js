@@ -28,6 +28,7 @@ module.exports = $ => [
   $.block_comment,
   $._space_prefix_operator,
   $._space_sensitive_probe,
+  $._macro_args_probe,
   $.identifier,
   $.integer_literal,
   $.float_literal,
@@ -54,6 +55,9 @@ module.exports = $ => [
   $._import_dots,
   $._quoted_keyword,
   $._juxtapose,
+  $._colon,
+  $._quote_colon,
+  $._ternary_colon,
   '∈',
   // keywords (JuliaSyntax: is_keyword, is_word_operator)
   'abstract',
