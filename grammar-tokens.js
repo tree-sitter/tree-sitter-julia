@@ -99,3 +99,4 @@ module.exports = $ => [
   'while',
 ];
 module.exports.keywords = ['abstract', 'as', 'baremodule', 'begin', 'break', 'catch', 'const', 'continue', 'do', 'else', 'elseif', 'end', 'export', 'finally', 'for', 'function', 'global', 'if', 'import', 'in', 'isa', 'let', 'local', 'macro', 'module', 'mutable', 'outer', 'primitive', 'public', 'quote', 'return', 'struct', 'try', 'type', 'using', 'where', 'while'];
+module.exports.whitespace = /[\x09-\x0d \u0085\u00a0\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/;

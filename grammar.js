@@ -73,7 +73,7 @@ module.exports = grammar({
   ],
 
   extras: $ => [
-    /\s/,
+    require('./grammar-tokens.js').whitespace, // JuliaSyntax's whitespace (generated)
     $.line_comment,
     $.block_comment,
   ],

@@ -4783,7 +4783,7 @@
   "extras": [
     {
       "type": "PATTERN",
-      "value": "\\s"
+      "value": "[\\x09-\\x0d \\u0085\\u00a0\\u1680\\u2000-\\u200a\\u202f\\u205f\\u3000\\ufeff]"
     },
     {
       "type": "SYMBOL",
