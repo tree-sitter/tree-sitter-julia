@@ -1,10 +1,44 @@
 [
   {
-    "type": "_expression",
+    "type": "_definition",
     "named": true,
     "subtypes": [
       {
         "type": "abstract_definition",
+        "named": true
+      },
+      {
+        "type": "function_definition",
+        "named": true
+      },
+      {
+        "type": "macro_definition",
+        "named": true
+      },
+      {
+        "type": "module_definition",
+        "named": true
+      },
+      {
+        "type": "primitive_definition",
+        "named": true
+      },
+      {
+        "type": "struct_definition",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_expression",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "_definition",
+        "named": true
+      },
+      {
+        "type": "_statement",
         "named": true
       },
       {
@@ -21,10 +55,6 @@
       },
       {
         "type": "boolean_literal",
-        "named": true
-      },
-      {
-        "type": "break_statement",
         "named": true
       },
       {
@@ -48,27 +78,11 @@
         "named": true
       },
       {
-        "type": "compound_statement",
-        "named": true
-      },
-      {
         "type": "comprehension_expression",
         "named": true
       },
       {
-        "type": "const_statement",
-        "named": true
-      },
-      {
-        "type": "continue_statement",
-        "named": true
-      },
-      {
         "type": "curly_expression",
-        "named": true
-      },
-      {
-        "type": "export_statement",
         "named": true
       },
       {
@@ -80,27 +94,7 @@
         "named": true
       },
       {
-        "type": "for_statement",
-        "named": true
-      },
-      {
-        "type": "function_definition",
-        "named": true
-      },
-      {
-        "type": "global_statement",
-        "named": true
-      },
-      {
         "type": "identifier",
-        "named": true
-      },
-      {
-        "type": "if_statement",
-        "named": true
-      },
-      {
-        "type": "import_statement",
         "named": true
       },
       {
@@ -120,27 +114,11 @@
         "named": true
       },
       {
-        "type": "let_statement",
-        "named": true
-      },
-      {
-        "type": "local_statement",
-        "named": true
-      },
-      {
-        "type": "macro_definition",
-        "named": true
-      },
-      {
         "type": "macrocall_expression",
         "named": true
       },
       {
         "type": "matrix_expression",
-        "named": true
-      },
-      {
-        "type": "module_definition",
         "named": true
       },
       {
@@ -164,27 +142,11 @@
         "named": true
       },
       {
-        "type": "primitive_definition",
-        "named": true
-      },
-      {
-        "type": "public_statement",
-        "named": true
-      },
-      {
         "type": "quote_expression",
         "named": true
       },
       {
-        "type": "quote_statement",
-        "named": true
-      },
-      {
         "type": "range_expression",
-        "named": true
-      },
-      {
-        "type": "return_statement",
         "named": true
       },
       {
@@ -196,15 +158,7 @@
         "named": true
       },
       {
-        "type": "struct_definition",
-        "named": true
-      },
-      {
         "type": "ternary_expression",
-        "named": true
-      },
-      {
-        "type": "try_statement",
         "named": true
       },
       {
@@ -224,15 +178,81 @@
         "named": true
       },
       {
-        "type": "using_statement",
-        "named": true
-      },
-      {
         "type": "vector_expression",
         "named": true
       },
       {
         "type": "where_expression",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_statement",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "break_statement",
+        "named": true
+      },
+      {
+        "type": "compound_statement",
+        "named": true
+      },
+      {
+        "type": "const_statement",
+        "named": true
+      },
+      {
+        "type": "continue_statement",
+        "named": true
+      },
+      {
+        "type": "export_statement",
+        "named": true
+      },
+      {
+        "type": "for_statement",
+        "named": true
+      },
+      {
+        "type": "global_statement",
+        "named": true
+      },
+      {
+        "type": "if_statement",
+        "named": true
+      },
+      {
+        "type": "import_statement",
+        "named": true
+      },
+      {
+        "type": "let_statement",
+        "named": true
+      },
+      {
+        "type": "local_statement",
+        "named": true
+      },
+      {
+        "type": "public_statement",
+        "named": true
+      },
+      {
+        "type": "quote_statement",
+        "named": true
+      },
+      {
+        "type": "return_statement",
+        "named": true
+      },
+      {
+        "type": "try_statement",
+        "named": true
+      },
+      {
+        "type": "using_statement",
         "named": true
       },
       {

@@ -410,7 +410,11 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         int32_t next = t->n > 1 ? (int32_t)t->buf[1] : lexer->lookahead;
         bool ws_after = lexer->eof(lexer) || next == ' ' || next == '\t' || next == '\n' || next == '\r';
         bool closing = next == ')' || next == ']' || next == '}' || next == ',' || next == ';';
-        bool space_sensitive = (valid[SPACE_SENSITIVE_PROBE] || valid[MACRO_ARGS_PROBE]) && !recovering;
+        // space-sensitive (matrix row, macro arguments): where an element may directly follow another,
+        // both a range `:` and a quoting `:` are valid. The probes say so too, but incremental parsing
+        // can reuse a repeat node and land in a state past the probe; the pair of tokens survives that.
+        bool space_sensitive = (valid[SPACE_SENSITIVE_PROBE] || valid[MACRO_ARGS_PROBE] ||
+                                (valid[COLON] && valid[QUOTE_COLON])) && !recovering;
         // right after an operator JuliaSyntax parses an operand: a quote (`x === :a`), not a range
         bool operand = t->after_operator && valid[QUOTE_COLON] && !ws_after && !closing && !recovering;
         if (valid[TERNARY_COLON] && !recovering) sym = TERNARY_COLON;
