@@ -159,6 +159,13 @@ module.exports = grammar({
     $._content_str_3_raw,
     $._end_cmd,
     $._end_str,
+    // Zero-width. In a space-sensitive context (matrix row, macro arguments), emitted by the scanner
+    // before whitespace + `+`/`-`/`±`/`∓` when JuliaSyntax's lexer rule says the operator starts a new
+    // element: `[x -y]` is `[x (-y)]`, `[x - y]` and `[x -= y]` are not (see src/jsyntax/).
+    $._space_prefix_gate,
+    // Never emitted: only valid right after an element of a matrix row or of macro arguments, which is
+    // where JuliaSyntax's space-sensitive rule applies (the scanner checks it with valid_symbols).
+    $._space_sensitive_probe,
   ],
 
   conflicts: $ => [
@@ -583,7 +590,7 @@ module.exports = grammar({
       ']',
     )),
 
-    matrix_row: $ => repeat1(prec(PREC.array, $._bracket_form)),
+    matrix_row: $ => repeat1(prec(PREC.array, seq($._bracket_form, optional($._space_sensitive_probe)))),
 
     vector_expression: $ => seq(
       '[',
@@ -685,7 +692,7 @@ module.exports = grammar({
 
     macrocall_expression: $ => prec.right(seq($._macro_head, optional($.macro_argument_list))),
 
-    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._block_form))),
+    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, seq($._block_form, optional($._space_sensitive_probe))))),
 
     do_clause: $ => seq(
       'do',
@@ -787,15 +794,23 @@ module.exports = grammar({
       ))));
     },
 
-    unary_expression: $ => prec.right(PREC.prefix, seq(
-      alias(choice(
-        $._tilde_operator,
-        $._type_order_operator,
-        $._unary_operator,
-        $._unary_plus_operator,
-      ), $.operator),
-      $._expression,
-    )),
+    unary_expression: $ => choice(
+      prec.right(PREC.prefix, seq(
+        alias(choice(
+          $._tilde_operator,
+          $._type_order_operator,
+          $._unary_operator,
+          $._unary_plus_operator,
+        ), $.operator),
+        $._expression,
+      )),
+      // `[x -y]`: a prefix operator starting a new element (decided by the scanner)
+      prec.right(PREC.prefix, seq(
+        $._space_prefix_gate,
+        alias($._unary_plus_operator, $.operator),
+        $._expression,
+      )),
+    ),
 
     range_expression: $ => prec.left(PREC.colon, seq(
       $._expression,

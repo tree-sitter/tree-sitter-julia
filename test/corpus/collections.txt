@@ -200,3 +200,123 @@ f(1, 2, i for i in iter)
           (for_binding (identifier) (operator) (identifier))
           (for_binding (identifier) (operator) (integer_literal)))
         (if_clause (identifier)))))
+
+==============================
+space-sensitive prefix operators
+==============================
+
+[x +y]
+[x - y]
+[x+y +z]
+[x -y z]
+[1 -2]
+[a -b; c -d]
+[x .-y]
+[x+ y]
+[a[1] -b]
+[x' -y]
+[x -(y)]
+[x, -y]
+@m x -y
+f(x -y)
+
+---
+
+(source_file
+  (matrix_expression
+    (matrix_row
+      (identifier)
+      (unary_expression
+        (operator)
+        (identifier))))
+  (vector_expression
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier)))
+  (matrix_expression
+    (matrix_row
+      (binary_expression
+        (identifier)
+        (operator)
+        (identifier))
+      (unary_expression
+        (operator)
+        (identifier))))
+  (matrix_expression
+    (matrix_row
+      (identifier)
+      (unary_expression
+        (operator)
+        (identifier))
+      (identifier)))
+  (matrix_expression
+    (matrix_row
+      (integer_literal)
+      (unary_expression
+        (operator)
+        (integer_literal))))
+  (matrix_expression
+    (matrix_row
+      (identifier)
+      (unary_expression
+        (operator)
+        (identifier)))
+    (matrix_row
+      (identifier)
+      (unary_expression
+        (operator)
+        (identifier))))
+  (vector_expression
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier)))
+  (vector_expression
+    (binary_expression
+      (identifier)
+      (operator)
+      (identifier)))
+  (matrix_expression
+    (matrix_row
+      (index_expression
+        (identifier)
+        (vector_expression
+          (integer_literal)))
+      (unary_expression
+        (operator)
+        (identifier))))
+  (matrix_expression
+    (matrix_row
+      (adjoint_expression
+        (identifier))
+      (unary_expression
+        (operator)
+        (identifier))))
+  (matrix_expression
+    (matrix_row
+      (identifier)
+      (unary_expression
+        (operator)
+        (parenthesized_expression
+          (identifier)))))
+  (vector_expression
+    (identifier)
+    (unary_expression
+      (operator)
+      (identifier)))
+  (macrocall_expression
+    (macro_identifier
+      (identifier))
+    (macro_argument_list
+      (identifier)
+      (unary_expression
+        (operator)
+        (identifier))))
+  (call_expression
+    (identifier)
+    (argument_list
+      (binary_expression
+        (identifier)
+        (operator)
+        (identifier)))))
