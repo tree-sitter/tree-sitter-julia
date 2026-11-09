@@ -2152,7 +2152,7 @@
       "required": true,
       "types": [
         {
-          "type": "integer_literal",
+          "type": "_expression",
           "named": true
         },
         {

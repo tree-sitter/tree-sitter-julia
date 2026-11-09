@@ -169,6 +169,7 @@ module.exports = grammar({
       'abstract',
       'type',
       $.type_head,
+      optional($._terminator),
       'end',
     ),
 
@@ -176,7 +177,8 @@ module.exports = grammar({
       'primitive',
       'type',
       $.type_head,
-      $.integer_literal,
+      $._expression,
+      optional($._terminator),
       'end',
     ),
 

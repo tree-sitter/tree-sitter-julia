@@ -80,6 +80,67 @@ primitive type Ptr{T} 32 end
 
 
 ==============================
+primitive type definitions - size expressions and terminators
+==============================
+
+primitive type X sizeof(Ptr) * 8 end
+primitive type $(esc(T)) <: Enum{$(B)} $(sizeof(B) * 8) end
+primitive type A 32 ; end
+abstract type AbstractPlatform; end
+abstract type X
+end
+
+---
+
+(source_file
+  (primitive_definition
+    (type_head
+      (identifier))
+    (binary_expression
+      (call_expression
+        (identifier)
+        (argument_list
+          (identifier)))
+      (operator)
+      (integer_literal)))
+  (primitive_definition
+    (type_head
+      (binary_expression
+        (interpolation_expression
+          (parenthesized_expression
+            (call_expression
+              (identifier)
+              (argument_list
+                (identifier)))))
+        (operator)
+        (parametrized_type_expression
+          (identifier)
+          (curly_expression
+            (interpolation_expression
+              (parenthesized_expression
+                (identifier)))))))
+    (interpolation_expression
+      (parenthesized_expression
+        (binary_expression
+          (call_expression
+            (identifier)
+            (argument_list
+              (identifier)))
+          (operator)
+          (integer_literal)))))
+  (primitive_definition
+    (type_head
+      (identifier))
+    (integer_literal))
+  (abstract_definition
+    (type_head
+      (identifier)))
+  (abstract_definition
+    (type_head
+      (identifier))))
+
+
+==============================
 struct definitions
 ==============================
 
