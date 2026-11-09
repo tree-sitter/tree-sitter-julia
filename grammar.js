@@ -39,58 +39,6 @@ PREC.assign = -2;
 PREC.stmt = -3;
 PREC.macro_arg = -4;
 
-const OPERATORS = {
-  assignment: `
-    += -= *= /= //= \\= ^= %= <<= >>= >>>= |= &=
-    −= ÷= ⊻= ≔ ⩴ ≕
-  `,
-
-  arrow: `
-    <-- --> <-->
-    ← → ↔ ↚ ↛ ↞ ↠ ↢ ↣ ↦ ↤ ↮ ⇎ ⇍ ⇏ ⇐ ⇒ ⇔ ⇴ ⇶ ⇷ ⇸ ⇹ ⇺ ⇻ ⇼ ⇽ ⇾ ⇿ ⟵ ⟶ ⟷ ⟹ ⟺ ⟻ ⟼ ⟽ ⟾ ⟿
-    ⤀ ⤁ ⤂ ⤃ ⤄ ⤅ ⤆ ⤇ ⤌ ⤍ ⤎ ⤏ ⤐ ⤑ ⤔ ⤕ ⤖ ⤗ ⤘ ⤝ ⤞ ⤟ ⤠ ⥄ ⥅ ⥆ ⥇ ⥈ ⥊ ⥋ ⥎ ⥐ ⥒ ⥓ ⥖ ⥗ ⥚ ⥛ ⥞
-    ⥟ ⥢ ⥤ ⥦ ⥧ ⥨ ⥩ ⥪ ⥫ ⥬ ⥭ ⥰ ⧴ ⬱ ⬰ ⬲ ⬳ ⬴ ⬵ ⬶ ⬷ ⬸ ⬹ ⬺ ⬻ ⬼ ⬽ ⬾ ⬿ ⭀ ⭁ ⭂ ⭃ ⥷ ⭄ ⥺ ⭇ ⭈ ⭉
-    ⭊ ⭋ ⭌ ￩ ￫ ⇜ ⇝ ↜ ↝ ↩ ↪ ↫ ↬ ↼ ↽ ⇀ ⇁ ⇄ ⇆ ⇇ ⇉ ⇋ ⇌ ⇚ ⇛ ⇠ ⇢ ↷ ↶ ↺ ↻
-  `,
-
-  comparison: `
-    > < >= <= == === != !==
-    ≥ ≤ ≡ ≠ ≢ ∈ ∉ ∋ ∌ ⊆ ⊈ ⊂ ⊄ ⊊ ∝ ∊ ∍ ∥ ∦ ∷ ∺ ∻ ∽ ∾ ≁ ≃ ≂ ≄ ≅ ≆ ≇ ≈ ≉ ≊ ≋ ≌ ≍ ≎ ≐
-    ≑ ≒ ≓ ≖ ≗ ≘ ≙ ≚ ≛ ≜ ≝ ≞ ≟ ≣ ≦ ≧ ≨ ≩ ≪ ≫ ≬ ≭ ≮ ≯ ≰ ≱ ≲ ≳ ≴ ≵ ≶ ≷ ≸ ≹ ≺ ≻ ≼ ≽ ≾
-    ≿ ⊀ ⊁ ⊃ ⊅ ⊇ ⊉ ⊋ ⊏ ⊐ ⊑ ⊒ ⊜ ⊩ ⊬ ⊮ ⊰ ⊱ ⊲ ⊳ ⊴ ⊵ ⊶ ⊷ ⋍ ⋐ ⋑ ⋕ ⋖ ⋗ ⋘ ⋙ ⋚ ⋛ ⋜ ⋝ ⋞ ⋟ ⋠
-    ⋡ ⋢ ⋣ ⋤ ⋥ ⋦ ⋧ ⋨ ⋩ ⋪ ⋫ ⋬ ⋭ ⋲ ⋳ ⋴ ⋵ ⋶ ⋷ ⋸ ⋹ ⋺ ⋻ ⋼ ⋽ ⋾ ⋿ ⟈ ⟉ ⟒ ⦷ ⧀ ⧁ ⧡ ⧣ ⧤ ⧥ ⩦ ⩧
-    ⩪ ⩫ ⩬ ⩭ ⩮ ⩯ ⩰ ⩱ ⩲ ⩳ ⩵ ⩶ ⩷ ⩸ ⩹ ⩺ ⩻ ⩼ ⩽ ⩾ ⩿ ⪀ ⪁ ⪂ ⪃ ⪄ ⪅ ⪆ ⪇ ⪈ ⪉ ⪊ ⪋ ⪌ ⪍ ⪎ ⪏ ⪐ ⪑
-    ⪒ ⪓ ⪔ ⪕ ⪖ ⪗ ⪘ ⪙ ⪚ ⪛ ⪜ ⪝ ⪞ ⪟ ⪠ ⪡ ⪢ ⪣ ⪤ ⪥ ⪦ ⪧ ⪨ ⪩ ⪪ ⪫ ⪬ ⪭ ⪮ ⪯ ⪰ ⪱ ⪲ ⪳ ⪴ ⪵ ⪶ ⪷ ⪸
-    ⪹ ⪺ ⪻ ⪼ ⪽ ⪾ ⪿ ⫀ ⫁ ⫂ ⫃ ⫄ ⫅ ⫆ ⫇ ⫈ ⫉ ⫊ ⫋ ⫌ ⫍ ⫎ ⫏ ⫐ ⫑ ⫒ ⫓ ⫔ ⫕ ⫖ ⫗ ⫘ ⫙ ⫷ ⫸ ⫹ ⫺ ⊢ ⊣
-    ⟂ ⫪ ⫫
-  `,
-
-  ellipsis: '… ⁝ ⋮ ⋱ ⋰ ⋯',
-
-  plus: `
-    ++ |
-    − ¦ ⊕ ⊖ ⊞ ⊟ ∪ ∨ ⊔ ∔ ∸ ≏ ⊎ ⊻ ⊽ ⋎ ⋓ ⟇ ⧺ ⧻ ⨈ ⨢ ⨣ ⨤ ⨥ ⨦ ⨧ ⨨ ⨩ ⨪ ⨫ ⨬ ⨭ ⨮ ⨹ ⨺ ⩁ ⩂ ⩅
-    ⩊ ⩌ ⩏ ⩐ ⩒ ⩔ ⩖ ⩗ ⩛ ⩝ ⩡ ⩢ ⩣
-  `,
-
-  times: `
-    * / % & \\
-    ⌿ ÷ · · ⋅ ∘ × ∩ ∧ ⊗ ⊘ ⊙ ⊚ ⊛ ⊠ ⊡ ⊓ ∗ ∙ ∤ ⅋ ≀ ⊼ ⋄ ⋆ ⋇ ⋉ ⋊ ⋋ ⋌ ⋏ ⋒ ⟑ ⦸ ⦼ ⦾ ⦿ ⧶ ⧷
-    ⨇ ⨰ ⨱ ⨲ ⨳ ⨴ ⨵ ⨶ ⨷ ⨸ ⨻ ⨼ ⨽ ⩀ ⩃ ⩄ ⩋ ⩍ ⩎ ⩑ ⩓ ⩕ ⩘ ⩚ ⩜ ⩞ ⩟ ⩠ ⫛ ⊍ ▷ ⨝ ⟕ ⟖ ⟗ ⨟
-  `,
-
-  bitshift: '<< >> >>>',
-
-  power: `
-    ^
-    ↑ ↓ ⇵ ⟰ ⟱ ⤈ ⤉ ⤊ ⤋ ⤒ ⤓ ⥉ ⥌ ⥍ ⥏ ⥑ ⥔ ⥕ ⥘ ⥙ ⥜ ⥝ ⥠ ⥡ ⥣ ⥥ ⥮ ⥯ ￪ ￬
-  `,
-
-  unary: '! ¬ √ ∛ ∜',
-
-  unary_plus: '+ - ± ∓',
-};
-
 const ESCAPE_SEQUENCE = token(seq(
   '\\',
   choice(
@@ -101,38 +49,8 @@ const ESCAPE_SEQUENCE = token(seq(
   ),
 ));
 
-// Keywords that can be quoted. Some still fail depending on the context.
-const KEYWORDS = choice(
-  'baremodule',
-  'module',
-  'abstract',
-  'primitive',
-  'mutable',
-  'struct',
-  'quote',
-  'let',
-  'if',
-  'else',
-  'elseif',
-  'try',
-  'catch',
-  'finally',
-  'for',
-  'while',
-  'break',
-  'continue',
-  'using',
-  'import',
-  'const',
-  'global',
-  'local',
-  'end',
-);
-
 module.exports = grammar({
   name: 'julia',
-
-  word: $ => $._word_identifier,
 
   inline: $ => [
     $._block_form,
@@ -162,10 +80,46 @@ module.exports = grammar({
     // Zero-width. In a space-sensitive context (matrix row, macro arguments), emitted by the scanner
     // before whitespace + `+`/`-`/`±`/`∓` when JuliaSyntax's lexer rule says the operator starts a new
     // element: `[x -y]` is `[x (-y)]`, `[x - y]` and `[x -= y]` are not (see src/jsyntax/).
-    $._space_prefix_gate,
+    // In a space-sensitive context (matrix row, macro arguments): a `+`/`-`/`±`/`∓` that JuliaSyntax's
+    // rule says starts a new element: `[x -y]` is `[x (-y)]`, `[x - y]` and `[x -= y]` are not.
+    $._space_prefix_operator,
     // Never emitted: only valid right after an element of a matrix row or of macro arguments, which is
     // where JuliaSyntax's space-sensitive rule applies (the scanner checks it with valid_symbols).
     $._space_sensitive_probe,
+
+    // Tokens lexed by JuliaSyntax's own lexer (src/jsyntax/): identifiers, numbers, operators by
+    // precedence class (JuliaSyntax's kind predicates), keywords (contextual ones decided as
+    // JuliaSyntax's parser does), and newlines where they terminate a statement.
+    $.identifier,
+    $.integer_literal,
+    $.float_literal,
+    $.boolean_literal,
+    $._assignment_operator,
+    $._pair_operator,
+    $._arrow_operator,
+    $._lazy_or_operator,
+    $._lazy_and_operator,
+    $._comparison_operator,
+    $._pipe_left_operator,
+    $._pipe_right_operator,
+    $._ellipsis_operator,
+    $._plus_operator,
+    $._unary_plus_operator,
+    $._times_operator,
+    $._rational_operator,
+    $._bitshift_operator,
+    $._power_operator,
+    $._tilde_operator,
+    $._type_order_operator,
+    $._unary_operator,
+    $._newline,
+    $._import_dots, // leading dots of a relative import path (`using ..A`), not the `..` operator
+    $._quoted_keyword, // `:end`, `:true`: a keyword or Bool right after `:` is a symbol
+    '∈', // the iteration operator in `for x ∈ xs` (elsewhere a comparison)
+    'baremodule', 'module', 'abstract', 'primitive', 'mutable', 'struct', 'type', 'function', 'macro',
+    'begin', 'quote', 'let', 'if', 'elseif', 'else', 'try', 'catch', 'finally', 'for', 'while', 'do',
+    'break', 'continue', 'return', 'const', 'global', 'local', 'export', 'public', 'import', 'using',
+    'as', 'outer', 'in', 'isa', 'where', 'end',
   ],
 
   conflicts: $ => [
@@ -461,10 +415,11 @@ module.exports = grammar({
     import_alias: $ => seq($._importable, 'as', $._exportable),
 
     import_path: $ => seq(
-      token(repeat1('.')),
+      $._import_dots,
       choice(
         $.identifier,
         $._scoped_identifier,
+        $.operator, // `import .⋆`
       ),
     ),
 
@@ -753,7 +708,7 @@ module.exports = grammar({
           ),
           $.operator,
         ),
-        alias(token.immediate(KEYWORDS), $.identifier),
+        alias($._quoted_keyword, $.identifier),
       ),
     )),
 
@@ -806,8 +761,7 @@ module.exports = grammar({
       )),
       // `[x -y]`: a prefix operator starting a new element (decided by the scanner)
       prec.right(PREC.prefix, seq(
-        $._space_prefix_gate,
-        alias($._unary_plus_operator, $.operator),
+        alias($._space_prefix_operator, $.operator),
         $._expression,
       )),
     ),
@@ -890,82 +844,7 @@ module.exports = grammar({
       ),
     ),
 
-    _word_identifier: _ => {
-      const nonIdentifierCharacters = [
-        '#',
-        '$',
-        ',',
-        ':',
-        ';',
-        '@',
-        '~',
-        '(', ')',
-        '{', '}',
-        ...Object.values(OPERATORS),
-      ].join(' ')
-        .trim()
-        .replace(/!/g, '')
-        .replace(/-/g, '')
-        .replace(/\\/g, '\\\\')
-        .replace(/\s+/g, '');
-
-      // Some symbols in Sm and So unicode categories that are identifiers
-      const validMathSymbols = '°∀-∇∎-∑∫-∳';
-
-      // Emojis are valid Julia identifiers but unsupported due to exploding parser size
-      // todo(clason): check if regex can be optimized
-      const start = `[_\\p{XID_Start}${validMathSymbols}&&[^0-9#*]]`;
-      const rest = `[^"'\`\\s\\.\\-\\[\\]${nonIdentifierCharacters}]*`;
-      return new RegExp(start + rest);
-    },
-
-    identifier: $ => $._word_identifier,
-
     // Literals
-
-    boolean_literal: _ => choice('true', 'false'),
-
-    integer_literal: _ => choice(
-      token(seq('0b', numeral('01'))),
-      token(seq('0o', numeral('0-7'))),
-      token(seq('0x', numeral('0-9a-fA-F'))),
-      numeral('0-9'),
-    ),
-
-    float_literal: _ => {
-      const dec = numeral('0-9');
-      const hex = numeral('0-9a-fA-F');
-      const exponent = /[eEf][+-]?\d+/;
-      const hex_exponent = /p[+-]?\d+/;
-
-      const leading_period = token(seq(
-        '.',
-        dec,
-        optional(exponent),
-      ));
-
-      // This has to be split into two tokens to avoid conflicts with ellipsis
-      const trailing_period = seq(
-        dec,
-        token.immediate(seq(
-          '.',
-          optional(dec),
-          optional(exponent),
-        )),
-      );
-
-      const just_exponent = token(seq(dec, exponent));
-
-      const hex_float = token(seq(
-        choice(
-          seq('0x', hex, optional('.'), optional(hex)),
-          seq('0x.', hex),
-        ),
-        hex_exponent,
-      ));
-
-      return choice(leading_period, trailing_period, just_exponent, hex_float);
-    },
 
     _string: $ => choice(
       $.character_literal,
@@ -1081,50 +960,12 @@ module.exports = grammar({
       $._unary_plus_operator,
     ),
 
-    _assignment_operator: _ => choice(':=', '$=', '.=', addDot(OPERATORS.assignment)),
-
-    _pair_operator: _ => addDot('=>'),
-
-    _arrow_operator: _ => addDot(OPERATORS.arrow),
-
-    _lazy_or_operator: _ => addDot('||'),
-
-    _lazy_and_operator: _ => addDot('&&'),
-
-    _comparison_operator: _ => addDot(OPERATORS.comparison),
-
-    _pipe_right_operator: _ => addDot('|>'),
-
-    _pipe_left_operator: _ => addDot('<|'),
-
-    _ellipsis_operator: _ => token(choice('..', addDot(OPERATORS.ellipsis))),
-
-    _plus_operator: _ => addDot(OPERATORS.plus),
-
-    _times_operator: _ => addDot(OPERATORS.times),
-
-    _rational_operator: _ => addDot('//'),
-
-    _bitshift_operator: _ => addDot(OPERATORS.bitshift),
-
-    _power_operator: _ => addDot(OPERATORS.power),
-
-
-    _tilde_operator: _ => addDot('~'), // unary or assignment
-
-    _type_order_operator: _ => addDot('<: >:'), // unary or comparison
-
-    _unary_operator: _ => addDot(OPERATORS.unary),
-
-    _unary_plus_operator: _ => addDot(OPERATORS.unary_plus),
-
-
     _syntactic_operator: _ => choice('$', '.', '...', '->', '?'),
 
 
     _semicolon: _ => seq(';', repeat(token.immediate(';'))),
 
-    _terminator: $ => choice(/\r?\n/, $._semicolon),
+    _terminator: $ => choice($._newline, $._semicolon),
 
     block_comment: $ => seq(/#=/, $._block_comment_rest),
 
@@ -1149,22 +990,6 @@ function sep(separator, rule) {
  */
 function sep1(separator, rule) {
   return seq(rule, repeat(seq(separator, rule)));
-}
-
-/**
- *
- * @param {string} operatorString
- */
-function addDot(operatorString) {
-  const operators = operatorString.trim().split(/\s+/);
-  return token(seq(optional('.'), operators.length > 1 ? choice(...operators) : operators[0]));
-}
-
-/**
- * @param {string} range
- */
-function numeral(range) {
-  return RegExp(`[${range}]([${range}]|_[${range}])*`);
 }
 
 /**

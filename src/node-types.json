@@ -489,7 +489,7 @@
     "fields": {}
   },
   {
-    "type": "boolean_literal",
+    "type": "break_statement",
     "named": true,
     "fields": {}
   },
@@ -834,6 +834,11 @@
     }
   },
   {
+    "type": "continue_statement",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "curly_expression",
     "named": true,
     "fields": {},
@@ -1157,11 +1162,6 @@
     }
   },
   {
-    "type": "float_literal",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "for_binding",
     "named": true,
     "fields": {},
@@ -1280,11 +1280,6 @@
     }
   },
   {
-    "type": "identifier",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "if_clause",
     "named": true,
     "fields": {},
@@ -1384,6 +1379,10 @@
         },
         {
           "type": "interpolation_expression",
+          "named": true
+        },
+        {
+          "type": "operator",
           "named": true
         }
       ]
@@ -1526,11 +1525,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "integer_literal",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "interpolation_expression",
@@ -2905,10 +2899,6 @@
     "named": false
   },
   {
-    "type": "$=",
-    "named": false
-  },
-  {
     "type": "'",
     "named": false
   },
@@ -2937,19 +2927,11 @@
     "named": false
   },
   {
-    "type": ".=",
-    "named": false
-  },
-  {
     "type": ":",
     "named": false
   },
   {
     "type": "::",
-    "named": false
-  },
-  {
-    "type": ":=",
     "named": false
   },
   {
@@ -2997,8 +2979,12 @@
     "named": false
   },
   {
-    "type": "break_statement",
+    "type": "boolean_literal",
     "named": true
+  },
+  {
+    "type": "break",
+    "named": false
   },
   {
     "type": "catch",
@@ -3017,8 +3003,8 @@
     "named": true
   },
   {
-    "type": "continue_statement",
-    "named": true
+    "type": "continue",
+    "named": false
   },
   {
     "type": "do",
@@ -3045,12 +3031,12 @@
     "named": false
   },
   {
-    "type": "false",
+    "type": "finally",
     "named": false
   },
   {
-    "type": "finally",
-    "named": false
+    "type": "float_literal",
+    "named": true
   },
   {
     "type": "for",
@@ -3065,12 +3051,20 @@
     "named": false
   },
   {
+    "type": "identifier",
+    "named": true
+  },
+  {
     "type": "if",
     "named": false
   },
   {
     "type": "import",
     "named": false
+  },
+  {
+    "type": "integer_literal",
+    "named": true
   },
   {
     "type": "let",
@@ -3114,10 +3108,6 @@
   },
   {
     "type": "struct",
-    "named": false
-  },
-  {
-    "type": "true",
     "named": false
   },
   {

@@ -29,9 +29,6 @@ typedef struct {
     jmp_buf jmp;
 #endif
     size_t used;
-    void *task[64];  // fake jl_task_t around the gcstack slot task[32]
-    void *ptls[64];  // fake thread state (task->ptls)
-    void *zero[8];
     _Alignas(16) unsigned char arena[JSK_ARENA];
 } jsk_ctx;
 
@@ -180,22 +177,60 @@ static uint32_t jsk_jl_id_char(uint32_t wc) {
            cat == CAT_NO || (wc >= 0x2032 && wc <= 0x2037) || wc == 0x2057 || wc == 0x1f8b2;
 }
 
-// ---- entry ----
-static uint32_t jsk_jsyn_space_prefix(void *pgcstack, void *p, uint64_t n);  // kernel.c
+// ---- entries ----
+static uint32_t jsk_jsyn_space_prefix(void *pgcstack, void *p, uint64_t n);                    // kernel.c
+static uint32_t jsk_jsyn_token(void *pgcstack, void *p, uint64_t n, int32_t last, void *out);   // kernel.c
+static uint32_t jsk_jsyn_contextual_keyword(void *pgcstack, void *p, uint64_t n);              // kernel.c
+
+// Runs CALL (a kernel function, with `&jsk_fake.task[32]` as its GC-stack argument) with a fresh arena and a
+// fake task; evaluates to its result, or to -1 if the Julia code threw.
+// The fake task and thread state are the same for every call on a thread: set them up once.
+#if defined(__wasm__) || defined(__STDC_NO_THREADS__)
+static struct { void *task[64]; void *ptls[64]; void *zero[8]; int ready; } jsk_fake;
+#elif defined(_MSC_VER)
+static __declspec(thread) struct { void *task[64]; void *ptls[64]; void *zero[8]; int ready; } jsk_fake;
+#else
+static _Thread_local struct { void *task[64]; void *ptls[64]; void *zero[8]; int ready; } jsk_fake;
+#endif
+
+// Runs CALL (a kernel function, with `jsk_fake.task + 32` as its GC-stack argument) with a fresh arena;
+// sets r to its result, or leaves it at -1 if the Julia code threw.
+#define JSK_RUN(CALL)                                                                          \
+    do {                                                                                       \
+        if (!jsk_fake.ready) {                                                                 \
+            for (int i = 0; i < 64; i++) { jsk_fake.ptls[i] = jsk_fake.zero; jsk_fake.task[i] = jsk_fake.ptls; } \
+            jsk_fake.ready = 1;                                                                \
+        }                                                                                      \
+        jsk_fake.task[32] = NULL; /* the GC frame list head (stale after a longjmp) */         \
+        jsk_ctx ctx;                                                                           \
+        ctx.used = 0;                                                                          \
+        jsk_ctx *prev = jsk_cur;                                                               \
+        jsk_cur = &ctx;                                                                        \
+        if (!JSK_SETJMP(ctx.jmp)) r = (int)(CALL);                                             \
+        jsk_cur = prev;                                                                        \
+    } while (0)
 
 // JuliaSyntax's space-sensitive rule (parser.jl, parse_with_chains / parse_chain), token part: the bytes
 // p[0..n) start with an operator that is preceded by whitespace in a space-sensitive context. Returns 1
 // if it is a prefix operator starting a new element (`[x -y]`), 0 if not, -1 if the Julia code threw.
-static int jsyn_space_prefix(const uint8_t *p, size_t n) {
-    jsk_ctx ctx;
-    ctx.used = 0;
-    memset(ctx.zero, 0, sizeof ctx.zero);
-    for (int i = 0; i < 64; i++) { ctx.ptls[i] = ctx.zero; ctx.task[i] = ctx.ptls; }
-    ctx.task[32] = NULL;  // the GC frame list head
-    jsk_ctx *prev = jsk_cur;
-    jsk_cur = &ctx;
+__attribute__((unused)) static int jsyn_space_prefix(const uint8_t *p, size_t n) {
     volatile int r = -1;
-    if (!JSK_SETJMP(ctx.jmp)) r = (int)jsk_jsyn_space_prefix(&ctx.task[32], (void *)p, n);
-    jsk_cur = prev;
+    JSK_RUN(jsk_jsyn_space_prefix(&jsk_fake.task[32], (void *)p, n));
+    return r;
+}
+
+// The first token of p[0..n) per JuliaSyntax's lexer (end of input after n), after a token of kind
+// `last` (0: none). Returns its Kind code (kinds.h), or -1; out[0] = byte length, out[1] = suffixed.
+__attribute__((unused)) static int jsyn_token(const uint8_t *p, size_t n, int last, int32_t out[2]) {
+    volatile int r = -1;
+    JSK_RUN(jsk_jsyn_token(&jsk_fake.task[32], (void *)p, n, last, out));
+    return r;
+}
+
+// For a contextual keyword at p (abstract, mutable, primitive, public, outer, ...): 1 if JuliaSyntax's
+// parser reads it as a keyword here (it looks at the next token), 0 if as an identifier, -1 on error.
+__attribute__((unused)) static int jsyn_contextual_keyword(const uint8_t *p, size_t n) {
+    volatile int r = -1;
+    JSK_RUN(jsk_jsyn_contextual_keyword(&jsk_fake.task[32], (void *)p, n));
     return r;
 }

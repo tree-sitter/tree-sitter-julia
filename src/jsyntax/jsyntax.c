@@ -29,6 +29,7 @@
 #endif
 #include "runtime.c"
 #include "kernel.c"
+#include "kinds.h"
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #elif defined(__GNUC__)

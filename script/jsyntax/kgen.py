@@ -24,6 +24,54 @@ D, entries = sys.argv[1], sys.argv[2:]
 os.chdir(D)
 run = lambda *a: subprocess.run(a, check=True)
 
+def canonicalize(s, roots):
+    """Deterministic output: juliac numbers specializations (julia_f_4459) and orders functions differently
+    from run to run. Order functions and globals breadth-first from the entry points and renumber the
+    numeric suffixes of Julia-generated names by that order."""
+    lines = s.split('\n')
+    blocks, i = [], 0
+    while i < len(lines):  # (kind, name, text)
+        l = lines[i]
+        if l.startswith('define '):
+            j = i
+            while lines[j] != '}': j += 1
+            name = re.match(r'define [^@]*@([\w.$]+)\(', l).group(1)
+            blocks.append(('define', name, '\n'.join(lines[i:j + 1]))); i = j + 1; continue
+        m = re.match(r'@([\w.$]+) = ', l)
+        blocks.append(('global', m.group(1), l) if m else ('other', None, l)); i += 1
+    defs = {n: t for k, n, t in blocks if k == 'define'}
+    globs = {n: t for k, n, t in blocks if k == 'global'}
+    order, seen, gorder = [], set(), []
+    queue = [r for r in roots if r in defs]
+    def visit_globals(text):
+        for g in re.findall(r'@([\w.$]+)', text):
+            if g in globs and g not in gorder:
+                gorder.append(g); visit_globals(globs[g])
+            elif g in defs and g not in seen:
+                seen.add(g); queue.append(g)
+    seen.update(queue)
+    while queue:
+        f = queue.pop(0); order.append(f)
+        visit_globals(defs[f].split('\n', 1)[1])
+    order += sorted(n for n in defs if n not in seen)
+    gorder += sorted(n for n in globs if n not in gorder)
+    pat = re.compile(r'^((?:julia|jfptr|japi1|jlplt|ccall|jl_global|SUM|_j_const|_j_str)[\w.$]*?)([._])(\d+)((?:DOT\.\d+)?)$')
+    rename = {}
+    for k, n in enumerate(order + gorder):
+        m = pat.match(n)
+        if m: rename[n] = f'{m.group(1)}{m.group(2)}{k}'
+    for n in order + gorder:  # a ccall's PLT slot is named after its thunk: jlplt_f_N_got
+        if n.endswith('_got') and n[:-4] in rename: rename[n] = rename[n[:-4]] + '_got'
+    def sub(text):
+        return re.sub(r'@([\w.$]+)', lambda m: '@' + rename.get(m.group(1), m.group(1)), text)
+    head = [t for k, n, t in blocks if k == 'other' and not t.startswith('declare ')][:]
+    decls = sorted(t for k, n, t in blocks if k == 'other' and t.startswith('declare '))
+    # keep the module header (source_filename, datalayout, triple) first, attributes/metadata last
+    pre = [t for t in head if not (t.startswith('attributes ') or t.startswith('!'))]
+    post = [t for t in head if t.startswith('attributes ') or t.startswith('!')]
+    out = pre + [globs[g] for g in gorder] + [defs[f] for f in order] + decls + post
+    return sub('\n'.join(out)) + '\n'
+
 run('ar', 'x', 'jsyn.bc.a')
 shards = sorted(f for f in os.listdir('.') if re.match(r'text_opt#\d+\.bc$', f))
 for f in shards:
@@ -60,6 +108,8 @@ s = open('k0.ll').read()
 for e, f in spec.items():
     s = re.sub(r'@' + f + r'\b', '@jsk_' + e, s)
     s = re.sub(r'^define hidden (swiftcc [^@]*@jsk_' + e + r'\()', r'define \1', s, flags=re.M)
+
+s = canonicalize(s, ['jsk_' + e for e in entries])  # before anything is numbered from module order
 
 # 1. exception paths: noreturn function bodies -> jsk_throw()
 noret = set(re.findall(r'^attributes (#\d+) = \{[^}]*\bnoreturn\b', s, re.M))
@@ -123,6 +173,7 @@ for x in rt + rtg:
 print('runtime functions left', rt, 'runtime globals left', rtg)
 # swiftcc/swiftself (Julia passes pgcstack as swiftself) mean nothing in C: plain C calls
 s = s.replace('swiftcc ', '').replace(' swiftself', '')
+s = canonicalize(s, ['jsk_' + e for e in entries])
 open('kernel.pre.ll', 'w').write(s)
 run(sys.executable, f'{HERE}/deasm.py', 'kernel.pre.ll', 'kernel.ll')
 run(f'{LL}/llvm-as', 'kernel.ll', '-o', 'kernel.dbg.bc')
