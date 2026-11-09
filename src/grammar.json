@@ -2845,34 +2845,30 @@
       }
     },
     "macro_argument_list": {
-      "type": "PREC_LEFT",
-      "value": 0,
+      "type": "REPEAT1",
       "content": {
-        "type": "REPEAT1",
+        "type": "PREC",
+        "value": -4,
         "content": {
-          "type": "PREC",
-          "value": -4,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "_block_form"
-              },
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "_space_sensitive_probe"
-                  },
-                  {
-                    "type": "BLANK"
-                  }
-                ]
-              }
-            ]
-          }
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_block_form"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_space_sensitive_probe"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
         }
       }
     },
@@ -4701,6 +4697,9 @@
     [
       "parenthesized_expression",
       "tuple_expression"
+    ],
+    [
+      "macro_argument_list"
     ]
   ],
   "precedences": [],

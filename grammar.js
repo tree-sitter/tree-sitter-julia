@@ -63,6 +63,7 @@ module.exports = grammar({
     [$.juxtaposition_expression, $._expression],
     [$.matrix_row, $.comprehension_expression], // Comprehensions with newlines
     [$.parenthesized_expression, $.tuple_expression],
+    [$.macro_argument_list], // `[@m a b for x in xs]`: in brackets, where macro arguments end
   ],
 
   supertypes: $ => [
@@ -611,7 +612,7 @@ module.exports = grammar({
 
     macrocall_expression: $ => prec.right(seq($._macro_head, optional($.macro_argument_list))),
 
-    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, seq($._block_form, optional($._space_sensitive_probe))))),
+    macro_argument_list: $ => repeat1(prec(PREC.macro_arg, seq($._block_form, optional($._space_sensitive_probe)))),
 
     do_clause: $ => seq(
       'do',

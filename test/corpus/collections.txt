@@ -198,6 +198,59 @@ UInt[b(c, e) for c in d for e in f]
       (for_clause (for_binding (identifier) (operator) (identifier))))))
 
 
+==============================
+comprehension array collections - macro call bodies
+==============================
+
+Any[ @spawnat p reduce(f, x) for p in procs(S) ]
+[@m a b]
+@a :x @b y z
+
+---
+
+(source_file
+  (index_expression
+    (identifier)
+    (comprehension_expression
+      (macrocall_expression
+        (macro_identifier
+          (identifier))
+        (macro_argument_list
+          (identifier)
+          (call_expression
+            (identifier)
+            (argument_list
+              (identifier)
+              (identifier)))))
+      (for_clause
+        (for_binding
+          (identifier)
+          (operator)
+          (call_expression
+            (identifier)
+            (argument_list
+              (identifier)))))))
+  (vector_expression
+    (macrocall_expression
+      (macro_identifier
+        (identifier))
+      (macro_argument_list
+        (identifier)
+        (identifier))))
+  (macrocall_expression
+    (macro_identifier
+      (identifier))
+    (macro_argument_list
+      (quote_expression
+        (identifier))
+      (macrocall_expression
+        (macro_identifier
+          (identifier))
+        (macro_argument_list
+          (identifier)
+          (identifier))))))
+
+
 ========================================
 generators
 ========================================
