@@ -102,3 +102,6 @@ ninja -C build llvm-cbe        # LLVM_CBE=build/tools/llvm-cbe/llvm-cbe
   UTF-8 as U+FFFD, so on invalid UTF-8 the answer can differ from JuliaSyntax on the raw bytes.
 - Strings, characters and comments are still lexed by the hand-written part of `scanner.c` / the
   grammar (see the tree-sitter-julia PR for why).
+- Tokens over ~1 KB are split; `for outer::T in xs` reads `outer` as a keyword (JuliaSyntax: an
+  identifier, it parses the expression before looking); without C11 threads support (glibc < 2.28) the
+  runtime's per-call state is a global, so parsers must not run concurrently.

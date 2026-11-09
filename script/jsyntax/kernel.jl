@@ -69,7 +69,9 @@ Base.@ccallable function jsyn_token(p::Ptr{UInt8}, n::Csize_t, last::Cint, out::
     return token(p, n % Int, last, out)
 end
 
-function next_nontrivia(l)  # next token, skipping whitespace and comments but not newlines
+# next token, skipping whitespace and comments but not newlines (JuliaSyntax: `(mutable\nstruct X end)`
+# is an identifier then an error, test/parser.jl)
+function next_nontrivia(l)
     while true
         k = kind(TK.next_token(l))
         (k == K"Whitespace" || k == K"Comment") || return k

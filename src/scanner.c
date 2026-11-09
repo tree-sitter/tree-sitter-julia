@@ -230,8 +230,9 @@ static int lex_jsyntax_token(TSLexer *lexer, TokBuf *t, size_t base, int last, i
             while (ascii && x != '!' && jsk_ascii_identifier_char[x]) {
                 lexer->mark_end(lexer); // x is in the token whatever follows
                 mark = (int32_t)(t->n - base);
+                kind = k; *suffix = 0;
                 int32_t y = lexer->lookahead;
-                if (lexer->eof(lexer) || y >= 0x80 || t->n + 4 > sizeof t->buf || !jsk_ascii_identifier_char[y]) break;
+                if (lexer->eof(lexer) || y < 0 || y >= 0x80 || t->n + 4 > sizeof t->buf || !jsk_ascii_identifier_char[y]) break;
                 t->buf[t->n++] = (uint8_t)y;
                 lexer->advance(lexer, false);
                 x = (uint8_t)y;
@@ -244,12 +245,13 @@ static int lex_jsyntax_token(TSLexer *lexer, TokBuf *t, size_t base, int last, i
     return kind;
 }
 
-// Read the rest of the line (after the marked token end) into t, for the kernel's lookahead questions.
-static void read_line(TSLexer *lexer, TokBuf *t) {
+// Read ahead (after the marked token end) into t, for the kernel's lookahead questions: to the end of
+// the line, or across newlines (up to 256 bytes) where they are whitespace.
+static void read_ahead(TSLexer *lexer, TokBuf *t, bool past_newlines) {
     while (t->n + 4 <= 256 && !lexer->eof(lexer)) {
         int32_t ch = lexer->lookahead;
         t->n += utf8_encode(t->buf + t->n, ch);
-        if (ch == '\n') break;
+        if (ch == '\n' && !past_newlines) break;
         lexer->advance(lexer, false);
     }
 }
@@ -318,7 +320,7 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         int ks = keyword_symbol(k);
         bool kv = ks >= 0 && valid[ks], iv = valid[IDENTIFIER];
         if (kv && iv && is_contextual_keyword(k)) { // JuliaSyntax's parser looks at the next token
-            read_line(lexer, &t);
+            read_ahead(lexer, &t, false); // the next token on this line (newlines are not skipped)
             kv = jsyn_contextual_keyword(t.buf, t.n) == 1;
         }
         // a keyword where it is valid, else an identifier where that is valid (as tree-sitter's keyword
@@ -338,7 +340,7 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         // arguments), after whitespace, ask JuliaSyntax's rule whether this starts a new element
         if (cls == JSK_C_UNARY_PLUS && ws_before && valid[SPACE_PREFIX_OPERATOR] && valid[SPACE_SENSITIVE_PROBE] &&
             !recovering) {
-            read_line(lexer, &t);
+            read_ahead(lexer, &t, false);
             if (jsyn_space_prefix(t.buf, t.n) == 1) sym = SPACE_PREFIX_OPERATOR;
         }
     } else {

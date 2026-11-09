@@ -77,9 +77,6 @@ module.exports = grammar({
     $._content_str_3_raw,
     $._end_cmd,
     $._end_str,
-    // Zero-width. In a space-sensitive context (matrix row, macro arguments), emitted by the scanner
-    // before whitespace + `+`/`-`/`±`/`∓` when JuliaSyntax's lexer rule says the operator starts a new
-    // element: `[x -y]` is `[x (-y)]`, `[x - y]` and `[x -= y]` are not (see src/jsyntax/).
     // In a space-sensitive context (matrix row, macro arguments): a `+`/`-`/`±`/`∓` that JuliaSyntax's
     // rule says starts a new element: `[x -y]` is `[x (-y)]`, `[x - y]` and `[x -= y]` are not.
     $._space_prefix_operator,
