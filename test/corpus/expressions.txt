@@ -144,6 +144,51 @@ $(usertype){T}
         (integer_literal)))))
 
 ==============================
+brace expressions
+==============================
+
+x where {T S}
+x where {y for y in ys}
+T{y for x = xs; a}
+{a, b; c}
+
+---
+
+(source_file
+  (where_expression
+    (identifier)
+    (curly_expression
+      (matrix_row
+        (identifier)
+        (identifier))))
+  (where_expression
+    (identifier)
+    (curly_expression
+      (generator
+        (identifier)
+        (for_clause
+          (for_binding
+            (identifier)
+            (operator)
+            (identifier))))))
+  (parametrized_type_expression
+    (identifier)
+    (curly_expression
+      (generator
+        (identifier)
+        (for_clause
+          (for_binding
+            (identifier)
+            (operator)
+            (identifier))))
+      (identifier)))
+  (curly_expression
+    (identifier)
+    (identifier)
+    (identifier)))
+
+
+==============================
 function call expressions
 ==============================
 

@@ -856,6 +856,14 @@
         {
           "type": "assignment",
           "named": true
+        },
+        {
+          "type": "generator",
+          "named": true
+        },
+        {
+          "type": "matrix_row",
+          "named": true
         }
       ]
     }
@@ -946,6 +954,10 @@
         },
         {
           "type": "operator",
+          "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
           "named": true
         }
       ]
@@ -1364,6 +1376,10 @@
         {
           "type": "operator",
           "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
+          "named": true
         }
       ]
     }
@@ -1382,6 +1398,10 @@
         },
         {
           "type": "interpolation_expression",
+          "named": true
+        },
+        {
+          "type": "macro_identifier",
           "named": true
         },
         {
@@ -1421,6 +1441,10 @@
         },
         {
           "type": "operator",
+          "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
           "named": true
         },
         {
@@ -2189,6 +2213,10 @@
         {
           "type": "operator",
           "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
+          "named": true
         }
       ]
     }
@@ -2348,6 +2376,10 @@
         {
           "type": "operator",
           "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
+          "named": true
         }
       ]
     }
@@ -2370,6 +2402,14 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "interpolation_expression",
+          "named": true
+        },
+        {
+          "type": "operator",
           "named": true
         },
         {
@@ -2814,6 +2854,10 @@
         },
         {
           "type": "operator",
+          "named": true
+        },
+        {
+          "type": "prefixed_string_literal",
           "named": true
         },
         {

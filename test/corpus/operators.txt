@@ -330,3 +330,31 @@ foo(^, ÷, -)
   (identifier)
   (argument_list (operator) (operator) (operator))))
 
+
+==============================
+operators as names
+==============================
+
+const ⊆ = issubset
+function ⊇ end
+function $name end
+≔
+
+---
+
+(source_file
+  (const_statement
+    (assignment
+      (operator)
+      (operator)
+      (identifier)))
+  (function_definition
+    (signature
+      (operator)))
+  (function_definition
+    (signature
+      (interpolation_expression
+        (identifier))))
+  (operator))
+
+

@@ -409,6 +409,48 @@ import Base: @view as @v
       (import_alias (macro_identifier (identifier)) (macro_identifier (identifier))))))
 
 
+==============================
+import statements - macro names and var names
+==============================
+
+import Base.@kwdef
+import .Base.Math.@horner
+import $A.@x
+import Base.CoreLogging:
+    AbstractLogger,
+    var"@debug"
+
+---
+
+(source_file
+  (import_statement
+    (import_path
+      (identifier)
+      (macro_identifier
+        (identifier))))
+  (import_statement
+    (import_path
+      (identifier)
+      (identifier)
+      (macro_identifier
+        (identifier))))
+  (import_statement
+    (import_path
+      (interpolation_expression
+        (identifier))
+      (macro_identifier
+        (identifier))))
+  (import_statement
+    (selected_import
+      (import_path
+        (identifier)
+        (identifier))
+      (identifier)
+      (prefixed_string_literal
+        (identifier)
+        (content)))))
+
+
 ===============================
 const statements
 ===============================

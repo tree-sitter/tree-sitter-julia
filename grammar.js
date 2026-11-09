@@ -50,6 +50,8 @@ module.exports = grammar({
     $._statement,
     $._operation,
     $._argument_separator,
+    $._tuple_body,
+    $._matrix_body,
   ],
 
   // The scanner's tokens (src/scanner.c, lexed by JuliaSyntax: src/jsyntax/), generated from
@@ -90,6 +92,7 @@ module.exports = grammar({
       $._expression,
       $.assignment,
       $.open_tuple,
+      alias($._assignment_operator, $.operator), // `≔` (not syntactic) as a name
     ),
 
     _bracket_form: $ => choice(
@@ -197,6 +200,8 @@ module.exports = grammar({
 
     signature: $ => prec(PREC.stmt, choice(
       $.identifier, // zero-method definition
+      $.operator, // `function + end`
+      $.interpolation_expression, // `function $name end`
       $.call_expression,
       alias($.tuple_expression, $.argument_list), // anonymous function
       $.typed_expression,
@@ -358,22 +363,34 @@ module.exports = grammar({
       $._import_dots,
       choice(
         $.identifier,
-        $._scoped_identifier,
+        $._import_dotted,
         $.operator, // `import .⋆`
       ),
     ),
+
+    // `Base.Math`, `Base.@kwdef`
+    _import_dotted: $ => seq(
+      choice($.identifier, $.interpolation_expression),
+      repeat1(seq(
+        token.immediate('.'),
+        choice($.identifier, $.interpolation_expression, alias($._simple_macro_identifier, $.macro_identifier)),
+      )),
+    ),
+
+    _simple_macro_identifier: $ => seq('@', $.identifier),
 
     _exportable: $ => choice(
       $.identifier,
       $.macro_identifier,
       $.operator,
       $.interpolation_expression,
+      $.prefixed_string_literal, // `var"@debug"`
       parenthesize($._exportable),
     ),
 
     _importable: $ => choice(
       $._exportable,
-      alias($._scoped_identifier, $.import_path),
+      alias($._import_dotted, $.import_path),
       $.import_path,
     ),
 
@@ -480,11 +497,13 @@ module.exports = grammar({
     matrix_expression: $ => prec(PREC.array, seq(
       '[',
       choice(
-        seq($.matrix_row, repeat(seq($._terminator, $.matrix_row)), optional($._terminator)),
+        $._matrix_body,
         $._semicolon, // `[;;]`: an empty ncat
       ),
       ']',
     )),
+
+    _matrix_body: $ => seq($.matrix_row, repeat(seq($._terminator, $.matrix_row)), optional($._terminator)),
 
     matrix_row: $ => repeat1(prec(PREC.array, seq($._bracket_form, optional($._space_sensitive_probe)))),
 
@@ -503,12 +522,15 @@ module.exports = grammar({
       optional($._semicolon),
     )),
 
-    tuple_expression: $ => parenthesize(
-      optional($._semicolon),
-      optional(seq(
+    tuple_expression: $ => parenthesize(optional($._tuple_body)),
+
+    _tuple_body: $ => choice(
+      $._semicolon,
+      seq(
+        optional($._semicolon),
         sep1($._argument_separator, choice($._bracket_form, $.generator)),
         optional($._argument_separator),
-      )),
+      ),
     ),
 
     // `f(a, b; c)`, `f(a, b, ; c)`, `f(a;)`
@@ -516,8 +538,7 @@ module.exports = grammar({
 
     curly_expression: $ => seq(
       '{',
-      sep(',', $._bracket_form),
-      optional(','),
+      optional(choice($._tuple_body, prec(PREC.array, $._matrix_body))), // `{a, b; c}`, `{x for x in xs}`, `{a b}`
       '}',
     ),
 
