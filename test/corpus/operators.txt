@@ -44,6 +44,60 @@ c &= d ÷= e
       (identifier))))
 
 ==============================
+assignment operators - trailing comma, typed and chained
+==============================
+
+ys, = f(x)
+lnz, unz, = h()
+is_interactive::Bool |= interactiveinput
+C .= C0 = rand(-10:10, size(C))
+
+---
+
+(source_file
+  (assignment
+    (open_tuple
+      (identifier))
+    (operator)
+    (call_expression
+      (identifier)
+      (argument_list
+        (identifier))))
+  (assignment
+    (open_tuple
+      (identifier)
+      (identifier))
+    (operator)
+    (call_expression
+      (identifier)
+      (argument_list)))
+  (compound_assignment_expression
+    (typed_expression
+      (identifier)
+      (identifier))
+    (operator)
+    (identifier))
+  (compound_assignment_expression
+    (identifier)
+    (operator)
+    (assignment
+      (identifier)
+      (operator)
+      (call_expression
+        (identifier)
+        (argument_list
+          (range_expression
+            (unary_expression
+              (operator)
+              (integer_literal))
+            (integer_literal))
+          (call_expression
+            (identifier)
+            (argument_list
+              (identifier))))))))
+
+
+==============================
 binary arithmetic operators
 ==============================
 

@@ -197,6 +197,46 @@ new{typeof(xs)}(xs)
     (argument_list
       (identifier))))
 
+==============================
+function call expressions - semicolons
+==============================
+
+printstyled(io, name, ; color)
+findnext(a, b,
+    ; overlap::Bool=false)
++(a;)
+f(a;)
+
+---
+
+(source_file
+  (call_expression
+    (identifier)
+    (argument_list
+      (identifier)
+      (identifier)
+      (identifier)))
+  (call_expression
+    (identifier)
+    (argument_list
+      (identifier)
+      (identifier)
+      (assignment
+        (typed_expression
+          (identifier)
+          (identifier))
+        (operator)
+        (boolean_literal))))
+  (call_expression
+    (operator)
+    (argument_list
+      (identifier)))
+  (call_expression
+    (identifier)
+    (argument_list
+      (identifier))))
+
+
 ========================================
 function call expressions with do blocks
 ========================================
@@ -221,6 +261,58 @@ end
           (argument_list
             (identifier)
             (identifier)))))))
+
+==============================
+function call expressions with inline do blocks
+==============================
+
+f(x) do y body end
+open(p, "w") do io end
+f() do _ end
+@f(x) do y body end
+f(x) do a, b end
+
+---
+
+(source_file
+  (call_expression
+    (identifier)
+    (argument_list
+      (identifier))
+    (do_clause
+      (identifier)
+      (block
+        (identifier))))
+  (call_expression
+    (identifier)
+    (argument_list
+      (identifier)
+      (string_literal
+        (content)))
+    (do_clause
+      (identifier)))
+  (call_expression
+    (identifier)
+    (argument_list)
+    (do_clause
+      (identifier)))
+  (macrocall_expression
+    (macro_identifier
+      (identifier))
+    (argument_list
+      (identifier))
+    (do_clause
+      (identifier)
+      (block
+        (identifier))))
+  (call_expression
+    (identifier)
+    (argument_list
+      (identifier))
+    (do_clause
+      (identifier)
+      (identifier))))
+
 
 ==============================
 macro call expressions

@@ -147,6 +147,28 @@ Int[1 2 3 4]
         (integer_literal)))))
 
 
+==============================
+empty ncat array collections
+==============================
+
+ComplexF64[;;]
+[;]
+[;;;]
+[
+ ;;
+]
+
+---
+
+(source_file
+  (index_expression
+    (identifier)
+    (matrix_expression))
+  (matrix_expression)
+  (matrix_expression)
+  (matrix_expression))
+
+
 ========================================
 comprehension array collections
 ========================================

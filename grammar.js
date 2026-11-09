@@ -49,6 +49,7 @@ module.exports = grammar({
     $._definition,
     $._statement,
     $._operation,
+    $._argument_separator,
   ],
 
   // The scanner's tokens (src/scanner.c, lexed by JuliaSyntax: src/jsyntax/), generated from
@@ -101,11 +102,14 @@ module.exports = grammar({
       repeat1(seq(',', $._expression))
     )),
 
+    _open_tuple_comma: $ => prec(0, seq(sep1(',', $._expression), ',')), // `x, = xs`
+
     // assignments inside blocks
     assignment: $ => prec.right(PREC.assign, seq(
       choice(
         $._primary_expression,
         $.open_tuple,
+        alias($._open_tuple_comma, $.open_tuple),
         $._operation,
         $.operator,
       ),
@@ -246,9 +250,10 @@ module.exports = grammar({
 
     let_statement: $ => seq(
       'let',
-      sep(',', $._bracket_form),
-      $._terminator,
-      optional($.block),
+      choice(
+        seq(sep(',', $._bracket_form), $._terminator, optional($.block)),
+        sep1(',', $._bracket_form), // `let x = 1 end`
+      ),
       'end',
     ),
 
@@ -474,9 +479,10 @@ module.exports = grammar({
 
     matrix_expression: $ => prec(PREC.array, seq(
       '[',
-      $.matrix_row,
-      repeat(seq($._terminator, $.matrix_row)),
-      optional($._terminator),
+      choice(
+        seq($.matrix_row, repeat(seq($._terminator, $.matrix_row)), optional($._terminator)),
+        $._semicolon, // `[;;]`: an empty ncat
+      ),
       ']',
     )),
 
@@ -499,12 +505,14 @@ module.exports = grammar({
 
     tuple_expression: $ => parenthesize(
       optional($._semicolon),
-      sep(choice(',', $._semicolon), choice(
-        $._bracket_form,
-        $.generator,
+      optional(seq(
+        sep1($._argument_separator, choice($._bracket_form, $.generator)),
+        optional($._argument_separator),
       )),
-      optional(','),
     ),
+
+    // `f(a, b; c)`, `f(a, b, ; c)`, `f(a;)`
+    _argument_separator: $ => choice(',', seq(optional(','), $._semicolon)),
 
     curly_expression: $ => seq(
       '{',
@@ -586,8 +594,7 @@ module.exports = grammar({
 
     do_clause: $ => seq(
       'do',
-      sep(',', $._bracket_form),
-      $._terminator,
+      choice(seq(sep(',', $._bracket_form), $._terminator), sep1(',', $._bracket_form)),
       optional($.block),
       'end',
     ),
@@ -748,9 +755,9 @@ module.exports = grammar({
     )),
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(
-      $._primary_expression,
+      choice($._primary_expression, $._operation),
       alias(choice($._assignment_operator, $._tilde_operator), $.operator),
-      $._expression,
+      $._bracket_form,
     )),
 
     where_expression: $ => prec.left(PREC.where, seq(
