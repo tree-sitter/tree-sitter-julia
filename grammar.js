@@ -375,7 +375,11 @@ module.exports = grammar({
       choice($.identifier, $.interpolation_expression),
       repeat1(seq(
         token.immediate('.'),
-        choice($.identifier, $.interpolation_expression, alias($._simple_macro_identifier, $.macro_identifier)),
+        choice(
+          choice($.identifier, $.interpolation_expression),
+          alias($._simple_macro_identifier, $.macro_identifier),
+          $.operator, // `import Base.*`: a dotted operator is not valid here, so the scanner leaves `.` to the lexer
+        ),
       )),
     ),
 
@@ -633,6 +637,7 @@ module.exports = grammar({
         $.tuple_expression,
         $._array,
         $._string,
+        $.interpolation_expression, // `$$x`
       ),
     )),
 
@@ -644,6 +649,7 @@ module.exports = grammar({
         $._string,
         $.identifier,
         $.operator,
+        alias($._simple_macro_identifier, $.macro_identifier), // `:@foo`
         seq($._immediate_brace, $.curly_expression),
         seq($._immediate_bracket, $._array),
         seq($._immediate_paren, choice(
@@ -782,18 +788,8 @@ module.exports = grammar({
     // Like a binary operator (so its tokens are valid exactly where operators are, which keeps the parse
     // table small), between prefix and power: `-2x` is `-(2x)`, `2x^2` is `2(x^2)`.
     juxtaposition_expression: $ => prec.left(PREC.juxtapose, seq(
-      // what JuliaSyntax juxtaposes after: not an operator, a block form or a reserved word
-      choice(
-        $._primary_expression,
-        $._operation,
-        $.compound_assignment_expression,
-        $.macrocall_expression,
-        $.arrow_function_expression,
-        $.juxtaposition_expression,
-        $.ternary_expression,
-        $.integer_literal,
-        $.float_literal,
-      ),
+      // the scanner emits `_juxtapose` only where JuliaSyntax juxtaposes (never after an operator)
+      $._expression,
       $._juxtapose,
       choice($._primary_expression, $.unary_expression),
     )),

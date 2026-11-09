@@ -1,44 +1,10 @@
 [
   {
-    "type": "_definition",
-    "named": true,
-    "subtypes": [
-      {
-        "type": "abstract_definition",
-        "named": true
-      },
-      {
-        "type": "function_definition",
-        "named": true
-      },
-      {
-        "type": "macro_definition",
-        "named": true
-      },
-      {
-        "type": "module_definition",
-        "named": true
-      },
-      {
-        "type": "primitive_definition",
-        "named": true
-      },
-      {
-        "type": "struct_definition",
-        "named": true
-      }
-    ]
-  },
-  {
     "type": "_expression",
     "named": true,
     "subtypes": [
       {
-        "type": "_definition",
-        "named": true
-      },
-      {
-        "type": "_statement",
+        "type": "abstract_definition",
         "named": true
       },
       {
@@ -55,6 +21,10 @@
       },
       {
         "type": "boolean_literal",
+        "named": true
+      },
+      {
+        "type": "break_statement",
         "named": true
       },
       {
@@ -78,11 +48,27 @@
         "named": true
       },
       {
+        "type": "compound_statement",
+        "named": true
+      },
+      {
         "type": "comprehension_expression",
         "named": true
       },
       {
+        "type": "const_statement",
+        "named": true
+      },
+      {
+        "type": "continue_statement",
+        "named": true
+      },
+      {
         "type": "curly_expression",
+        "named": true
+      },
+      {
+        "type": "export_statement",
         "named": true
       },
       {
@@ -94,7 +80,27 @@
         "named": true
       },
       {
+        "type": "for_statement",
+        "named": true
+      },
+      {
+        "type": "function_definition",
+        "named": true
+      },
+      {
+        "type": "global_statement",
+        "named": true
+      },
+      {
         "type": "identifier",
+        "named": true
+      },
+      {
+        "type": "if_statement",
+        "named": true
+      },
+      {
+        "type": "import_statement",
         "named": true
       },
       {
@@ -114,11 +120,27 @@
         "named": true
       },
       {
+        "type": "let_statement",
+        "named": true
+      },
+      {
+        "type": "local_statement",
+        "named": true
+      },
+      {
+        "type": "macro_definition",
+        "named": true
+      },
+      {
         "type": "macrocall_expression",
         "named": true
       },
       {
         "type": "matrix_expression",
+        "named": true
+      },
+      {
+        "type": "module_definition",
         "named": true
       },
       {
@@ -142,11 +164,27 @@
         "named": true
       },
       {
+        "type": "primitive_definition",
+        "named": true
+      },
+      {
+        "type": "public_statement",
+        "named": true
+      },
+      {
         "type": "quote_expression",
         "named": true
       },
       {
+        "type": "quote_statement",
+        "named": true
+      },
+      {
         "type": "range_expression",
+        "named": true
+      },
+      {
+        "type": "return_statement",
         "named": true
       },
       {
@@ -158,7 +196,15 @@
         "named": true
       },
       {
+        "type": "struct_definition",
+        "named": true
+      },
+      {
         "type": "ternary_expression",
+        "named": true
+      },
+      {
+        "type": "try_statement",
         "named": true
       },
       {
@@ -178,81 +224,15 @@
         "named": true
       },
       {
+        "type": "using_statement",
+        "named": true
+      },
+      {
         "type": "vector_expression",
         "named": true
       },
       {
         "type": "where_expression",
-        "named": true
-      }
-    ]
-  },
-  {
-    "type": "_statement",
-    "named": true,
-    "subtypes": [
-      {
-        "type": "break_statement",
-        "named": true
-      },
-      {
-        "type": "compound_statement",
-        "named": true
-      },
-      {
-        "type": "const_statement",
-        "named": true
-      },
-      {
-        "type": "continue_statement",
-        "named": true
-      },
-      {
-        "type": "export_statement",
-        "named": true
-      },
-      {
-        "type": "for_statement",
-        "named": true
-      },
-      {
-        "type": "global_statement",
-        "named": true
-      },
-      {
-        "type": "if_statement",
-        "named": true
-      },
-      {
-        "type": "import_statement",
-        "named": true
-      },
-      {
-        "type": "let_statement",
-        "named": true
-      },
-      {
-        "type": "local_statement",
-        "named": true
-      },
-      {
-        "type": "public_statement",
-        "named": true
-      },
-      {
-        "type": "quote_statement",
-        "named": true
-      },
-      {
-        "type": "return_statement",
-        "named": true
-      },
-      {
-        "type": "try_statement",
-        "named": true
-      },
-      {
-        "type": "using_statement",
         "named": true
       },
       {
@@ -1590,6 +1570,10 @@
           "named": true
         },
         {
+          "type": "interpolation_expression",
+          "named": true
+        },
+        {
           "type": "matrix_expression",
           "named": true
         },
@@ -1629,143 +1613,7 @@
       "required": true,
       "types": [
         {
-          "type": "adjoint_expression",
-          "named": true
-        },
-        {
-          "type": "arrow_function_expression",
-          "named": true
-        },
-        {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "boolean_literal",
-          "named": true
-        },
-        {
-          "type": "broadcast_call_expression",
-          "named": true
-        },
-        {
-          "type": "call_expression",
-          "named": true
-        },
-        {
-          "type": "character_literal",
-          "named": true
-        },
-        {
-          "type": "command_literal",
-          "named": true
-        },
-        {
-          "type": "compound_assignment_expression",
-          "named": true
-        },
-        {
-          "type": "comprehension_expression",
-          "named": true
-        },
-        {
-          "type": "curly_expression",
-          "named": true
-        },
-        {
-          "type": "field_expression",
-          "named": true
-        },
-        {
-          "type": "float_literal",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "index_expression",
-          "named": true
-        },
-        {
-          "type": "integer_literal",
-          "named": true
-        },
-        {
-          "type": "interpolation_expression",
-          "named": true
-        },
-        {
-          "type": "juxtaposition_expression",
-          "named": true
-        },
-        {
-          "type": "macrocall_expression",
-          "named": true
-        },
-        {
-          "type": "matrix_expression",
-          "named": true
-        },
-        {
-          "type": "parametrized_type_expression",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
-          "type": "prefixed_command_literal",
-          "named": true
-        },
-        {
-          "type": "prefixed_string_literal",
-          "named": true
-        },
-        {
-          "type": "quote_expression",
-          "named": true
-        },
-        {
-          "type": "range_expression",
-          "named": true
-        },
-        {
-          "type": "splat_expression",
-          "named": true
-        },
-        {
-          "type": "string_literal",
-          "named": true
-        },
-        {
-          "type": "ternary_expression",
-          "named": true
-        },
-        {
-          "type": "tuple_expression",
-          "named": true
-        },
-        {
-          "type": "typed_expression",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
-          "named": true
-        },
-        {
-          "type": "unary_typed_expression",
-          "named": true
-        },
-        {
-          "type": "vector_expression",
-          "named": true
-        },
-        {
-          "type": "where_expression",
+          "type": "_expression",
           "named": true
         }
       ]
@@ -2299,6 +2147,10 @@
         },
         {
           "type": "integer_literal",
+          "named": true
+        },
+        {
+          "type": "macro_identifier",
           "named": true
         },
         {

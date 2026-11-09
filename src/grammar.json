@@ -1552,12 +1552,17 @@
                 "type": "CHOICE",
                 "members": [
                   {
-                    "type": "SYMBOL",
-                    "name": "identifier"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "interpolation_expression"
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "identifier"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "interpolation_expression"
+                      }
+                    ]
                   },
                   {
                     "type": "ALIAS",
@@ -1567,6 +1572,10 @@
                     },
                     "named": true,
                     "value": "macro_identifier"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "operator"
                   }
                 ]
               }
@@ -3031,6 +3040,10 @@
               {
                 "type": "SYMBOL",
                 "name": "_string"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "interpolation_expression"
               }
             ]
           }
@@ -3074,6 +3087,15 @@
               {
                 "type": "SYMBOL",
                 "name": "operator"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_simple_macro_identifier"
+                },
+                "named": true,
+                "value": "macro_identifier"
               },
               {
                 "type": "SEQ",
@@ -3908,45 +3930,8 @@
         "type": "SEQ",
         "members": [
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "_primary_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "_operation"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "compound_assignment_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "macrocall_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "arrow_function_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "juxtaposition_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "ternary_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "integer_literal"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "float_literal"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_expression"
           },
           {
             "type": "SYMBOL",

@@ -15,6 +15,8 @@ typedef struct {
     size_t n;     // bytes consumed from the TSLexer so far
     size_t cap;
     uint8_t after_operator; // the last token this scanner emitted was an operator (serialized)
+    uint8_t in_import;      // inside `import`/`using` up to the end of the line or `;` (serialized)
+    size_t tok_end;         // length of the token scan_token just emitted (bytes of buf)
 } TokBuf;
 
 void *tree_sitter_julia_external_scanner_create(void) {
@@ -32,11 +34,13 @@ void tree_sitter_julia_external_scanner_destroy(void *payload) {
 // juxtapose after an operator: `a && !b`). Everything else is in the text ahead and in valid_symbols.
 unsigned tree_sitter_julia_external_scanner_serialize(void *payload, char *buffer) {
     buffer[0] = (char)((TokBuf *)payload)->after_operator;
-    return 1;
+    buffer[1] = (char)((TokBuf *)payload)->in_import;
+    return 2;
 }
 
 void tree_sitter_julia_external_scanner_deserialize(void *payload, const char *buffer, unsigned size) {
     ((TokBuf *)payload)->after_operator = size > 0 ? (uint8_t)buffer[0] : 0;
+    ((TokBuf *)payload)->in_import = size > 1 ? (uint8_t)buffer[1] : 0;
 }
 
 static size_t utf8_encode(uint8_t *b, int32_t c) {
@@ -391,6 +395,10 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         if (k2 < 0) return false;
         cls = k2 == JSK_K_EQ ? JSK_C_ASSIGNMENT : jsk_kind_class[k2];
         if (cls < JSK_C_ASSIGNMENT) return false; // field access, `...`: punctuation
+        // `import Base.*`: in an import path the dot separates and the operator is the name
+        // (JuliaSyntax parse_import_path); the lexer takes the `.`
+        if (t->in_import && !ws_before && !recovering) return false;
+        len = 1 + len2;
     }
     int sym;
     if (k == JSK_K_COLON) {
@@ -410,6 +418,7 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         else if (valid[QUOTE_COLON] && !ws_after && !closing) sym = QUOTE_COLON;
         else return false; // `:` as a name, `using A: b`: the internal lexer's
         lexer->result_symbol = (TSSymbol)sym;
+        t->tok_end = (size_t)len;
         return true;
     }
     if (valid[STRING_SUFFIX] && !ws_before && !recovering &&
@@ -432,10 +441,10 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         if (kv && iv && is_contextual_keyword(k)) { // JuliaSyntax's parser looks at the next token
             read_ahead(lexer, t);
             kv = jsyn_contextual_keyword(t->buf, t->n) == 1;
-        } else if (kv && iv && (k == JSK_K_in || k == JSK_K_isa || k == JSK_K_where) && ws_before &&
-                   valid[MACRO_ARGS_PROBE] && !recovering) {
-            // `@assert where.uuid`, `GC.@preserve in out begin`: a word operator at the start of macro
-            // arguments has no left operand; JuliaSyntax reads it as a name
+        } else if (kv && iv && (k == JSK_K_in || k == JSK_K_isa || k == JSK_K_where) && !recovering &&
+                   ((ws_before && valid[MACRO_ARGS_PROBE]) || t->after_operator)) {
+            // `@assert where.uuid`, `GC.@preserve in out begin`, `x === where.uuid`: a word operator with
+            // no left operand (start of macro arguments, right after an operator); JuliaSyntax reads a name
             kv = false;
         }
         // a keyword where it is valid, else an identifier where that is valid (as tree-sitter's keyword
@@ -463,10 +472,20 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
     }
     if (!valid[sym]) return false;
     lexer->result_symbol = (TSSymbol)sym;
+    t->tok_end = (size_t)len;
     return true;
 }
 
 static bool scan(TokBuf *t, TSLexer *lexer, const bool *valid_symbols);
+
+// After an operator: the next character past spaces (looking past the token's marked end is free).
+static int32_t char_after_token(TokBuf *t, TSLexer *lexer) {
+    size_t i = t->tok_end;
+    while (i < t->n && (t->buf[i] == ' ' || t->buf[i] == '\t')) i++;
+    if (i < t->n) return t->buf[i];
+    while (!lexer->eof(lexer) && (lexer->lookahead == ' ' || lexer->lookahead == '\t')) lexer->advance(lexer, false);
+    return lexer->eof(lexer) ? 0 : lexer->lookahead;
+}
 
 bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
     TokBuf *t = payload;
@@ -475,10 +494,23 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
     if (s != JUXTAPOSE && s != IMMEDIATE_PAREN && s != IMMEDIATE_BRACKET && s != IMMEDIATE_BRACE &&
         s != IMMEDIATE_STRING_START && s != IMMEDIATE_COMMAND_START && s != LINE_COMMENT && s != BLOCK_COMMENT)
         t->after_operator = (s >= ASSIGNMENT_OPERATOR && s <= UNARY_OPERATOR) || s == SPACE_PREFIX_OPERATOR || s == ELEMENT_OF;
+    // which line an import is on: JuliaSyntax's parser knows; here the scanner follows it
+    if (s == KW_IMPORT || s == KW_USING) t->in_import = 1;
+    else if (s == NEWLINE) t->in_import = 0;
+    else if (t->in_import && t->tok_end > 0 && char_after_token(t, lexer) == ';') t->in_import = 0;
+    if (t->after_operator && t->tok_end > 0) {
+        // the bit must describe what the scanner sees next: if a closing token or separator follows
+        // (lexed by the internal lexer, which does not update this state: `(==)) where`), the next
+        // scanned token is not this operator's operand. An opening bracket is (`.~[x]`, `-(x)`).
+        int32_t c = char_after_token(t, lexer);
+        if (c == ')' || c == ']' || c == '}' || c == ',' || c == ';') t->after_operator = 0;
+    }
     return true;
 }
 
 static bool scan(TokBuf *t, TSLexer *lexer, const bool *valid_symbols) {
+    t->n = 0;
+    t->tok_end = 0; // set by scan_token for the tokens it lexes (their text is in t->buf)
     // In error recovery every symbol is valid: no string context then
     bool recovering = valid_symbols[CONTENT_STR_1] && valid_symbols[CONTENT_CMD_1];
 
