@@ -18,6 +18,7 @@
 #include <setjmp.h>
 #endif
 #include <stddef.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include "unicode_tables.h"
@@ -181,6 +182,11 @@ static uint32_t jsk_jl_id_char(uint32_t wc) {
 static uint32_t jsk_jsyn_space_prefix(void *pgcstack, void *p, uint64_t n);                    // kernel.c
 static uint32_t jsk_jsyn_token(void *pgcstack, void *p, uint64_t n, int32_t last, void *out);   // kernel.c
 static uint32_t jsk_jsyn_contextual_keyword(void *pgcstack, void *p, uint64_t n);              // kernel.c
+static uint32_t jsk_jsyn_string_token(void *pgcstack, void *p, uint64_t n, int32_t delim, int32_t triple,
+                                      int32_t raw, int32_t last, void *out);                     // kernel.c
+static uint32_t jsk_jsyn_char_literal(void *pgcstack, void *p, uint64_t n);                    // kernel.c
+static uint32_t jsk_jsyn_escape_len(void *pgcstack, void *p, uint64_t n, int32_t raw, int32_t delim); // kernel.c
+static uint32_t jsk_jsyn_var_identifier(void *pgcstack, void *p, uint64_t n);                  // kernel.c
 
 // Runs CALL (a kernel function, with `&jsk_fake.task[32]` as its GC-stack argument) with a fresh arena and a
 // fake task; evaluates to its result, or to -1 if the Julia code threw.
@@ -232,5 +238,34 @@ __attribute__((unused)) static int jsyn_token(const uint8_t *p, size_t n, int la
 __attribute__((unused)) static int jsyn_contextual_keyword(const uint8_t *p, size_t n) {
     volatile int r = -1;
     JSK_RUN(jsk_jsyn_contextual_keyword(&jsk_fake.task[32], (void *)p, n));
+    return r;
+}
+
+// The first token of p[0..n) inside a string delimited by `delim` (triple-quoted, raw: 0/1), per
+// JuliaSyntax's lex_string_chunk. Returns its Kind (kinds.h) or -1; out[0] = byte length.
+__attribute__((unused)) static int jsyn_string_token(const uint8_t *p, size_t n, int delim, int triple, int raw, int last, int32_t out[2]) {
+    volatile int r = -1;
+    JSK_RUN(jsk_jsyn_string_token(&jsk_fake.task[32], (void *)p, n, delim, triple, raw, last, out));
+    return r;
+}
+
+// A character literal at p: its byte length, 0 if there is none (JuliaSyntax's lexer), -1 on error.
+__attribute__((unused)) static int jsyn_char_literal(const uint8_t *p, size_t n) {
+    volatile int r = -1;
+    JSK_RUN(jsk_jsyn_char_literal(&jsk_fake.task[32], (void *)p, n));
+    return r;
+}
+
+// The byte length of the escape sequence at p (a backslash) in string content, 0 if none (raw strings).
+__attribute__((unused)) static int jsyn_escape_len(const uint8_t *p, size_t n, int raw, int delim) {
+    volatile int r = -1;
+    JSK_RUN(jsk_jsyn_escape_len(&jsk_fake.task[32], (void *)p, n, raw, delim));
+    return r; // -1: error; below -1: an invalid escape of that (negated) length
+}
+
+// `var"..."` at p: its byte length, 0 if there is none (JuliaSyntax's lexer), -1 on error.
+__attribute__((unused)) static int jsyn_var_identifier(const uint8_t *p, size_t n) {
+    volatile int r = -1;
+    JSK_RUN(jsk_jsyn_var_identifier(&jsk_fake.task[32], (void *)p, n));
     return r;
 }

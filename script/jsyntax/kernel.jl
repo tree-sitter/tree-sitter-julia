@@ -101,6 +101,115 @@ Base.@ccallable function jsyn_contextual_keyword(p::Ptr{UInt8}, n::Csize_t)::Cin
     return contextual_keyword(p, n % Int)
 end
 
+# ---- Strings, characters --------------------------------------------------------------------------
+# The first token of p[0..n) inside a string or command (JuliaSyntax's lex_string_chunk): a content
+# chunk, `$`, the closing delimiter, an escaped newline (Whitespace), or an error kind. The string is
+# delimited by `delim` (`"` or `` ` ``), triple-quoted or not, raw (string macro) or not; `last` is the
+# previous token's kind (`$` before an interpolated identifier). out[1] = byte length.
+function string_token(p::Ptr{UInt8}, n::Int, delim::Int32, triple::Bool, raw::Bool, last::Int32, out::Ptr{Int32})
+    l = TK.Lexer(PtrIO(p, n, 0))
+    push!(l.string_states, TK.StringState(triple, raw, Char(delim), 0))
+    last != 0 && (l.last_token = reinterpret(JS.Kind, UInt16(last)))
+    t = TK.next_token(l)
+    unsafe_store!(out, Int32(t.endbyte - t.startbyte + 1), 1)
+    return Int32(reinterpret(UInt16, kind(t)))
+end
+
+Base.@ccallable function jsyn_string_token(p::Ptr{UInt8}, n::Csize_t, delim::Cint, triple::Cint, raw::Cint,
+                                           last::Cint, out::Ptr{Cint})::Cint
+    return string_token(p, n % Int, delim, triple != 0, raw != 0, last, out)
+end
+
+# A character literal at p (`'a'`, `'\n'`, `'''`): its byte length, or 0 if JuliaSyntax's lexer does
+# not read one there (an error kind, or no closing quote).
+function char_literal(p::Ptr{UInt8}, n::Int)
+    l = TK.Lexer(PtrIO(p, n, 0))
+    t1 = TK.next_token(l)                       # `'`, opening (no previous token: not an adjoint)
+    kind(t1) == K"'" || return Int32(0)
+    t2 = TK.next_token(l)
+    kind(t2) == K"Char" || return Int32(0)
+    t3 = TK.next_token(l)
+    kind(t3) == K"'" || return Int32(0)
+    return Int32(t3.endbyte + 1)
+end
+
+Base.@ccallable function jsyn_char_literal(p::Ptr{UInt8}, n::Csize_t)::Cint
+    return char_literal(p, n % Int)
+end
+
+# `var"..."` at p (JuliaSyntax: the `var` contextual keyword directly followed by a raw string is an
+# identifier): its byte length, or 0.
+function var_identifier(p::Ptr{UInt8}, n::Int)
+    l = TK.Lexer(PtrIO(p, n, 0))
+    t1 = TK.next_token(l)
+    (kind(t1) == K"var" && t1.endbyte == 2) || return Int32(0)
+    t2 = TK.next_token(l)
+    (kind(t2) == K"\"" && t2.startbyte == 3) || return Int32(0)
+    t3 = TK.next_token(l)
+    if kind(t3) == K"String"
+        t3 = TK.next_token(l)
+    end
+    kind(t3) == K"\"" || return Int32(0)
+    return Int32(t3.endbyte + 1)
+end
+
+Base.@ccallable function jsyn_var_identifier(p::Ptr{UInt8}, n::Csize_t)::Cint
+    return var_identifier(p, n % Int)
+end
+
+# The byte length of the escape sequence starting with a backslash at p[0] in string content: restated
+# from JuliaSyntax's unescape_julia_string (src/julia/literal_parsing.jl), which consumes `\x` + up to 2
+# hex digits, `\u` + up to 4, `\U` + up to 8, `\` + up to 3 octal digits, else `\` + one character. In
+# raw strings (string macros) only two backslashes or backslash + delimiter are escapes (2 bytes), else 0.
+# An invalid escape (JuliaSyntax reports "invalid escape sequence") gives minus its length.
+function escape_len(p::Ptr{UInt8}, n::Int, raw::Bool, delim::UInt8)
+    (n >= 1 && unsafe_load(p, 1) == UInt8('\\')) || return Int32(0)
+    n >= 2 || return Int32(1)
+    c = unsafe_load(p, 2)
+    if raw
+        return Int32(c == UInt8('\\') || c == delim ? 2 : 0)
+    end
+    i = 2
+    valid = true
+    if c == UInt8('x') || c == UInt8('u') || c == UInt8('U')
+        m = c == UInt8('x') ? 2 : c == UInt8('u') ? 4 : 8
+        k = 0
+        v = UInt32(0)
+        while (k += 1) <= m && i + 1 <= n
+            nc = unsafe_load(p, i + 1)
+            d = UInt8('0') <= nc <= UInt8('9') ? nc - UInt8('0') : UInt8('a') <= nc <= UInt8('f') ? nc - UInt8('a') + 0x0a :
+                UInt8('A') <= nc <= UInt8('F') ? nc - UInt8('A') + 0x0a : 0xff
+            d == 0xff && break
+            v = v << 4 + d
+            i += 1
+        end
+        valid = k > 1 && v <= 0x10ffff
+    elseif UInt8('0') <= c <= UInt8('7')
+        k = 1
+        v = UInt32(c - UInt8('0'))
+        while (k += 1) <= 3 && i + 1 <= n
+            nc = unsafe_load(p, i + 1)
+            UInt8('0') <= nc <= UInt8('7') || break
+            v = v << 3 + (nc - UInt8('0'))
+            i += 1
+        end
+        valid = v <= 255
+    elseif c == UInt8('\r') && i + 1 <= n && unsafe_load(p, i + 1) == UInt8('\n')
+        i += 1          # escaped \r\n: one line continuation
+    elseif !(c in (UInt8('n'), UInt8('t'), UInt8('r'), UInt8('e'), UInt8('b'), UInt8('f'), UInt8('v'), UInt8('a'),
+                   UInt8('\\'), UInt8('\''), UInt8('"'), UInt8('$'), UInt8('`'), UInt8('\n')))
+        valid = false   # JuliaSyntax: "invalid escape sequence"
+        while i + 1 <= n && (unsafe_load(p, i + 1) & 0xc0) == 0x80   # the whole (non-ASCII) character
+            i += 1
+        end
+    end
+    return Int32(valid ? i : -i)
+end
+
+Base.@ccallable function jsyn_escape_len(p::Ptr{UInt8}, n::Csize_t, raw::Cint, delim::Cint)::Cint
+    return escape_len(p, n % Int, raw != 0, delim % UInt8)
+end
+
 # The grammar's terminal class of a JuliaSyntax token kind, from JuliaSyntax's kind predicates. Not
 # compiled into the kernel: regenerate.sh evaluates it for every kind and writes a C table (kinds.h).
 const CLASSES = [:NONE, :IDENTIFIER, :KEYWORD, :INTEGER, :FLOAT, :BOOL, :DOT, :WHITESPACE, :NEWLINE,

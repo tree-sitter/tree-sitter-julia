@@ -37,10 +37,12 @@ $JULIA --project="$W/envc" -e 'using Pkg; Pkg.add(name="JuliaC", version="0.3.12
 
 # 2. juliac --trim=safe --output-bc -> one runtime-free module -> C (llvm-cbe)
 $JULIA --project="$W/envc" "$HERE/build_bc.jl" "$HERE/kernel.jl" "$W/envk" "$W/bc/jsyn.bc.a"
-python3 "$HERE/kgen.py" "$W/bc" jsyn_space_prefix jsyn_token jsyn_contextual_keyword
+python3 "$HERE/kgen.py" "$W/bc" jsyn_space_prefix jsyn_token jsyn_contextual_keyword jsyn_string_token jsyn_char_literal jsyn_escape_len jsyn_var_identifier
 cp "$W/bc/kernel.c" "$ROOT/src/jsyntax/kernel.c"
-# Kind codes and the grammar class of every kind (JuliaSyntax's kind predicates), for the scanner
-$JULIA --project="$W/envk" "$HERE/gen_kinds.jl" "$HERE/kernel.jl" > "$ROOT/src/jsyntax/kinds.h"
+# Kind codes, each kind's grammar class (JuliaSyntax's kind predicates) and plain-character tables for
+# the scanner; the scanner's token list for grammar.js (grammar-tokens.js) and scanner.c (externals.h)
+$JULIA --project="$W/envk" "$HERE/gen_kinds.jl" "$HERE/kernel.jl" "$ROOT/grammar-tokens.js" \
+    "$ROOT/src/jsyntax/externals.h" > "$ROOT/src/jsyntax/kinds.h"
 
 # 3. Unicode tables from the utf8proc inside Julia (libjulia-internal), read with utf8proc.h 2.11.3
 curl -fsSL https://raw.githubusercontent.com/JuliaStrings/utf8proc/v2.11.3/utf8proc.h -o "$W/utf8proc.h"

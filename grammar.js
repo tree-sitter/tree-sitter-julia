@@ -39,15 +39,6 @@ PREC.assign = -2;
 PREC.stmt = -3;
 PREC.macro_arg = -4;
 
-const ESCAPE_SEQUENCE = token(seq(
-  '\\',
-  choice(
-    /[^uUx0-7]/,
-    /[uU][0-9a-fA-F]{1,6}/, // unicode codepoints
-    /[0-7]{1,3}/,
-    /x[0-9a-fA-F]{2}/,
-  ),
-));
 
 module.exports = grammar({
   name: 'julia',
@@ -60,64 +51,9 @@ module.exports = grammar({
     $._operation,
   ],
 
-  externals: $ => [
-    $._block_comment_rest,
-    $._immediate_paren,
-    $._immediate_bracket,
-    $._immediate_brace,
-    $._immediate_string_start,
-    $._immediate_command_start,
-    $._content_cmd_1,
-    $._content_cmd_1_raw,
-    $._content_cmd_3,
-    $._content_cmd_3_raw,
-    $._content_str_1,
-    $._content_str_1_raw,
-    $._content_str_3,
-    $._content_str_3_raw,
-    $._end_cmd,
-    $._end_str,
-    // In a space-sensitive context (matrix row, macro arguments): a `+`/`-`/`±`/`∓` that JuliaSyntax's
-    // rule says starts a new element: `[x -y]` is `[x (-y)]`, `[x - y]` and `[x -= y]` are not.
-    $._space_prefix_operator,
-    // Never emitted: only valid right after an element of a matrix row or of macro arguments, which is
-    // where JuliaSyntax's space-sensitive rule applies (the scanner checks it with valid_symbols).
-    $._space_sensitive_probe,
-
-    // Tokens lexed by JuliaSyntax's own lexer (src/jsyntax/): identifiers, numbers, operators by
-    // precedence class (JuliaSyntax's kind predicates), keywords (contextual ones decided as
-    // JuliaSyntax's parser does), and newlines where they terminate a statement.
-    $.identifier,
-    $.integer_literal,
-    $.float_literal,
-    $.boolean_literal,
-    $._assignment_operator,
-    $._pair_operator,
-    $._arrow_operator,
-    $._lazy_or_operator,
-    $._lazy_and_operator,
-    $._comparison_operator,
-    $._pipe_left_operator,
-    $._pipe_right_operator,
-    $._ellipsis_operator,
-    $._plus_operator,
-    $._unary_plus_operator,
-    $._times_operator,
-    $._rational_operator,
-    $._bitshift_operator,
-    $._power_operator,
-    $._tilde_operator,
-    $._type_order_operator,
-    $._unary_operator,
-    $._newline,
-    $._import_dots, // leading dots of a relative import path (`using ..A`), not the `..` operator
-    $._quoted_keyword, // `:end`, `:true`: a keyword or Bool right after `:` is a symbol
-    '∈', // the iteration operator in `for x ∈ xs` (elsewhere a comparison)
-    'baremodule', 'module', 'abstract', 'primitive', 'mutable', 'struct', 'type', 'function', 'macro',
-    'begin', 'quote', 'let', 'if', 'elseif', 'else', 'try', 'catch', 'finally', 'for', 'while', 'do',
-    'break', 'continue', 'return', 'const', 'global', 'local', 'export', 'public', 'import', 'using',
-    'as', 'outer', 'in', 'isa', 'where', 'end',
-  ],
+  // The scanner's tokens (src/scanner.c, lexed by JuliaSyntax: src/jsyntax/), generated from
+  // script/jsyntax/tokens.jl and JuliaSyntax's keyword list by script/jsyntax/regenerate.sh
+  externals: $ => require('./grammar-tokens.js')($),
 
   conflicts: $ => [
     [$.juxtaposition_expression, $._primary_expression], // adjoint
@@ -577,7 +513,7 @@ module.exports = grammar({
 
     adjoint_expression: $ => seq(
       $._primary_expression,
-      token.immediate('\''),
+      alias($._adjoint, "'"),
     ),
 
     field_expression: $ => prec(PREC.dot, seq(
@@ -851,31 +787,15 @@ module.exports = grammar({
       $.prefixed_command_literal,
     ),
 
-    escape_sequence: _ => ESCAPE_SEQUENCE,
-
-    character_literal: _ => token(seq(
-      '\'',
-      choice(
-        /[^'\\]/,
-        ESCAPE_SEQUENCE,
-      ),
-      '\'',
-    )),
-
-    _delimiter_str_1: _ => '"',
-    _delimiter_str_3: _ => '"""',
-    _delimiter_cmd_1: _ => '`',
-    _delimiter_cmd_3: _ => '```',
-
     string_literal: $ => choice(
       seq(
         $._delimiter_str_1,
-        repeat(choice(alias($._content_str_1, $.content), $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_str_1_run, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_str,
       ),
       seq(
         $._delimiter_str_3,
-        repeat(choice(alias($._content_str_3, $.content), $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_str_3_run, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_str,
       ),
     ),
@@ -883,12 +803,12 @@ module.exports = grammar({
     command_literal: $ => choice(
       seq(
         $._delimiter_cmd_1,
-        repeat(choice(alias($._content_cmd_1, $.content), $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_cmd_1_run, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_cmd,
       ),
       seq(
         $._delimiter_cmd_3,
-        repeat(choice(alias($._content_cmd_3, $.content), $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_cmd_3_run, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_cmd,
       ),
     ),
@@ -899,16 +819,16 @@ module.exports = grammar({
       choice(
         seq(
           $._delimiter_str_1,
-          repeat(choice(alias($._content_str_1_raw, $.content), $.escape_sequence)),
+          repeat(choice(alias($._content_str_1_raw_run, $.content), $.escape_sequence)),
           $._end_str,
         ),
         seq(
           $._delimiter_str_3,
-          repeat(choice(alias($._content_str_3_raw, $.content), $.escape_sequence)),
+          repeat(choice(alias($._content_str_3_raw_run, $.content), $.escape_sequence)),
           $._end_str,
         ),
       ),
-      optional(field('suffix', $.identifier)),
+      optional(field('suffix', alias($._string_suffix, $.identifier))),
     )),
 
     prefixed_command_literal: $ => prec.left(seq(
@@ -917,16 +837,16 @@ module.exports = grammar({
       choice(
         seq(
           $._delimiter_cmd_1,
-          repeat(choice(alias($._content_cmd_1_raw, $.content), $.escape_sequence)),
+          repeat(choice(alias($._content_cmd_1_raw_run, $.content), $.escape_sequence)),
           $._end_cmd,
         ),
         seq(
           $._delimiter_cmd_3,
-          repeat(choice(alias($._content_cmd_3_raw, $.content), $.escape_sequence)),
+          repeat(choice(alias($._content_cmd_3_raw_run, $.content), $.escape_sequence)),
           $._end_cmd,
         ),
       ),
-      optional(field('suffix', $.identifier)),
+      optional(field('suffix', alias($._string_suffix, $.identifier))),
     )),
 
     string_interpolation: $ => seq(
@@ -964,10 +884,15 @@ module.exports = grammar({
 
     _terminator: $ => choice($._newline, $._semicolon),
 
-    block_comment: $ => seq(/#=/, $._block_comment_rest),
-
-    // FIXME: This is currently a seq to avoid conflicts with block_comment
-    line_comment: _ => seq(/#/, /.*/),
+    // content: a run of content pieces (JuliaSyntax's chunks), between escapes and interpolations
+    _content_str_1_run: $ => prec.right(repeat1($._content_str_1)),
+    _content_str_3_run: $ => prec.right(repeat1($._content_str_3)),
+    _content_cmd_1_run: $ => prec.right(repeat1($._content_cmd_1)),
+    _content_cmd_3_run: $ => prec.right(repeat1($._content_cmd_3)),
+    _content_str_1_raw_run: $ => prec.right(repeat1($._content_str_1_raw)),
+    _content_str_3_raw_run: $ => prec.right(repeat1($._content_str_3_raw)),
+    _content_cmd_1_raw_run: $ => prec.right(repeat1($._content_cmd_1_raw)),
+    _content_cmd_3_raw_run: $ => prec.right(repeat1($._content_cmd_3_raw)),
   },
 });
 
