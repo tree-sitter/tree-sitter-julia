@@ -78,6 +78,18 @@ for (name, f) in [("str_q", c -> plain_string(c, '"', false, false)), ("str_qqq"
     for i in 1:128; print(i == 1 ? "" : ",", t[i]); end
     println("};")
 end
+# Juxtaposition (parser.jl parse_juxtapose / is_juxtapose): the next token's part of the rule, with no
+# whitespace before it; the previous token's part is the grammar's (what may stand on the left).
+# is_initial_reserved_word: all keywords except the contextual ones (and `begin` inside indexing, which
+# the grammar handles); is_closing_token: else elseif catch finally end , ) ] } ; EndMarker.
+juxt(k) = !JS.is_number(k) && k != JS.K"@" && (!JS.is_operator(k) || JS.is_radical_op(k)) &&
+          !(k in JS.KSet", ) ] } ; EndMarker") && !(JS.is_keyword(k) && !JS.is_contextual_keyword(k)) &&
+          !(k in JS.KSet"\" \"\"\" ` ```") && !(k in JS.KSet"Whitespace NewlineWs Comment") && !JS.is_error(k)
+print("static const uint8_t jsk_juxtapose_next[JSK_NKINDS] = {")
+for (i, k) in enumerate(reinterpret(JS.Kind, UInt16(j)) for j in 0:n-1)
+    print(i == 1 ? "" : ",", (i - 1) % 40 == 0 ? "\n" : "", Int(valid(k) && juxt(k)))
+end
+println("};")
 for (name, k) in [("DQUOTE", JS.K"\""), ("TRIPLE_DQUOTE", JS.K"\"\"\""), ("BACKTICK", JS.K"`"), ("TRIPLE_BACKTICK", JS.K"```"),
                   ("DOLLAR", JS.K"$"), ("PRIME", JS.K"'")]
     println("#define JSK_K_$name $(reinterpret(UInt16, k))")

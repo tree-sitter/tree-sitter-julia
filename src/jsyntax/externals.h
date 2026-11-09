@@ -53,6 +53,7 @@ enum TokenType {
     NEWLINE,
     IMPORT_DOTS,
     QUOTED_KEYWORD,
+    JUXTAPOSE,
     ELEMENT_OF,
     KW_ABSTRACT,
     KW_AS,

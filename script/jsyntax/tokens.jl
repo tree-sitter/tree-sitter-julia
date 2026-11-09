@@ -25,5 +25,6 @@ const SCANNER_TOKENS = [
     "_newline",                # a newline where it terminates a statement or a matrix row
     "_import_dots",            # `using ..A`
     "_quoted_keyword",         # `:end`, `:true`
+    "_juxtapose",              # zero-width: `2x`, `(n+1)ε`, `VT'Vecs` (JuliaSyntax's is_juxtapose)
 ]
 const SCANNER_STRINGS = ["∈" => "ELEMENT_OF"]  # the iteration operator in `for x ∈ xs`

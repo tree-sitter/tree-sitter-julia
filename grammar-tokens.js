@@ -53,6 +53,7 @@ module.exports = $ => [
   $._newline,
   $._import_dots,
   $._quoted_keyword,
+  $._juxtapose,
   '∈',
   // keywords (JuliaSyntax: is_keyword, is_word_operator)
   'abstract',
