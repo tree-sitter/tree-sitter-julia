@@ -542,6 +542,24 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
             space_prefix = jsyn_space_prefix(t->buf, t->n);
             if (space_prefix == 1) sym = SPACE_PREFIX_OPERATOR;
         }
+        // `~`: infix (binary, JuliaSyntax call-i at assignment precedence) after an operand, unless spaced as
+        // a prefix in a space-sensitive context (`[a ~b]`); else the prefix (bitwise not) as a unary operator
+        if (sym == TILDE_OPERATOR && !recovering) {
+            bool operand = valid[JUXTAPOSE] && !t->after_operator;
+            bool sens = valid[SPACE_SENSITIVE_PROBE] || valid[MACRO_ARGS_PROBE] ||
+                        (valid[COLON] && valid[QUOTE_COLON] && !t->in_head);
+            if (operand && ws_before && sens) {
+                read_ahead(lexer, t);
+                if (jsyn_space_prefix(t->buf, t->n) == 1) operand = false;
+            }
+            if (!valid[TILDE_OPERATOR] || (!operand && valid[UNARY_OPERATOR])) sym = UNARY_OPERATOR;
+        }
+        // `if T <: R`, `x <: y && z`: `<:`/`>:` right after an operand are infix (JuliaSyntax reads a prefix
+        // `<:` only where an expression starts). The comparison token is accepted by the same binary rule
+        // (same tree) and cannot start a block as a prefix. Not in matrix rows or macro arguments.
+        if (sym == TYPE_ORDER_OPERATOR && valid[JUXTAPOSE] && valid[COMPARISON_OPERATOR] && !t->after_operator &&
+            !valid[SPACE_SENSITIVE_PROBE] && !valid[MACRO_ARGS_PROBE] && !recovering)
+            sym = COMPARISON_OPERATOR;
         // `if n - j; …`, `while a + b > c …`: right after an operand on the same line (the parser could
         // juxtapose here), JuliaSyntax reads `+`/`-` as infix unless it is spaced as a prefix (`a -b`, which
         // only space-sensitive contexts read as prefix). The infix-only token keeps the grammar from starting
@@ -708,7 +726,7 @@ static bool scan(TokBuf *t, TSLexer *lexer, const bool *valid_symbols) {
     }
     // `using ..A`: in an import path, leading dots are the path's (JuliaSyntax: parse_import_path)
     if (valid_symbols[IMPORT_DOTS] && !recovering && lexer->lookahead == '.') {
-        while (lexer->lookahead == '.') lexer->advance(lexer, false);
+        lexer->advance(lexer, false); // one token per dot (`..A`: two)
         lexer->mark_end(lexer);
         lexer->result_symbol = IMPORT_DOTS;
         return true;

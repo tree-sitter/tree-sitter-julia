@@ -358,3 +358,33 @@ function $name end
   (operator))
 
 
+
+==============================
+tilde, lazy operators, type order after an operand
+==============================
+
+eqs = [D(x) ~ y, 0 ~ z]
+return 2.0 ~ Normal(m)
+x = ~a
+a && b && c
+if T <: R end
+f(g::::IsDirected) = 1
+
+---
+
+(source_file
+  (assignment
+    (identifier)
+    (operator)
+    (vector_expression
+      (binary_expression (call_expression (identifier) (argument_list (identifier))) (operator) (identifier))
+      (binary_expression (integer_literal) (operator) (identifier))))
+  (return_statement
+    (binary_expression (float_literal) (operator) (call_expression (identifier) (argument_list (identifier)))))
+  (assignment (identifier) (operator) (unary_expression (operator) (identifier)))
+  (binary_expression (identifier) (operator) (binary_expression (identifier) (operator) (identifier)))
+  (if_statement condition: (binary_expression (identifier) (operator) (identifier)))
+  (assignment
+    (call_expression (identifier) (argument_list (typed_expression (identifier) (unary_typed_expression (identifier)))))
+    (operator)
+    (integer_literal)))

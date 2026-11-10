@@ -132,7 +132,7 @@ $(usertype){T}
         (identifier)))
     (curly_expression
       (identifier)))
-  (compound_assignment_expression
+  (binary_expression
     (curly_expression
       (quote_expression
         (identifier)))

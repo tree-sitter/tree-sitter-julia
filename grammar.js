@@ -369,7 +369,7 @@ module.exports = grammar({
     import_alias: $ => seq($._importable, 'as', $._exportable),
 
     import_path: $ => seq(
-      $._import_dots,
+      repeat1(alias($._import_dots, '.')), // one per dot, as JuliaSyntax's importpath
       choice(
         $.identifier,
         $._import_dotted,
@@ -706,10 +706,13 @@ module.exports = grammar({
 
     binary_expression: $ => {
       const table = [
+        // `D(x) ~ y`: an infix call at assignment precedence (JuliaSyntax: call-i), allowed wherever an
+        // expression is (`[a ~ b, c]`, `return 2.0 ~ d`); prefix `~x` is the scanner's unary operator
+        [prec.right, PREC.assign, $._tilde_operator],
         [prec.right, PREC.pair, $._pair_operator],
         [prec.right, PREC.arrow, $._arrow_operator],
-        [prec.left, PREC.lazy_or, $._lazy_or_operator],
-        [prec.left, PREC.lazy_and, $._lazy_and_operator],
+        [prec.right, PREC.lazy_or, $._lazy_or_operator], // `a || b || c` is `a || (b || c)` (JuliaSyntax)
+        [prec.right, PREC.lazy_and, $._lazy_and_operator],
         [prec.left, PREC.comparison, choice('in', 'isa', $._comparison_operator, $._type_order_operator)],
         [prec.right, PREC.pipe_left, $._pipe_left_operator],
         [prec.left, PREC.pipe_right, $._pipe_right_operator],
@@ -731,7 +734,6 @@ module.exports = grammar({
     unary_expression: $ => choice(
       prec.right(PREC.prefix, seq(
         alias(choice(
-          $._tilde_operator,
           $._type_order_operator,
           $._unary_operator,
           $._unary_plus_operator,
@@ -767,7 +769,7 @@ module.exports = grammar({
     typed_expression: $ => prec(PREC.decl, seq(
       $._expression,
       '::',
-      $._primary_expression,
+      choice($._primary_expression, $.unary_typed_expression), // `g::::IsDirected` (SimpleTraits)
     )),
 
     unary_typed_expression: $ => prec.right(PREC.prefix, seq(
@@ -804,7 +806,7 @@ module.exports = grammar({
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(
       choice($._primary_expression, $._operation),
-      alias(choice($._assignment_operator, $._tilde_operator), $.operator),
+      alias($._assignment_operator, $.operator),
       $._bracket_form,
     )),
 
@@ -928,7 +930,7 @@ module.exports = grammar({
       $._rational_operator,
       $._bitshift_operator,
       $._power_operator,
-      $._tilde_operator,
+      // (`~` as a value, `map(~, x)`, is the scanner's unary operator: it has no left operand)
       $._type_order_operator,
       $._unary_operator,
       $._unary_plus_operator,
