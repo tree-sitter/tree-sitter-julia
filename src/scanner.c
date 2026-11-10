@@ -466,10 +466,25 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         if (k == JSK_K_ELEMENT_OF && valid[ELEMENT_OF]) sym = ELEMENT_OF;
         // `[x -y]`: in a space-sensitive context (right after an element of a matrix row or of macro
         // arguments), after whitespace, ask JuliaSyntax's rule whether this starts a new element
+        int space_prefix = -1; // JuliaSyntax's spacing rule (`a -b`), asked at most once
         if (cls == JSK_C_UNARY_PLUS && ws_before && valid[SPACE_PREFIX_OPERATOR] && valid[SPACE_SENSITIVE_PROBE] &&
             !recovering) {
             read_ahead(lexer, t);
-            if (jsyn_space_prefix(t->buf, t->n) == 1) sym = SPACE_PREFIX_OPERATOR;
+            space_prefix = jsyn_space_prefix(t->buf, t->n);
+            if (space_prefix == 1) sym = SPACE_PREFIX_OPERATOR;
+        }
+        // `if n - j; …`, `while a + b > c …`: right after an operand on the same line (the parser could
+        // juxtapose here), JuliaSyntax reads `+`/`-` as infix unless it is spaced as a prefix (`a -b`, which
+        // only space-sensitive contexts read as prefix). The infix-only token keeps the grammar from starting
+        // a block with `-j`. `a -b` is left to the rule above: the space-sensitive probe can be skipped when
+        // incremental parsing reuses a node, so the context is not known reliably here.
+        if (sym == UNARY_PLUS_OPERATOR && valid[JUXTAPOSE] && valid[PLUS_OPERATOR] && !t->after_operator &&
+            !recovering) {
+            if (ws_before && space_prefix < 0) {
+                read_ahead(lexer, t);
+                space_prefix = jsyn_space_prefix(t->buf, t->n);
+            }
+            if (!ws_before || space_prefix != 1) sym = PLUS_OPERATOR;
         }
     } else {
         return false;
@@ -497,7 +512,11 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
     TSSymbol s = lexer->result_symbol;
     if (s != JUXTAPOSE && s != IMMEDIATE_PAREN && s != IMMEDIATE_BRACKET && s != IMMEDIATE_BRACE &&
         s != IMMEDIATE_STRING_START && s != IMMEDIATE_COMMAND_START && s != LINE_COMMENT && s != BLOCK_COMMENT)
-        t->after_operator = (s >= ASSIGNMENT_OPERATOR && s <= UNARY_OPERATOR) || s == SPACE_PREFIX_OPERATOR || s == ELEMENT_OF;
+        // no left operand next: after an operator, or a keyword that does not end an expression (`return -1`)
+        t->after_operator = (s >= ASSIGNMENT_OPERATOR && s <= UNARY_OPERATOR) || s == SPACE_PREFIX_OPERATOR ||
+                            s == ELEMENT_OF ||
+                            (s >= FIRST_KEYWORD && s <= LAST_KEYWORD && s != KW_END && s != KW_BEGIN && s != KW_BREAK &&
+                             s != KW_CONTINUE); // `a[begin:i]`, `a[end - 1]`: operands
     // which line an import is on: JuliaSyntax's parser knows; here the scanner follows it
     if (s == KW_IMPORT || s == KW_USING) t->in_import = 1;
     else if (s == NEWLINE) t->in_import = 0;

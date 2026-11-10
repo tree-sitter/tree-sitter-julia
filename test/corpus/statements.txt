@@ -538,3 +538,43 @@ global function bar() 4 end
         (call_expression (identifier) (argument_list)))
         (block
           (integer_literal)))))
+
+==============================
+infix plus/minus after a condition, prefix after return
+==============================
+
+if n - j; end
+while a + b > c end
+x = if a - b <= c d else e end
+f(x) = x && return -1
+return isa(t, T)
+
+---
+
+(source_file
+  (if_statement
+    condition: (binary_expression (identifier) (operator) (identifier)))
+  (while_statement
+    condition: (binary_expression
+      (binary_expression (identifier) (operator) (identifier))
+      (operator)
+      (identifier)))
+  (assignment
+    (identifier)
+    (operator)
+    (if_statement
+      condition: (binary_expression
+        (binary_expression (identifier) (operator) (identifier))
+        (operator)
+        (identifier))
+      (block (identifier))
+      alternative: (else_clause (block (identifier)))))
+  (assignment
+    (call_expression (identifier) (argument_list (identifier)))
+    (operator)
+    (binary_expression
+      (identifier)
+      (operator)
+      (return_statement (unary_expression (operator) (integer_literal)))))
+  (return_statement
+    (call_expression (identifier) (argument_list (identifier) (identifier)))))
