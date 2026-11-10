@@ -371,9 +371,9 @@ f(x -y)
   (matrix_expression
     (matrix_row
       (identifier)
-      (unary_expression
+      (call_expression
         (operator)
-        (parenthesized_expression
+        (argument_list
           (identifier)))))
   (vector_expression
     (identifier)

@@ -80,9 +80,17 @@ module.exports = grammar({
 
   rules: {
     source_file: $ => optional(seq(
-      sep1($._terminator, $._block_form),
+      sep1($._terminator, $._toplevel_form),
       optional($._terminator)
     )),
+
+    // top level and module bodies: the only places JuliaSyntax reads `public` as a keyword (parse_public)
+    _toplevel_form: $ => choice($._block_form, $.public_statement),
+
+    _module_block: $ => seq(
+      sep1($._terminator, $._toplevel_form),
+      optional($._terminator)
+    ),
 
     block: $ => seq(
       sep1($._terminator, $._block_form),
@@ -164,7 +172,7 @@ module.exports = grammar({
       choice('module', 'baremodule'),
       field('name', choice($.identifier, $.interpolation_expression)),
       optional($._terminator),
-      optional($.block),
+      optional(alias($._module_block, $.block)),
       'end',
     ),
 
@@ -246,7 +254,6 @@ module.exports = grammar({
       $.global_statement,
       $.local_statement,
       $.export_statement,
-      $.public_statement,
       $.import_statement,
       $.using_statement,
     ),
@@ -577,7 +584,8 @@ module.exports = grammar({
     ),
 
     call_expression: $ => seq(
-      choice($._primary_expression, $.operator),
+      // `[x -(y)]` is a call of `-`, as `x = -(y)` (JuliaSyntax: call-pre in both)
+      choice($._primary_expression, $.operator, alias($._space_prefix_operator, $.operator)),
       $._immediate_paren,
       alias($.tuple_expression, $.argument_list),
       optional($.do_clause),

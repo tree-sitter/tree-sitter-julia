@@ -100,9 +100,9 @@ ninja -C build llvm-cbe        # LLVM_CBE=build/tools/llvm-cbe/llvm-cbe
 - Generated from 64-bit Julia: byte offsets assume 8-byte pointer slots. Works on 32-bit targets
   (wasm32 tested) because every pointer slot is 8 bytes; untested on MSVC. Little-endian only
   (`jsyntax.c` stops a big-endian build with `#error`).
-- The generated C type-puns and relies on wrapping arithmetic: `jsyntax.c` sets `-fno-strict-aliasing
-  -fwrapv` for GCC by pragma; Clang has no such pragma (verified 0 differences with Clang, but the C is
-  not strictly conforming).
+- No compiler flags needed: `cconform.py` turns llvm-cbe's typed loads and stores into `memcpy` (no
+  aliasing assumptions) and guards shifts by the type's width. GCC and Clang at -O2 and -O3 give the same
+  answers at every byte position of the corpus; ASan + UBSan report nothing.
 - The scanner passes at most 256 bytes (whole characters) of the line; tree-sitter re-encodes invalid
   UTF-8 as U+FFFD, so on invalid UTF-8 the answer can differ from JuliaSyntax on the raw bytes.
 - Block comments are lexed by the scanner with Tokenize's nesting rule (re-lexing them per character

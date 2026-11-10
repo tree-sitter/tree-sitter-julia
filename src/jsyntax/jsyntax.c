@@ -25,8 +25,6 @@
 #pragma GCC diagnostic ignored "-Wold-style-declaration"
 #pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
 #pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
-#pragma GCC push_options
-#pragma GCC optimize("no-strict-aliasing", "wrapv")  // llvm-cbe's C type-puns through pointer casts
 #endif
 #if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #error "src/jsyntax/kernel.c was generated for little-endian targets (it builds characters from byte loads)"
@@ -40,7 +38,6 @@
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #elif defined(__GNUC__)
-#pragma GCC pop_options
 #pragma GCC diagnostic pop
 #endif
 #endif

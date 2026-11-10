@@ -193,8 +193,10 @@ c = c.replace('#include <stdint.h>\n', '#include <stdint.h>\n#include <string.h>
 assert 'typedef unsigned char bool;' in c
 c = c.replace('typedef unsigned char bool;', 'typedef unsigned char jsk_bool;\n#define bool jsk_bool')
 c = ('// GENERATED from JuliaSyntax (Julia) by script/jsyntax/regenerate.sh (juliac --trim --output-bc, llvm-cbe,\n'
-     '// kgen.py): do not edit. Entry: jsk_' + ', jsk_'.join(entries) + '; support: runtime.c.\n' + c)
+     '// kgen.py, cconform.py): do not edit. Entry: jsk_' + ', jsk_'.join(entries) + '; support: runtime.c.\n' + c)
 c += ''.join('#undef ' + m + '\n' for m in ['bool', '__noreturn', '__forceinline', '__ATTRIBUTELIST__',
                                             '__PREFIXALIGN__', '__POSTFIXALIGN__', '__HIDDEN__'])
 open('kernel.c', 'w').write(c)
+# well-defined C without -fno-strict-aliasing/-fwrapv: typed accesses through memcpy, guarded shifts
+run(sys.executable, f'{HERE}/cconform.py', 'kernel.c')
 print('functions', len(re.findall(r'^define ', s, re.M)), 'kernel.c bytes', os.path.getsize('kernel.c'))

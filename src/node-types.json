@@ -236,10 +236,6 @@
         "named": true
       },
       {
-        "type": "public_statement",
-        "named": true
-      },
-      {
         "type": "quote_statement",
         "named": true
       },
@@ -477,6 +473,10 @@
         },
         {
           "type": "open_tuple",
+          "named": true
+        },
+        {
+          "type": "public_statement",
           "named": true
         }
       ]
@@ -2358,6 +2358,10 @@
         },
         {
           "type": "open_tuple",
+          "named": true
+        },
+        {
+          "type": "public_statement",
           "named": true
         }
       ]

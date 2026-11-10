@@ -90,10 +90,9 @@ function contextual_keyword(p::Ptr{UInt8}, n::Int)
     elseif k == K"abstract" || k == K"primitive"
         return Int32(k2 == K"type")
     elseif k == K"public"
-        # parse_public: `public` followed by `(`, `=`, `[` is a name; and it is only a keyword where JuliaSyntax
-        # calls parse_public (top level), where `public` starts a list of names: so a keyword only when a
-        # name follows (`function f(public)`, `public *= 4`, `public ∪ x` inside code are names)
-        return Int32(!(k2 in JS.KSet"( = [") && (k2 == K"Identifier" || k2 == K"@" || k2 == K"$" || JS.is_contextual_keyword(k2)))
+        # parse_public: `public` followed by `(`, `=`, `[` is a name. JuliaSyntax only calls it at top level
+        # and in module bodies, the only places the grammar has a public_statement.
+        return Int32(!(k2 in JS.KSet"( = ["))
     elseif k == K"outer"
         return Int32(!(k2 in JS.KSet"= in ∈"))
     end

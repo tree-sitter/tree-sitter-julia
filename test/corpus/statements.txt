@@ -578,3 +578,34 @@ return isa(t, T)
       (return_statement (unary_expression (operator) (integer_literal)))))
   (return_statement
     (call_expression (identifier) (argument_list (identifier) (identifier)))))
+
+==============================
+block heads are not space-sensitive; public at top level
+==============================
+
+for i = 1 :n
+end
+if x :a end
+if n -j; end
+module A
+public ⊕, @m
+end
+function g()
+  public = 1
+end
+
+---
+
+(source_file
+  (for_statement
+    (for_binding (identifier) (operator) (range_expression (integer_literal) (identifier))))
+  (if_statement
+    condition: (range_expression (identifier) (identifier)))
+  (if_statement
+    condition: (binary_expression (identifier) (operator) (identifier)))
+  (module_definition
+    name: (identifier)
+    (block (public_statement (operator) (macro_identifier (identifier)))))
+  (function_definition
+    (signature (call_expression (identifier) (argument_list)))
+    (block (assignment (identifier) (operator) (integer_literal)))))

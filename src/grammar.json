@@ -13,7 +13,7 @@
               "members": [
                 {
                   "type": "SYMBOL",
-                  "name": "_block_form"
+                  "name": "_toplevel_form"
                 },
                 {
                   "type": "REPEAT",
@@ -26,7 +26,7 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "_block_form"
+                        "name": "_toplevel_form"
                       }
                     ]
                   }
@@ -49,6 +49,61 @@
         },
         {
           "type": "BLANK"
+        }
+      ]
+    },
+    "_toplevel_form": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_block_form"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "public_statement"
+        }
+      ]
+    },
+    "_module_block": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_toplevel_form"
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_terminator"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_toplevel_form"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_terminator"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
@@ -440,8 +495,13 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "block"
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_module_block"
+              },
+              "named": true,
+              "value": "block"
             },
             {
               "type": "BLANK"
@@ -776,10 +836,6 @@
         {
           "type": "SYMBOL",
           "name": "export_statement"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "public_statement"
         },
         {
           "type": "SYMBOL",
@@ -2655,6 +2711,15 @@
             {
               "type": "SYMBOL",
               "name": "operator"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_space_prefix_operator"
+              },
+              "named": true,
+              "value": "operator"
             }
           ]
         },

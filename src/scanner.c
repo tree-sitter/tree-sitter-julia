@@ -16,6 +16,8 @@ typedef struct {
     size_t cap;
     uint8_t after_operator; // no left operand next: the last token was an operator or keyword (serialized)
     uint8_t in_import;      // inside `import`/`using`, up to a newline, `;` or closing bracket (serialized)
+    uint8_t in_head;        // in the head of `if`/`elseif`/`while`/`for`, up to a newline or `;`:
+                            // not space-sensitive there (serialized)
     size_t tok_end;         // length of the token scan_token just emitted (bytes of buf)
 } TokBuf;
 
@@ -30,18 +32,21 @@ void tree_sitter_julia_external_scanner_destroy(void *payload) {
     if (t) { free(t->buf); free(t); }
 }
 
-// Two bytes of state: whether the next token has no left operand (after an operator or keyword: `a && !b`
-// does not juxtapose, `return -1` is a prefix minus) and whether we are in an import path (`import Base.*`).
-// Everything else is in the text ahead and in valid_symbols.
+// Three bytes of state: whether the next token has no left operand (after an operator or keyword: `a && !b`
+// does not juxtapose, `return -1` is a prefix minus), whether we are in an import path (`import Base.*`)
+// and whether we are in a block head (`if x :a`: a range). Everything else is in the text ahead and in
+// valid_symbols.
 unsigned tree_sitter_julia_external_scanner_serialize(void *payload, char *buffer) {
     buffer[0] = (char)((TokBuf *)payload)->after_operator;
     buffer[1] = (char)((TokBuf *)payload)->in_import;
-    return 2;
+    buffer[2] = (char)((TokBuf *)payload)->in_head;
+    return 3;
 }
 
 void tree_sitter_julia_external_scanner_deserialize(void *payload, const char *buffer, unsigned size) {
     ((TokBuf *)payload)->after_operator = size > 0 ? (uint8_t)buffer[0] : 0;
     ((TokBuf *)payload)->in_import = size > 1 ? (uint8_t)buffer[1] : 0;
+    ((TokBuf *)payload)->in_head = size > 2 ? (uint8_t)buffer[2] : 0;
 }
 
 static size_t utf8_encode(uint8_t *b, int32_t c) {
@@ -467,8 +472,9 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         // space-sensitive (matrix row, macro arguments): where an element may directly follow another,
         // both a range `:` and a quoting `:` are valid. The probes say so too, but incremental parsing
         // can reuse a repeat node and land in a state past the probe; the pair of tokens survives that.
+        // A block head (`if x :a`, `for i = 1 :n`) has the pair too, but is not space-sensitive.
         bool space_sensitive = (valid[SPACE_SENSITIVE_PROBE] || valid[MACRO_ARGS_PROBE] ||
-                                (valid[COLON] && valid[QUOTE_COLON])) && !recovering;
+                                (valid[COLON] && valid[QUOTE_COLON] && !t->in_head)) && !recovering;
         // right after an operator JuliaSyntax parses an operand: a quote (`x === :a`), not a range
         bool operand = t->after_operator && valid[QUOTE_COLON] && !ws_after && !closing && !recovering;
         if (valid[TERNARY_COLON] && !recovering) sym = TERNARY_COLON;
@@ -527,7 +533,8 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         // reuse in incremental parsing: `[x -(y)]` must not become a call of `-` after an edit elsewhere)
         int space_prefix = -1; // JuliaSyntax's spacing rule (`a -b`), asked at most once
         // (not at the first macro argument, which follows no element: `@inline -(x, y) = …`)
-        bool space_sensitive = (valid[SPACE_SENSITIVE_PROBE] || (valid[COLON] && valid[QUOTE_COLON])) &&
+        bool space_sensitive = (valid[SPACE_SENSITIVE_PROBE] ||
+                                (valid[COLON] && valid[QUOTE_COLON] && !t->in_head)) &&
                                !valid[MACRO_ARGS_PROBE];
         if (cls == JSK_C_UNARY_PLUS && ws_before && valid[SPACE_PREFIX_OPERATOR] && space_sensitive &&
             !recovering) {
@@ -546,7 +553,10 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
                 read_ahead(lexer, t);
                 space_prefix = jsyn_space_prefix(t->buf, t->n);
             }
-            if (!ws_before || space_prefix != 1) sym = PLUS_OPERATOR;
+            // (in a block head without a probe, `if n -j` is not space-sensitive: infix as well)
+            if (!ws_before || space_prefix != 1 ||
+                (t->in_head && !valid[SPACE_SENSITIVE_PROBE] && !valid[MACRO_ARGS_PROBE]))
+                sym = PLUS_OPERATOR;
         }
     } else {
         return false;
@@ -594,6 +604,15 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
         size_t i = t->tok_end;
         int32_t c = peek_after(t, lexer, &i);
         if (c == ';' || c == ')' || c == ']' || c == '}') t->in_import = 0;
+    }
+    // a block head (JuliaSyntax parses it with parse_cond / parse_iteration_specs, not space-sensitive)
+    // ends at a newline or `;`
+    // (not `struct`: the grammar's type head has no range, `struct A :b end` stays a quoted body)
+    if (s == KW_IF || s == KW_ELSEIF || s == KW_WHILE || s == KW_FOR) t->in_head = 1;
+    else if (s == NEWLINE || s == KW_END || s == KW_ELSE) t->in_head = 0;
+    else if (t->in_head && (t->tok_end > 0 || s == BLOCK_COMMENT)) {
+        size_t i = t->tok_end;
+        if (peek_after(t, lexer, &i) == ';') t->in_head = 0;
     }
     if (t->after_operator && (t->tok_end > 0 || s == BLOCK_COMMENT)) {
         // the bit must describe what the scanner sees next: if a closing token or separator follows
