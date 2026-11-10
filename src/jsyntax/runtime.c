@@ -33,18 +33,26 @@ typedef struct {
     _Alignas(16) unsigned char arena[JSK_ARENA];
 } jsk_ctx;
 
-#if defined(__wasm__) || defined(__STDC_NO_THREADS__)
-static jsk_ctx *jsk_cur;
+// Per-thread state, so that parsers on different threads do not share an arena. Chosen by compiler:
+// __STDC_NO_THREADS__ only says <threads.h> is missing (Clang defines it on Darwin and for MSVC targets),
+// not that thread-local storage is.
+#if defined(__wasm__)
+#define JSK_TLS // tree-sitter's Wasm runtime is single-threaded
 #elif defined(_MSC_VER)
-static __declspec(thread) jsk_ctx *jsk_cur;
+#define JSK_TLS __declspec(thread)
+#elif defined(__GNUC__) || defined(__clang__)
+#define JSK_TLS __thread
 #else
-static _Thread_local jsk_ctx *jsk_cur;
+#define JSK_TLS _Thread_local
 #endif
+static JSK_TLS jsk_ctx *jsk_cur;
 
 #if defined(_MSC_VER)
 #define JSK_NORETURN __declspec(noreturn)
+#define JSK_UNUSED
 #else
 #define JSK_NORETURN __attribute__((noreturn))
+#define JSK_UNUSED __attribute__((unused))
 #endif
 
 #if defined(__wasm__)
@@ -191,13 +199,7 @@ static uint32_t jsk_jsyn_var_identifier(void *pgcstack, void *p, uint64_t n);   
 // Runs CALL (a kernel function, with `&jsk_fake.task[32]` as its GC-stack argument) with a fresh arena and a
 // fake task; evaluates to its result, or to -1 if the Julia code threw.
 // The fake task and thread state are the same for every call on a thread: set them up once.
-#if defined(__wasm__) || defined(__STDC_NO_THREADS__)
-static struct { void *task[64]; void *ptls[64]; void *zero[8]; int ready; } jsk_fake;
-#elif defined(_MSC_VER)
-static __declspec(thread) struct { void *task[64]; void *ptls[64]; void *zero[8]; int ready; } jsk_fake;
-#else
-static _Thread_local struct { void *task[64]; void *ptls[64]; void *zero[8]; int ready; } jsk_fake;
-#endif
+static JSK_TLS struct { void *task[64]; void *ptls[64]; void *zero[8]; int ready; } jsk_fake;
 
 // Runs CALL (a kernel function, with `jsk_fake.task + 32` as its GC-stack argument) with a fresh arena;
 // sets r to its result, or leaves it at -1 if the Julia code threw.
@@ -219,7 +221,7 @@ static _Thread_local struct { void *task[64]; void *ptls[64]; void *zero[8]; int
 // JuliaSyntax's space-sensitive rule (parser.jl, parse_with_chains / parse_chain), token part: the bytes
 // p[0..n) start with an operator that is preceded by whitespace in a space-sensitive context. Returns 1
 // if it is a prefix operator starting a new element (`[x -y]`), 0 if not, -1 if the Julia code threw.
-__attribute__((unused)) static int jsyn_space_prefix(const uint8_t *p, size_t n) {
+JSK_UNUSED static int jsyn_space_prefix(const uint8_t *p, size_t n) {
     volatile int r = -1;
     JSK_RUN(jsk_jsyn_space_prefix(&jsk_fake.task[32], (void *)p, n));
     return r;
@@ -227,7 +229,7 @@ __attribute__((unused)) static int jsyn_space_prefix(const uint8_t *p, size_t n)
 
 // The first token of p[0..n) per JuliaSyntax's lexer (end of input after n), after a token of kind
 // `last` (0: none). Returns its Kind code (kinds.h), or -1; out[0] = byte length, out[1] = suffixed.
-__attribute__((unused)) static int jsyn_token(const uint8_t *p, size_t n, int last, int32_t out[2]) {
+JSK_UNUSED static int jsyn_token(const uint8_t *p, size_t n, int last, int32_t out[2]) {
     volatile int r = -1;
     JSK_RUN(jsk_jsyn_token(&jsk_fake.task[32], (void *)p, n, last, out));
     return r;
@@ -235,7 +237,7 @@ __attribute__((unused)) static int jsyn_token(const uint8_t *p, size_t n, int la
 
 // For a contextual keyword at p (abstract, mutable, primitive, public, outer, ...): 1 if JuliaSyntax's
 // parser reads it as a keyword here (it looks at the next token), 0 if as an identifier, -1 on error.
-__attribute__((unused)) static int jsyn_contextual_keyword(const uint8_t *p, size_t n) {
+JSK_UNUSED static int jsyn_contextual_keyword(const uint8_t *p, size_t n) {
     volatile int r = -1;
     JSK_RUN(jsk_jsyn_contextual_keyword(&jsk_fake.task[32], (void *)p, n));
     return r;
@@ -243,28 +245,28 @@ __attribute__((unused)) static int jsyn_contextual_keyword(const uint8_t *p, siz
 
 // The first token of p[0..n) inside a string delimited by `delim` (triple-quoted, raw: 0/1), per
 // JuliaSyntax's lex_string_chunk. Returns its Kind (kinds.h) or -1; out[0] = byte length.
-__attribute__((unused)) static int jsyn_string_token(const uint8_t *p, size_t n, int delim, int triple, int raw, int last, int32_t out[2]) {
+JSK_UNUSED static int jsyn_string_token(const uint8_t *p, size_t n, int delim, int triple, int raw, int last, int32_t out[2]) {
     volatile int r = -1;
     JSK_RUN(jsk_jsyn_string_token(&jsk_fake.task[32], (void *)p, n, delim, triple, raw, last, out));
     return r;
 }
 
 // A character literal at p: its byte length, 0 if there is none (JuliaSyntax's lexer), -1 on error.
-__attribute__((unused)) static int jsyn_char_literal(const uint8_t *p, size_t n) {
+JSK_UNUSED static int jsyn_char_literal(const uint8_t *p, size_t n) {
     volatile int r = -1;
     JSK_RUN(jsk_jsyn_char_literal(&jsk_fake.task[32], (void *)p, n));
     return r;
 }
 
 // The byte length of the escape sequence at p (a backslash) in string content, 0 if none (raw strings).
-__attribute__((unused)) static int jsyn_escape_len(const uint8_t *p, size_t n, int raw, int delim) {
+JSK_UNUSED static int jsyn_escape_len(const uint8_t *p, size_t n, int raw, int delim) {
     volatile int r = -1;
     JSK_RUN(jsk_jsyn_escape_len(&jsk_fake.task[32], (void *)p, n, raw, delim));
     return r; // -1: error; below -1: an invalid escape of that (negated) length
 }
 
 // `var"..."` at p: its byte length, 0 if there is none (JuliaSyntax's lexer), -1 on error.
-__attribute__((unused)) static int jsyn_var_identifier(const uint8_t *p, size_t n) {
+JSK_UNUSED static int jsyn_var_identifier(const uint8_t *p, size_t n) {
     volatile int r = -1;
     JSK_RUN(jsk_jsyn_var_identifier(&jsk_fake.task[32], (void *)p, n));
     return r;

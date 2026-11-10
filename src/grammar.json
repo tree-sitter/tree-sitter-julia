@@ -3616,7 +3616,7 @@
         },
         {
           "type": "PREC_LEFT",
-          "value": 27,
+          "value": 26,
           "content": {
             "type": "SEQ",
             "members": [
@@ -3925,7 +3925,7 @@
     },
     "juxtaposition_expression": {
       "type": "PREC_LEFT",
-      "value": 26,
+      "value": 27,
       "content": {
         "type": "SEQ",
         "members": [
@@ -5197,8 +5197,6 @@
   "inline": [
     "_block_form",
     "_terminator",
-    "_definition",
-    "_statement",
     "_operation",
     "_argument_separator",
     "_tuple_body",

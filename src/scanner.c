@@ -1,4 +1,4 @@
-// JuliaSyntax's lexer rule for `[x -y]`, compiled from Julia to C (src/jsyntax/, script/jsyntax/).
+// JuliaSyntax's lexer and parser rules, compiled from Julia to C (src/jsyntax/, script/jsyntax/).
 // Included first: it is one translation unit with this file.
 #include "jsyntax/jsyntax.c"
 #include "tree_sitter/parser.h"
@@ -14,8 +14,8 @@ typedef struct {
     uint8_t *buf; // text of the token being lexed (block comments can be long)
     size_t n;     // bytes consumed from the TSLexer so far
     size_t cap;
-    uint8_t after_operator; // the last token this scanner emitted was an operator (serialized)
-    uint8_t in_import;      // inside `import`/`using` up to the end of the line or `;` (serialized)
+    uint8_t after_operator; // no left operand next: the last token was an operator or keyword (serialized)
+    uint8_t in_import;      // inside `import`/`using`, up to a newline, `;` or closing bracket (serialized)
     size_t tok_end;         // length of the token scan_token just emitted (bytes of buf)
 } TokBuf;
 
@@ -30,8 +30,9 @@ void tree_sitter_julia_external_scanner_destroy(void *payload) {
     if (t) { free(t->buf); free(t); }
 }
 
-// One bit of state: whether the last token this scanner emitted was an operator (JuliaSyntax does not
-// juxtapose after an operator: `a && !b`). Everything else is in the text ahead and in valid_symbols.
+// Two bytes of state: whether the next token has no left operand (after an operator or keyword: `a && !b`
+// does not juxtapose, `return -1` is a prefix minus) and whether we are in an import path (`import Base.*`).
+// Everything else is in the text ahead and in valid_symbols.
 unsigned tree_sitter_julia_external_scanner_serialize(void *payload, char *buffer) {
     buffer[0] = (char)((TokBuf *)payload)->after_operator;
     buffer[1] = (char)((TokBuf *)payload)->in_import;
@@ -74,6 +75,22 @@ static bool is_space(int32_t c) {
 
 static bool is_plain(const uint8_t *plain, int32_t c) { return c >= 0 && c < 0x80 && plain[c]; }
 
+// In a comment, JuliaSyntax keeps every character whatever follows, except the ASCII ones that can end or
+// nest it (the plain table says which), invalid UTF-8 and bidirectional formatting characters (errors).
+static bool is_plain_comment(const uint8_t *plain, int32_t c) {
+    return is_plain(plain, c) ||
+           (c >= 0x80 && !(c >= 0x202A && c <= 0x202E) && !(c >= 0x2066 && c <= 0x2069));
+}
+
+// The code point starting at b[0] (b holds a whole character written by utf8_encode).
+static int32_t utf8_decode(const uint8_t *b) {
+    if (b[0] < 0x80) return b[0];
+    if (b[0] == 0xFF) return -1;
+    if (b[0] < 0xE0) return ((b[0] & 0x1F) << 6) | (b[1] & 0x3F);
+    if (b[0] < 0xF0) return ((b[0] & 0x0F) << 12) | ((b[1] & 0x3F) << 6) | (b[2] & 0x3F);
+    return ((b[0] & 0x07) << 18) | ((b[1] & 0x3F) << 12) | ((b[2] & 0x3F) << 6) | (b[3] & 0x3F);
+}
+
 /// Lex one JuliaSyntax token whose first byte is t->buf[base] (bytes base..t->n are already consumed),
 /// advancing the TSLexer over it and marking its end. Returns the Kind (kinds.h) or -1; *len is the
 /// token's length from base.
@@ -108,6 +125,7 @@ static int lex_jsyntax_token(TSLexer *lexer, TokBuf *t, size_t base, int last, c
             mark = (int32_t)c; kind = k; *suffix = o[1];
         }
         if (!la || e < c) break;
+        int32_t ch = lexer->lookahead;
         lexer->advance(lexer, false); // e > c: the lookahead character is in the token; e == c: confirm
         t->n += w;
         if (e <= c) continue;
@@ -128,16 +146,17 @@ static int lex_jsyntax_token(TSLexer *lexer, TokBuf *t, size_t base, int last, c
                 lexer->advance(lexer, false);
                 x = (uint8_t)y;
             }
-        } else if (cl == JSK_C_COMMENT) {
-            uint8_t x = t->buf[t->n - 1];
-            while (is_plain(plain, x)) {
+        } else if (cl == JSK_C_COMMENT || k == JSK_K_ErrorEofMultiComment) {
+            // (every prefix of a `#= =#` comment is an unterminated one: the fast path must cover it, or
+            // each character would re-lex the whole comment)
+            while (is_plain_comment(plain, ch)) {
                 lexer->mark_end(lexer);
                 mark = (int32_t)(t->n - base); kind = k; *suffix = 0;
                 int32_t y = lexer->lookahead;
-                if (lexer->eof(lexer) || !is_plain(plain, y) || !tb_reserve(t)) break;
-                t->buf[t->n++] = (uint8_t)y;
+                if (lexer->eof(lexer) || !is_plain_comment(plain, y) || !tb_reserve(t)) break;
+                t->n += utf8_encode(t->buf + t->n, y);
                 lexer->advance(lexer, false);
-                x = (uint8_t)y;
+                ch = y;
             }
         }
     }
@@ -148,13 +167,21 @@ static int lex_jsyntax_token(TSLexer *lexer, TokBuf *t, size_t base, int last, c
 }
 
 // Read ahead (after the marked token end) into t, for the kernel's lookahead questions: to the end of
-// the line, at most 256 bytes.
+// the line, at most 256 bytes. Newlines and bytes inside `#= =#` comments do not count (`mutable #= …
+// =# struct`), up to 4 KiB in all.
 static void read_ahead(TSLexer *lexer, TokBuf *t) {
-    while (t->n + 4 <= 256 && tb_reserve(t) && !lexer->eof(lexer)) {
+    int depth = 0;
+    size_t outside = t->n;
+    int32_t prev = 0;
+    while (outside + 4 <= 256 && t->n + 4 <= 4096 && tb_reserve(t) && !lexer->eof(lexer)) {
         int32_t ch = lexer->lookahead;
         t->n += utf8_encode(t->buf + t->n, ch);
-        if (ch == '\n') break;
+        if (depth == 0) outside++;
+        if (ch == '\n' && depth == 0) break;
         lexer->advance(lexer, false);
+        if (prev == '#' && ch == '=') { depth++; ch = 0; }                     // `#=` opens (nested)
+        else if (prev == '=' && ch == '#' && depth > 0) { depth--; ch = 0; }   // `=#` closes
+        prev = ch;
     }
 }
 
@@ -232,7 +259,9 @@ static bool scan_string(TSLexer *lexer, const bool *valid, const StrCtx *x, TokB
             t->n += w;
         }
         if (mark > 0) {
-            if (invalid) return false; // JuliaSyntax: invalid escape sequence
+            // an invalid escape (JuliaSyntax: ErrorInvalidEscapeSequence, inside the string) is still an
+            // escape token here: refusing it would leave the string open and break the rest of the file
+            (void)invalid;
             lexer->result_symbol = (TSSymbol)ESCAPE_SEQUENCE;
             return true;
         }
@@ -342,7 +371,6 @@ static bool scan_var_identifier(TSLexer *lexer, TokBuf *t) {
         int e = jsyn_var_identifier(t->buf, t->n);
         if (e > 0 && (size_t)e == t->n) { lexer->mark_end(lexer); return true; }
         if (e > 0 || lexer->eof(lexer) || t->n > 4096 || !tb_reserve(t)) return false;
-        if (t->n >= 5 && t->buf[t->n - 1] == '\n') return false;
         t->n += utf8_encode(t->buf + t->n, lexer->lookahead);
         lexer->advance(lexer, false);
     }
@@ -352,8 +380,10 @@ static bool scan_var_identifier(TSLexer *lexer, TokBuf *t) {
 
 /// The next token, lexed by JuliaSyntax: identifiers, keywords, numbers, booleans, operators (dotted and
 /// suffixed), opening quotes, characters, comments. Returns false for punctuation (the internal lexer).
-static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool recovering, TokBuf *t) {
-    switch (lexer->lookahead) {
+/// prefilled: t->buf[0..t->n) holds the start of the token, already consumed (an ASCII word).
+static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool recovering, TokBuf *t,
+                       bool prefilled) {
+    if (!prefilled) switch (lexer->lookahead) {
         case '(': case ')': case '[': case ']': case '{': case '}': case ',': case ';':
             return false; // punctuation only, in JuliaSyntax's lexer too
         case '\'':
@@ -367,22 +397,44 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
             }
             return valid[CHARACTER_LITERAL] && scan_character(lexer, t);
     }
-    t->n = 0;
+    if (!prefilled) t->n = 0;
     int32_t len = 0, suffix = 0;
     const uint8_t *plain = NULL;
-    if (lexer->lookahead == '#') plain = jsk_plain_line_comment; // switched to block below if `#=`
+    if (!prefilled && lexer->lookahead == '#') plain = jsk_plain_line_comment; // `#=`: block comment, below
     int k;
     if (plain) {
         // comments: `#` then the line, or `#=` ... `=#` (nested)
         lexer->advance(lexer, false);
         t->buf[0] = '#'; t->n = 1;
-        if (lexer->lookahead == '=') plain = jsk_plain_block_comment;
+        if (lexer->lookahead == '=') {
+            // `#= … =#`, nested: Tokenize's lex_comment, character by character (re-lexing the whole
+            // comment at each step, as for other tokens, would be quadratic). Unterminated: not ours.
+            if (!valid[BLOCK_COMMENT]) return false;
+            lexer->advance(lexer, false);
+            int depth = 1;
+            while (!lexer->eof(lexer)) {
+                int32_t c = lexer->lookahead;
+                lexer->advance(lexer, false);
+                if (c == '#' && lexer->lookahead == '=') { lexer->advance(lexer, false); depth++; }
+                else if (c == '=' && lexer->lookahead == '#') {
+                    lexer->advance(lexer, false);
+                    if (--depth == 0) {
+                        lexer->mark_end(lexer);
+                        t->n = 0; // the text is not buffered: the wrapper reads on from the lexer
+                        lexer->result_symbol = BLOCK_COMMENT;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         k = lex_jsyntax_token(lexer, t, 0, 0, plain, &len, &suffix);
         if (k < 0) return false;
         if (jsk_kind_class[k] != JSK_C_COMMENT && k != JSK_K_ErrorInvalidUTF8 && k != JSK_K_ErrorBidiFormatting) return false;
-        TSSymbol sym = plain == jsk_plain_block_comment ? BLOCK_COMMENT : LINE_COMMENT;
+        TSSymbol sym = LINE_COMMENT;
         if (!valid[sym]) return false;
         lexer->result_symbol = sym;
+        t->tok_end = (size_t)len;
         return true;
     }
     k = lex_jsyntax_token(lexer, t, 0, 0, NULL, &len, &suffix);
@@ -407,8 +459,10 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         // quotes the next element (parse_range: `[1 :a]`); at the start of an expression it quotes the
         // next atom (parse_atom), unless whitespace or a closing token follows (`x[:]`: a name).
         // the colon is marked; the character after it may already be in t (the lexer's confirming step)
-        int32_t next = t->n > 1 ? (int32_t)t->buf[1] : lexer->lookahead;
-        bool ws_after = lexer->eof(lexer) || next == ' ' || next == '\t' || next == '\n' || next == '\r';
+        bool at_eof = t->n <= 1 && lexer->eof(lexer);
+        int32_t next = t->n > 1 ? utf8_decode(t->buf + 1) : lexer->lookahead;
+        // whitespace as JuliaSyntax's lexer sees it; a comment counts as whitespace (`[1 :#= c =#a]`)
+        bool ws_after = at_eof || next == '\n' || is_space(next) || next == '#';
         bool closing = next == ')' || next == ']' || next == '}' || next == ',' || next == ';';
         // space-sensitive (matrix row, macro arguments): where an element may directly follow another,
         // both a range `:` and a quoting `:` are valid. The probes say so too, but incremental parsing
@@ -432,6 +486,9 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         sym = k == JSK_K_DQUOTE ? DELIMITER_STR_1 : k == JSK_K_TRIPLE_DQUOTE ? DELIMITER_STR_3 :
               k == JSK_K_BACKTICK ? DELIMITER_CMD_1 : DELIMITER_CMD_3;
     } else if (k == JSK_K_var && len == 3 && valid[IDENTIFIER] &&
+               // not right after a string's `$` (only a name or `(` is valid there: no number, no quoted
+               // symbol, unlike after `.` in `M.var"#f#"`): `"a $var"`
+               !(valid[IMMEDIATE_PAREN] && !valid[INTEGER_LITERAL] && !valid[QUOTE_COLON] && !recovering) &&
                (t->n > 3 ? t->buf[3] == '"' : lexer->lookahead == '"') && scan_var_identifier(lexer, t)) {
         sym = IDENTIFIER; // `var"..."`
     } else if (cls == JSK_C_IDENTIFIER) {
@@ -466,8 +523,13 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
         if (k == JSK_K_ELEMENT_OF && valid[ELEMENT_OF]) sym = ELEMENT_OF;
         // `[x -y]`: in a space-sensitive context (right after an element of a matrix row or of macro
         // arguments), after whitespace, ask JuliaSyntax's rule whether this starts a new element
+        // (space-sensitive as for `:` above: the probes, or the pair of colon tokens, which survives node
+        // reuse in incremental parsing: `[x -(y)]` must not become a call of `-` after an edit elsewhere)
         int space_prefix = -1; // JuliaSyntax's spacing rule (`a -b`), asked at most once
-        if (cls == JSK_C_UNARY_PLUS && ws_before && valid[SPACE_PREFIX_OPERATOR] && valid[SPACE_SENSITIVE_PROBE] &&
+        // (not at the first macro argument, which follows no element: `@inline -(x, y) = …`)
+        bool space_sensitive = (valid[SPACE_SENSITIVE_PROBE] || (valid[COLON] && valid[QUOTE_COLON])) &&
+                               !valid[MACRO_ARGS_PROBE];
+        if (cls == JSK_C_UNARY_PLUS && ws_before && valid[SPACE_PREFIX_OPERATOR] && space_sensitive &&
             !recovering) {
             read_ahead(lexer, t);
             space_prefix = jsyn_space_prefix(t->buf, t->n);
@@ -497,13 +559,19 @@ static bool scan_token(TSLexer *lexer, const bool *valid, bool ws_before, bool r
 
 static bool scan(TokBuf *t, TSLexer *lexer, const bool *valid_symbols);
 
-// After an operator: the next character past spaces (looking past the token's marked end is free).
-static int32_t char_after_token(TokBuf *t, TSLexer *lexer) {
-    size_t i = t->tok_end;
-    while (i < t->n && (t->buf[i] == ' ' || t->buf[i] == '\t')) i++;
-    if (i < t->n) return t->buf[i];
-    while (!lexer->eof(lexer) && (lexer->lookahead == ' ' || lexer->lookahead == '\t')) lexer->advance(lexer, false);
-    return lexer->eof(lexer) ? 0 : lexer->lookahead;
+// The byte at *i after the emitted token's start, reading on from the lexer as needed (looking past the
+// token's marked end is free), skipping spaces and tabs; 0 at EOF. Non-ASCII characters give their first
+// byte, which is enough for the ASCII punctuation the callers look for.
+static int32_t peek_after(TokBuf *t, TSLexer *lexer, size_t *i) {
+    for (;;) {
+        while (*i >= t->n) {
+            if (lexer->eof(lexer) || !tb_reserve(t)) return 0;
+            t->n += utf8_encode(t->buf + t->n, lexer->lookahead);
+            lexer->advance(lexer, false);
+        }
+        uint8_t b = t->buf[(*i)++];
+        if (b != ' ' && b != '\t') return b;
+    }
 }
 
 bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
@@ -517,16 +585,28 @@ bool tree_sitter_julia_external_scanner_scan(void *payload, TSLexer *lexer, cons
                             s == ELEMENT_OF ||
                             (s >= FIRST_KEYWORD && s <= LAST_KEYWORD && s != KW_END && s != KW_BEGIN && s != KW_BREAK &&
                              s != KW_CONTINUE); // `a[begin:i]`, `a[end - 1]`: operands
-    // which line an import is on: JuliaSyntax's parser knows; here the scanner follows it
+    // which line an import is on: JuliaSyntax's parser knows; here the scanner follows it. Brackets and
+    // `;` are the internal lexer's and do not update this state, so look at what follows the token:
+    // `import Base: (+); x.*y`, `f(:(using A), x.+y)`, `import A #= c =#; x.*y`.
     if (s == KW_IMPORT || s == KW_USING) t->in_import = 1;
     else if (s == NEWLINE) t->in_import = 0;
-    else if (t->in_import && t->tok_end > 0 && char_after_token(t, lexer) == ';') t->in_import = 0;
-    if (t->after_operator && t->tok_end > 0) {
+    else if (t->in_import && (t->tok_end > 0 || s == BLOCK_COMMENT)) {
+        size_t i = t->tok_end;
+        int32_t c = peek_after(t, lexer, &i);
+        if (c == ';' || c == ')' || c == ']' || c == '}') t->in_import = 0;
+    }
+    if (t->after_operator && (t->tok_end > 0 || s == BLOCK_COMMENT)) {
         // the bit must describe what the scanner sees next: if a closing token or separator follows
-        // (lexed by the internal lexer, which does not update this state: `(==)) where`), the next
-        // scanned token is not this operator's operand. An opening bracket is (`.~[x]`, `-(x)`).
-        int32_t c = char_after_token(t, lexer);
+        // (lexed by the internal lexer, which does not update this state: `(==)) where`), or an empty
+        // bracket pair (`a == [] isa T`), the next scanned token is not this operator's operand. An
+        // opening bracket with something inside is (`.~[x]`, `-(x)`).
+        size_t i = t->tok_end;
+        int32_t c = peek_after(t, lexer, &i);
         if (c == ')' || c == ']' || c == '}' || c == ',' || c == ';') t->after_operator = 0;
+        else if (c == '(' || c == '[' || c == '{') {
+            int32_t d = peek_after(t, lexer, &i);
+            if (d == (c == '(' ? ')' : c + 2)) t->after_operator = 0;
+        }
     }
     return true;
 }
@@ -576,8 +656,26 @@ static bool scan(TokBuf *t, TSLexer *lexer, const bool *valid_symbols) {
     }
     // `2x`, `(n+1)ε`, `2(x)`, `1√x`: JuliaSyntax juxtaposes (is_juxtapose) when no whitespace separates,
     // the previous token is not an operator, and the next token is not an operator, a closing token, a
-    // number or a reserved word. The next token is judged by its first character (an identifier there
-    // could be a reserved word only in code like `x)end`, which does not occur outside strings).
+    // number or a reserved word. A word is read whole (`f(x)end`, `(x)isa T`, `1:3if c`): the juxtaposition
+    // is marked zero-width at its start, and a reserved word is then scanned from what was read.
+    if (!ws_before && valid_symbols[JUXTAPOSE] && !recovering && !t->after_operator && !lexer->eof(lexer) &&
+        lexer->lookahead < 0x80 && lexer->lookahead >= 0 &&
+        (jsk_ascii_identifier_char[lexer->lookahead] && !(lexer->lookahead >= '0' && lexer->lookahead <= '9'))) {
+        lexer->mark_end(lexer);
+        t->n = 0;
+        while (t->n < 16 && !lexer->eof(lexer) && lexer->lookahead >= 0 && lexer->lookahead < 0x80 &&
+               lexer->lookahead != '!' && jsk_ascii_identifier_char[lexer->lookahead]) {
+            t->buf[t->n++] = (uint8_t)lexer->lookahead;
+            lexer->advance(lexer, false);
+        }
+        int32_t o[2];
+        int k = jsyn_token(t->buf, t->n, 0, o);
+        if (!(k >= 0 && (size_t)o[0] == t->n && !jsk_juxtapose_next[k])) {
+            lexer->result_symbol = JUXTAPOSE;
+            return true;
+        }
+        return scan_token(lexer, valid_symbols, ws_before, recovering, t, true);
+    }
     if (!ws_before && valid_symbols[JUXTAPOSE] && !recovering && !t->after_operator && !lexer->eof(lexer)) {
         uint8_t b[4];
         size_t w = utf8_encode(b, lexer->lookahead);
@@ -596,5 +694,5 @@ static bool scan(TokBuf *t, TSLexer *lexer, const bool *valid_symbols) {
         lexer->result_symbol = IMPORT_DOTS;
         return true;
     }
-    return scan_token(lexer, valid_symbols, ws_before, recovering, t);
+    return scan_token(lexer, valid_symbols, ws_before, recovering, t, false);
 }

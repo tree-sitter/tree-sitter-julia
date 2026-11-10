@@ -28,8 +28,7 @@ const SCANNER_TOKENS = [
     "_quoted_keyword",         # `:end`, `:true`
     "_juxtapose",              # zero-width: `2x`, `(n+1)ε`, `VT'Vecs`, `2(x)`, `1√x` (JuliaSyntax's is_juxtapose)
     # `:` (JuliaSyntax: parse_range, parse_cond, parse_atom)
-    # One token for the range and the ternary colon (a ternary-only token would duplicate every
-    # expression state inside `c ? … :`; the grammar tells them apart, GLR)
+    # three tokens: the grammar cannot tell a range from a quote or a ternary's `:`, JuliaSyntax can
     "_colon",                  # `a:b`, `a : b`, `c ? a : b`; not `[1 :a]` (space-sensitive: a quote)
     "_quote_colon",            # `:x`, `:(a + b)`
     "_ternary_colon",          # `:` ending a ternary's middle branch (JuliaSyntax: ranges off there)

@@ -79,7 +79,8 @@ distribution's stack protector). No Julia, no system image.
 
 - The C answers like the same Julia code run natively at every byte position (13,804,851 calls, 0
   differences), compiled with gcc, clang, and wasi-sdk (wasm32, run under wasmtime); never throws.
-- About 300 ns per call; the scanner only calls it for whitespace + operator after a matrix/macro element.
+- About 300 ns per call. The scanner asks it for every token it lexes, and for the contextual rules
+  (`[x -y]`, `+`/`-` after an operand, contextual keywords, juxtaposition, `public`).
 - `regenerate.sh` reproduces `kernel.c` and `unicode_tables.h` byte for byte.
 
 ## Building llvm-cbe
@@ -97,11 +98,15 @@ ninja -C build llvm-cbe        # LLVM_CBE=build/tools/llvm-cbe/llvm-cbe
 ## Limits
 
 - Generated from 64-bit Julia: byte offsets assume 8-byte pointer slots. Works on 32-bit targets
-  (wasm32 tested) because every pointer slot is 8 bytes; untested on MSVC.
+  (wasm32 tested) because every pointer slot is 8 bytes; untested on MSVC. Little-endian only
+  (`jsyntax.c` stops a big-endian build with `#error`).
+- The generated C type-puns and relies on wrapping arithmetic: `jsyntax.c` sets `-fno-strict-aliasing
+  -fwrapv` for GCC by pragma; Clang has no such pragma (verified 0 differences with Clang, but the C is
+  not strictly conforming).
 - The scanner passes at most 256 bytes (whole characters) of the line; tree-sitter re-encodes invalid
   UTF-8 as U+FFFD, so on invalid UTF-8 the answer can differ from JuliaSyntax on the raw bytes.
-- Strings, characters and comments are still lexed by the hand-written part of `scanner.c` / the
-  grammar (see the tree-sitter-julia PR for why).
-- Tokens over ~1 KB are split; `for outer::T in xs` reads `outer` as a keyword (JuliaSyntax: an
-  identifier, it parses the expression before looking); without C11 threads support (glibc < 2.28) the
-  runtime's per-call state is a global, so parsers must not run concurrently.
+- Block comments are lexed by the scanner with Tokenize's nesting rule (re-lexing them per character
+  would be quadratic); everything else goes through the kernel.
+- Tokens over 1 MiB are split; `for outer::T in xs` reads `outer` as a keyword (JuliaSyntax: an
+  identifier, it parses the expression before looking). The runtime's per-call state is thread-local
+  (`__thread` / `__declspec(thread)`; Wasm is single-threaded).

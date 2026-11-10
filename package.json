@@ -18,6 +18,8 @@
   ],
   "files": [
     "grammar.js",
+    "grammar-tokens.js",
+    "THIRD-PARTY-NOTICES.md",
     "tree-sitter.json",
     "binding.gyp",
     "prebuilds/**",

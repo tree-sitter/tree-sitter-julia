@@ -25,8 +25,10 @@ const PREC = [
   'rational',
   'bitshift',
   'prefix',
-  'juxtapose', // `2x`: tighter than prefix (`-2x` is `-(2x)`), looser than power (`2x^2` is `2(x^2)`)
   'power',
+  // `2x`: tighter than prefix (`-2x` is `-(2x)`) and than a power's right side (`2^2x` is `2^(2x)`,
+  // JuliaSyntax parse_factor_after)
+  'juxtapose',
   'decl',
   'dot',
 ].reduce((result, name, index) => {
@@ -47,8 +49,6 @@ module.exports = grammar({
   inline: $ => [
     $._block_form,
     $._terminator,
-    $._definition,
-    $._statement,
     $._operation,
     $._argument_separator,
     $._tuple_body,
