@@ -1,0 +1,111 @@
+--- a/src/julia/tokenize.jl
++++ b/src/julia/tokenize.jl
+@@ -72,6 +72,36 @@
+ 
+ readchar(io::IO) = eof(io) ? EOF_CHAR : read(io, Char)
+ 
++# An immutable lookup table: sorted keys, binary search. Unlike a `Dict` it is isbits, so a lookup
++# compiles to code and constant data and needs no heap object at run time (`--trim`med or
++# statically compiled lexers).
++struct ConstMap{N,K,V}
++    keys::NTuple{N,K}
++    vals::NTuple{N,V}
++end
++function ConstMap(pairs)
++    ps = sort!(collect(pairs); by=first)
++    allunique(first.(ps)) || error("duplicate keys")
++    ConstMap(Tuple(first.(ps)), Tuple(last.(ps)))
++end
++Base.keys(m::ConstMap) = m.keys
++Base.length(::ConstMap{N}) where {N} = N
++function Base.get(m::ConstMap{N}, k, default) where {N}
++    lo, hi = 1, N
++    while lo <= hi
++        mid = (lo + hi) >>> 1
++        km = @inbounds m.keys[mid]
++        if km == k
++            return @inbounds m.vals[mid]
++        elseif km < k
++            lo = mid + 1
++        else
++            hi = mid - 1
++        end
++    end
++    return default
++end
++
+ # Some unicode operators are normalized by the tokenizer into their equivalent
+ # kinds. See also normalize_identifier()
+ const _ops_with_unicode_aliases = [
+@@ -186,7 +216,7 @@
+     for ck in _ops_with_unicode_aliases
+         push!(ops, ck)
+     end
+-    ops
++    ConstMap(ops)
+ end
+ 
+ #-------------------------------------------------------------------------------
+@@ -390,13 +420,13 @@
+ end
+ 
+ """
+-    accept(l::Lexer, f::Union{Function, Char, Vector{Char}, String})
++    accept(l::Lexer, f::Union{Function, Char, Tuple{Vararg{Char}}, Vector{Char}, String})
+ 
+ Consumes the next character `c` if either `f::Function(c)` returns true, `c == f`
+ for `c::Char` or `c in f` otherwise. Returns `true` if a character has been
+ consumed and `false` otherwise.
+ """
+-@inline function accept(l::Lexer, f::Union{Function, Char, Vector{Char}, String})
++@inline function accept(l::Lexer, f::Union{Function, Char, Tuple{Vararg{Char}}, Vector{Char}, String})
+     c = peekchar(l)
+     if isa(f, Function)
+         ok = f(c)
+@@ -1006,7 +1036,7 @@
+         if (pc == 'e' || pc == 'E' || pc == 'f') && (isdigit(ppc) || ppc == '+' || ppc == '-' || ppc == '−')
+             kind = pc == 'f' ? K"Float32" : K"Float"
+             readchar(l)
+-            accept(l, "+-−")
++            accept(l, ('+', '-', '−'))
+             if accept_batch(l, isdigit)
+                 pc,ppc = dpeekchar(l)
+                 if pc === '.' && !is_dottable_operator_start_char(ppc)
+@@ -1027,7 +1057,7 @@
+     elseif (pc == 'e' || pc == 'E' || pc == 'f') && (isdigit(ppc) || ppc == '+' || ppc == '-' || ppc == '−')
+         kind = pc == 'f' ? K"Float32" : K"Float"
+         readchar(l)
+-        accept(l, "+-−")
++        accept(l, ('+', '-', '−'))
+         if accept_batch(l, isdigit)
+             pc,ppc = dpeekchar(l)
+             if pc === '.' && !is_dottable_operator_start_char(ppc)
+@@ -1051,9 +1081,9 @@
+                 had_digits |= accept_number(l, ishex)
+                 isfloat = true
+             end
+-            if accept(l, "pP")
++            if accept(l, ('p', 'P'))
+                 kind = K"Float"
+-                accept(l, "+-−")
++                accept(l, ('+', '-', '−'))
+                 if !accept_number(l, isdigit) || !had_digits
+                     return emit(l, K"ErrorInvalidNumericConstant") # `0x1p` `0x.p0`
+                 end
+@@ -1205,7 +1235,7 @@
+ end
+ 
+ const MAX_KW_LENGTH = 10
+-const ascii_is_identifier_char = Bool[is_identifier_char(Char(b)) for b=0x00:0x7f]
++const ascii_is_identifier_char = Tuple(is_identifier_char(Char(b)) for b=0x00:0x7f)
+ function lex_identifier(l::Lexer, c)
+     h = simple_hash(c, UInt64(0))
+     n = 1
+@@ -1309,6 +1339,6 @@
+ 
+ const _true_hash = simple_hash("true")
+ const _false_hash = simple_hash("false")
+-const _kw_hash = Dict(simple_hash(lowercase(string(kw))) => kw for kw in kws)
++const _kw_hash = ConstMap(simple_hash(lowercase(string(kw))) => kw for kw in kws)
+ 
+ end # module

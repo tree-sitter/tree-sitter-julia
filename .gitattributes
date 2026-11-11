@@ -4,6 +4,9 @@
 src/*.json linguist-generated
 src/parser.c linguist-generated
 src/tree_sitter/* linguist-generated
+src/jsyntax/kernel.c linguist-generated
+src/jsyntax/kinds.h linguist-generated
+src/jsyntax/unicode_tables.h linguist-generated
 
 # C bindings
 bindings/c/** linguist-generated

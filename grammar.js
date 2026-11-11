@@ -25,6 +25,9 @@ const PREC = [
   'rational',
   'bitshift',
   'prefix',
+  // `^` and juxtaposition (`2x`) share a level and associate to the right, as JuliaSyntax's
+  // parse_juxtapose/parse_factor nest: `2x^2` is `2(x^2)`, `x^2y` is `x^(2y)`, `2^3^2` is `2^(3^2)`,
+  // `2x::T` is `2(x::T)`; both bind tighter than prefix operators (`-2x` is `-(2x)`)
   'power',
   'decl',
   'dot',
@@ -39,133 +42,28 @@ PREC.assign = -2;
 PREC.stmt = -3;
 PREC.macro_arg = -4;
 
-const OPERATORS = {
-  assignment: `
-    += -= *= /= //= \\= ^= %= <<= >>= >>>= |= &=
-    −= ÷= ⊻= ≔ ⩴ ≕
-  `,
-
-  arrow: `
-    <-- --> <-->
-    ← → ↔ ↚ ↛ ↞ ↠ ↢ ↣ ↦ ↤ ↮ ⇎ ⇍ ⇏ ⇐ ⇒ ⇔ ⇴ ⇶ ⇷ ⇸ ⇹ ⇺ ⇻ ⇼ ⇽ ⇾ ⇿ ⟵ ⟶ ⟷ ⟹ ⟺ ⟻ ⟼ ⟽ ⟾ ⟿
-    ⤀ ⤁ ⤂ ⤃ ⤄ ⤅ ⤆ ⤇ ⤌ ⤍ ⤎ ⤏ ⤐ ⤑ ⤔ ⤕ ⤖ ⤗ ⤘ ⤝ ⤞ ⤟ ⤠ ⥄ ⥅ ⥆ ⥇ ⥈ ⥊ ⥋ ⥎ ⥐ ⥒ ⥓ ⥖ ⥗ ⥚ ⥛ ⥞
-    ⥟ ⥢ ⥤ ⥦ ⥧ ⥨ ⥩ ⥪ ⥫ ⥬ ⥭ ⥰ ⧴ ⬱ ⬰ ⬲ ⬳ ⬴ ⬵ ⬶ ⬷ ⬸ ⬹ ⬺ ⬻ ⬼ ⬽ ⬾ ⬿ ⭀ ⭁ ⭂ ⭃ ⥷ ⭄ ⥺ ⭇ ⭈ ⭉
-    ⭊ ⭋ ⭌ ￩ ￫ ⇜ ⇝ ↜ ↝ ↩ ↪ ↫ ↬ ↼ ↽ ⇀ ⇁ ⇄ ⇆ ⇇ ⇉ ⇋ ⇌ ⇚ ⇛ ⇠ ⇢ ↷ ↶ ↺ ↻
-  `,
-
-  comparison: `
-    > < >= <= == === != !==
-    ≥ ≤ ≡ ≠ ≢ ∈ ∉ ∋ ∌ ⊆ ⊈ ⊂ ⊄ ⊊ ∝ ∊ ∍ ∥ ∦ ∷ ∺ ∻ ∽ ∾ ≁ ≃ ≂ ≄ ≅ ≆ ≇ ≈ ≉ ≊ ≋ ≌ ≍ ≎ ≐
-    ≑ ≒ ≓ ≖ ≗ ≘ ≙ ≚ ≛ ≜ ≝ ≞ ≟ ≣ ≦ ≧ ≨ ≩ ≪ ≫ ≬ ≭ ≮ ≯ ≰ ≱ ≲ ≳ ≴ ≵ ≶ ≷ ≸ ≹ ≺ ≻ ≼ ≽ ≾
-    ≿ ⊀ ⊁ ⊃ ⊅ ⊇ ⊉ ⊋ ⊏ ⊐ ⊑ ⊒ ⊜ ⊩ ⊬ ⊮ ⊰ ⊱ ⊲ ⊳ ⊴ ⊵ ⊶ ⊷ ⋍ ⋐ ⋑ ⋕ ⋖ ⋗ ⋘ ⋙ ⋚ ⋛ ⋜ ⋝ ⋞ ⋟ ⋠
-    ⋡ ⋢ ⋣ ⋤ ⋥ ⋦ ⋧ ⋨ ⋩ ⋪ ⋫ ⋬ ⋭ ⋲ ⋳ ⋴ ⋵ ⋶ ⋷ ⋸ ⋹ ⋺ ⋻ ⋼ ⋽ ⋾ ⋿ ⟈ ⟉ ⟒ ⦷ ⧀ ⧁ ⧡ ⧣ ⧤ ⧥ ⩦ ⩧
-    ⩪ ⩫ ⩬ ⩭ ⩮ ⩯ ⩰ ⩱ ⩲ ⩳ ⩵ ⩶ ⩷ ⩸ ⩹ ⩺ ⩻ ⩼ ⩽ ⩾ ⩿ ⪀ ⪁ ⪂ ⪃ ⪄ ⪅ ⪆ ⪇ ⪈ ⪉ ⪊ ⪋ ⪌ ⪍ ⪎ ⪏ ⪐ ⪑
-    ⪒ ⪓ ⪔ ⪕ ⪖ ⪗ ⪘ ⪙ ⪚ ⪛ ⪜ ⪝ ⪞ ⪟ ⪠ ⪡ ⪢ ⪣ ⪤ ⪥ ⪦ ⪧ ⪨ ⪩ ⪪ ⪫ ⪬ ⪭ ⪮ ⪯ ⪰ ⪱ ⪲ ⪳ ⪴ ⪵ ⪶ ⪷ ⪸
-    ⪹ ⪺ ⪻ ⪼ ⪽ ⪾ ⪿ ⫀ ⫁ ⫂ ⫃ ⫄ ⫅ ⫆ ⫇ ⫈ ⫉ ⫊ ⫋ ⫌ ⫍ ⫎ ⫏ ⫐ ⫑ ⫒ ⫓ ⫔ ⫕ ⫖ ⫗ ⫘ ⫙ ⫷ ⫸ ⫹ ⫺ ⊢ ⊣
-    ⟂ ⫪ ⫫
-  `,
-
-  ellipsis: '… ⁝ ⋮ ⋱ ⋰ ⋯',
-
-  plus: `
-    ++ |
-    − ¦ ⊕ ⊖ ⊞ ⊟ ∪ ∨ ⊔ ∔ ∸ ≏ ⊎ ⊻ ⊽ ⋎ ⋓ ⟇ ⧺ ⧻ ⨈ ⨢ ⨣ ⨤ ⨥ ⨦ ⨧ ⨨ ⨩ ⨪ ⨫ ⨬ ⨭ ⨮ ⨹ ⨺ ⩁ ⩂ ⩅
-    ⩊ ⩌ ⩏ ⩐ ⩒ ⩔ ⩖ ⩗ ⩛ ⩝ ⩡ ⩢ ⩣
-  `,
-
-  times: `
-    * / % & \\
-    ⌿ ÷ · · ⋅ ∘ × ∩ ∧ ⊗ ⊘ ⊙ ⊚ ⊛ ⊠ ⊡ ⊓ ∗ ∙ ∤ ⅋ ≀ ⊼ ⋄ ⋆ ⋇ ⋉ ⋊ ⋋ ⋌ ⋏ ⋒ ⟑ ⦸ ⦼ ⦾ ⦿ ⧶ ⧷
-    ⨇ ⨰ ⨱ ⨲ ⨳ ⨴ ⨵ ⨶ ⨷ ⨸ ⨻ ⨼ ⨽ ⩀ ⩃ ⩄ ⩋ ⩍ ⩎ ⩑ ⩓ ⩕ ⩘ ⩚ ⩜ ⩞ ⩟ ⩠ ⫛ ⊍ ▷ ⨝ ⟕ ⟖ ⟗ ⨟
-  `,
-
-  bitshift: '<< >> >>>',
-
-  power: `
-    ^
-    ↑ ↓ ⇵ ⟰ ⟱ ⤈ ⤉ ⤊ ⤋ ⤒ ⤓ ⥉ ⥌ ⥍ ⥏ ⥑ ⥔ ⥕ ⥘ ⥙ ⥜ ⥝ ⥠ ⥡ ⥣ ⥥ ⥮ ⥯ ￪ ￬
-  `,
-
-  unary: '! ¬ √ ∛ ∜',
-
-  unary_plus: '+ - ± ∓',
-};
-
-const ESCAPE_SEQUENCE = token(seq(
-  '\\',
-  choice(
-    /[^uUx0-7]/,
-    /[uU][0-9a-fA-F]{1,6}/, // unicode codepoints
-    /[0-7]{1,3}/,
-    /x[0-9a-fA-F]{2}/,
-  ),
-));
-
-// Keywords that can be quoted. Some still fail depending on the context.
-const KEYWORDS = choice(
-  'baremodule',
-  'module',
-  'abstract',
-  'primitive',
-  'mutable',
-  'struct',
-  'quote',
-  'let',
-  'if',
-  'else',
-  'elseif',
-  'try',
-  'catch',
-  'finally',
-  'for',
-  'while',
-  'break',
-  'continue',
-  'using',
-  'import',
-  'const',
-  'global',
-  'local',
-  'end',
-);
 
 module.exports = grammar({
   name: 'julia',
 
-  word: $ => $._word_identifier,
-
   inline: $ => [
     $._block_form,
     $._terminator,
-    $._definition,
-    $._statement,
     $._operation,
+    $._argument_separator,
+    $._tuple_body,
+    $._matrix_body,
   ],
 
-  externals: $ => [
-    $._block_comment_rest,
-    $._immediate_paren,
-    $._immediate_bracket,
-    $._immediate_brace,
-    $._immediate_string_start,
-    $._immediate_command_start,
-    $._content_cmd_1,
-    $._content_cmd_1_raw,
-    $._content_cmd_3,
-    $._content_cmd_3_raw,
-    $._content_str_1,
-    $._content_str_1_raw,
-    $._content_str_3,
-    $._content_str_3_raw,
-    $._end_cmd,
-    $._end_str,
-  ],
+  // The scanner's tokens (src/scanner.c, lexed by JuliaSyntax: src/jsyntax/), generated from
+  // script/jsyntax/tokens.jl and JuliaSyntax's keyword list by script/jsyntax/regenerate.sh
+  externals: $ => require('./grammar-tokens.js')($),
 
   conflicts: $ => [
-    [$.juxtaposition_expression, $._primary_expression], // adjoint
-    [$.juxtaposition_expression, $._expression],
     [$.matrix_row, $.comprehension_expression], // Comprehensions with newlines
     [$.parenthesized_expression, $.tuple_expression],
+    [$.compound_statement, $._expression], // `a[begin+1]`: `begin` is firstindex inside indexing
+    [$.macro_argument_list], // `[@m a b for x in xs]`: in brackets, where macro arguments end
   ],
 
   supertypes: $ => [
@@ -175,16 +73,24 @@ module.exports = grammar({
   ],
 
   extras: $ => [
-    /\s/,
+    require('./grammar-tokens.js').whitespace, // JuliaSyntax's whitespace (generated)
     $.line_comment,
     $.block_comment,
   ],
 
   rules: {
     source_file: $ => optional(seq(
-      sep1($._terminator, $._block_form),
+      sep1($._terminator, $._toplevel_form),
       optional($._terminator)
     )),
+
+    // top level and module bodies: the only places JuliaSyntax reads `public` as a keyword (parse_public)
+    _toplevel_form: $ => choice($._block_form, $.public_statement),
+
+    _module_block: $ => seq(
+      sep1($._terminator, $._toplevel_form),
+      optional($._terminator)
+    ),
 
     block: $ => seq(
       sep1($._terminator, $._block_form),
@@ -195,6 +101,7 @@ module.exports = grammar({
       $._expression,
       $.assignment,
       $.open_tuple,
+      alias($._assignment_operator, $.operator), // `≔` (not syntactic) as a name
     ),
 
     _bracket_form: $ => choice(
@@ -207,11 +114,14 @@ module.exports = grammar({
       repeat1(seq(',', $._expression))
     )),
 
+    _open_tuple_comma: $ => prec(0, seq(sep1(',', $._expression), ',')), // `x, = xs`
+
     // assignments inside blocks
     assignment: $ => prec.right(PREC.assign, seq(
       choice(
         $._primary_expression,
         $.open_tuple,
+        alias($._open_tuple_comma, $.open_tuple),
         $._operation,
         $.operator,
       ),
@@ -243,7 +153,8 @@ module.exports = grammar({
       $.operator,
       $.integer_literal,
       $.float_literal,
-      prec(-1, alias('begin', $.identifier)),
+      // `a[begin]`: firstindex inside indexing (GLR, see conflicts); elsewhere the block wins
+      prec.dynamic(-1, alias('begin', $.identifier)),
     ),
 
     // Definitions
@@ -261,7 +172,7 @@ module.exports = grammar({
       choice('module', 'baremodule'),
       field('name', choice($.identifier, $.interpolation_expression)),
       optional($._terminator),
-      optional($.block),
+      optional(alias($._module_block, $.block)),
       'end',
     ),
 
@@ -269,12 +180,26 @@ module.exports = grammar({
     type_head: $ => prec(PREC.stmt, choice(
       $._primary_expression,
       $.binary_expression,
+      alias($._subtype_where, $.binary_expression),
     )),
+
+    // `struct C{N} <: B where {N}`: `C{N} <: (B where {N})` (JuliaSyntax), where `<:` would otherwise bind first
+    _subtype_where: $ => seq(
+      $._expression,
+      alias(choice($._comparison_operator, $._type_order_operator), $.operator),
+      alias($._type_head_where, $.where_expression),
+    ),
+
+    _type_head_where: $ => prec(PREC.dot + 1, seq($._primary_expression, 'where', $._where_bound)),
+
+    // the bound is a whole expression (`where N <: Int`): low precedence, so its operators shift
+    _where_bound: $ => prec(PREC.where, $._expression),
 
     abstract_definition: $ => seq(
       'abstract',
       'type',
       $.type_head,
+      optional($._terminator),
       'end',
     ),
 
@@ -282,7 +207,8 @@ module.exports = grammar({
       'primitive',
       'type',
       $.type_head,
-      $.integer_literal,
+      $._expression,
+      optional($._terminator),
       'end',
     ),
 
@@ -297,6 +223,8 @@ module.exports = grammar({
 
     signature: $ => prec(PREC.stmt, choice(
       $.identifier, // zero-method definition
+      $.operator, // `function + end`
+      $.interpolation_expression, // `function $name end`
       $.call_expression,
       alias($.tuple_expression, $.argument_list), // anonymous function
       $.typed_expression,
@@ -340,7 +268,6 @@ module.exports = grammar({
       $.local_statement,
       $.export_statement,
       $.import_statement,
-      $.public_statement,
       $.using_statement,
     ),
 
@@ -350,9 +277,10 @@ module.exports = grammar({
 
     let_statement: $ => seq(
       'let',
-      sep(',', $._bracket_form),
-      $._terminator,
-      optional($.block),
+      choice(
+        seq(sep(',', $._bracket_form), $._terminator, optional($.block)),
+        sep1(',', $._bracket_form), // `let x = 1 end`
+      ),
       'end',
     ),
 
@@ -454,24 +382,43 @@ module.exports = grammar({
     import_alias: $ => seq($._importable, 'as', $._exportable),
 
     import_path: $ => seq(
-      token(repeat1('.')),
+      repeat1(alias($._import_dots, '.')), // one per dot, as JuliaSyntax's importpath
       choice(
         $.identifier,
-        $._scoped_identifier,
+        $._import_dotted,
+        $.operator, // `import .⋆`
+        $.interpolation_expression, // `using .$lib`
       ),
     ),
+
+    // `Base.Math`, `Base.@kwdef`
+    _import_dotted: $ => seq(
+      choice($.identifier, $.interpolation_expression),
+      repeat1(seq(
+        token.immediate('.'),
+        choice(
+          choice($.identifier, $.interpolation_expression),
+          alias($._simple_macro_identifier, $.macro_identifier),
+          $.operator, // `import Base.*`: a dotted operator is not valid here, so the scanner leaves `.` to the lexer
+          parenthesize($.operator), // `import Base.(+)`
+        ),
+      )),
+    ),
+
+    _simple_macro_identifier: $ => seq('@', choice($.identifier, $.operator)), // `import Lazy.@>`
 
     _exportable: $ => choice(
       $.identifier,
       $.macro_identifier,
       $.operator,
       $.interpolation_expression,
+      $.prefixed_string_literal, // `var"@debug"`
       parenthesize($._exportable),
     ),
 
     _importable: $ => choice(
       $._exportable,
-      alias($._scoped_identifier, $.import_path),
+      alias($._import_dotted, $.import_path),
       $.import_path,
     ),
 
@@ -480,11 +427,11 @@ module.exports = grammar({
       $.import_alias,
     ))),
 
-    selected_import: $ => seq(
+    selected_import: $ => prec(1, seq( // over a range on the import statement
       $._importable,
-      token.immediate(':'),
+      alias($._colon, ':'),
       $._import_list,
-    ),
+    )),
 
     export_statement: $ => seq('export', prec.right(sep1(',', $._exportable))),
 
@@ -577,13 +524,16 @@ module.exports = grammar({
 
     matrix_expression: $ => prec(PREC.array, seq(
       '[',
-      $.matrix_row,
-      repeat(seq($._terminator, $.matrix_row)),
-      optional($._terminator),
+      choice(
+        $._matrix_body,
+        $._semicolon, // `[;;]`: an empty ncat
+      ),
       ']',
     )),
 
-    matrix_row: $ => repeat1(prec(PREC.array, $._bracket_form)),
+    _matrix_body: $ => seq($.matrix_row, repeat(seq($._terminator, $.matrix_row)), optional($._terminator)),
+
+    matrix_row: $ => repeat1(prec(PREC.array, seq($._bracket_form, optional($._space_sensitive_probe)))),
 
     vector_expression: $ => seq(
       '[',
@@ -600,25 +550,29 @@ module.exports = grammar({
       optional($._semicolon),
     )),
 
-    tuple_expression: $ => parenthesize(
-      optional($._semicolon),
-      sep(choice(',', $._semicolon), choice(
-        $._bracket_form,
-        $.generator,
-      )),
-      optional(','),
+    tuple_expression: $ => parenthesize(optional($._tuple_body)),
+
+    _tuple_body: $ => choice(
+      $._semicolon,
+      seq(
+        optional($._semicolon),
+        sep1($._argument_separator, choice($._bracket_form, $.generator)),
+        optional($._argument_separator),
+      ),
     ),
+
+    // `f(a, b; c)`, `f(a, b, ; c)`, `f(a;)`
+    _argument_separator: $ => choice(',', seq(optional(','), $._semicolon)),
 
     curly_expression: $ => seq(
       '{',
-      sep(',', $._bracket_form),
-      optional(','),
+      optional(choice($._tuple_body, prec(PREC.array, $._matrix_body))), // `{a, b; c}`, `{x for x in xs}`, `{a b}`
       '}',
     ),
 
     adjoint_expression: $ => seq(
       $._primary_expression,
-      token.immediate('\''),
+      alias($._adjoint, "'"),
     ),
 
     field_expression: $ => prec(PREC.dot, seq(
@@ -645,7 +599,8 @@ module.exports = grammar({
     ),
 
     call_expression: $ => seq(
-      choice($._primary_expression, $.operator),
+      // `[x -(y)]` is a call of `-`, as `x = -(y)` (JuliaSyntax: call-pre in both)
+      choice($._primary_expression, $.operator, alias($._space_prefix_operator, $.operator)),
       $._immediate_paren,
       alias($.tuple_expression, $.argument_list),
       optional($.do_clause),
@@ -683,14 +638,13 @@ module.exports = grammar({
       ),
     ),
 
-    macrocall_expression: $ => prec.right(seq($._macro_head, optional($.macro_argument_list))),
+    macrocall_expression: $ => prec.right(seq($._macro_head, optional($._macro_args_probe), optional($.macro_argument_list))),
 
-    macro_argument_list: $ => prec.left(repeat1(prec(PREC.macro_arg, $._block_form))),
+    macro_argument_list: $ => repeat1(prec(PREC.macro_arg, seq($._block_form, optional($._space_sensitive_probe)))),
 
     do_clause: $ => seq(
       'do',
-      sep(',', $._bracket_form),
-      $._terminator,
+      choice(seq(sep(',', $._bracket_form), $._terminator), sep1(',', $._bracket_form)),
       optional($.block),
       'end',
     ),
@@ -706,17 +660,19 @@ module.exports = grammar({
         $.tuple_expression,
         $._array,
         $._string,
+        $.interpolation_expression, // `$$x`
       ),
     )),
 
     quote_expression: $ => prec.right(PREC.prefix, seq(
-      ':',
+      alias($._quote_colon, ':'),
       choice(
         $.integer_literal,
         $.float_literal,
         $._string,
         $.identifier,
         $.operator,
+        alias($._simple_macro_identifier, $.macro_identifier), // `:@foo`
         seq($._immediate_brace, $.curly_expression),
         seq($._immediate_bracket, $._array),
         seq($._immediate_paren, choice(
@@ -746,7 +702,7 @@ module.exports = grammar({
           ),
           $.operator,
         ),
-        alias(token.immediate(KEYWORDS), $.identifier),
+        alias($._quoted_keyword, $.identifier),
       ),
     )),
 
@@ -765,10 +721,13 @@ module.exports = grammar({
 
     binary_expression: $ => {
       const table = [
+        // `D(x) ~ y`: an infix call at assignment precedence (JuliaSyntax: call-i), allowed wherever an
+        // expression is (`[a ~ b, c]`, `return 2.0 ~ d`); prefix `~x` is the scanner's unary operator
+        [prec.right, PREC.assign, $._tilde_operator],
         [prec.right, PREC.pair, $._pair_operator],
         [prec.right, PREC.arrow, $._arrow_operator],
-        [prec.left, PREC.lazy_or, $._lazy_or_operator],
-        [prec.left, PREC.lazy_and, $._lazy_and_operator],
+        [prec.right, PREC.lazy_or, $._lazy_or_operator], // `a || b || c` is `a || (b || c)` (JuliaSyntax)
+        [prec.right, PREC.lazy_and, $._lazy_and_operator],
         [prec.left, PREC.comparison, choice('in', 'isa', $._comparison_operator, $._type_order_operator)],
         [prec.right, PREC.pipe_left, $._pipe_left_operator],
         [prec.left, PREC.pipe_right, $._pipe_right_operator],
@@ -777,7 +736,7 @@ module.exports = grammar({
         [prec.left, PREC.times, $._times_operator],
         [prec.left, PREC.rational, $._rational_operator],
         [prec.left, PREC.bitshift, $._bitshift_operator],
-        [prec.left, PREC.power, $._power_operator],
+        [prec.right, PREC.power, $._power_operator],
       ];
 
       return choice(...table.map(([fn, prec, op]) => fn(prec, seq(
@@ -787,36 +746,45 @@ module.exports = grammar({
       ))));
     },
 
-    unary_expression: $ => prec.right(PREC.prefix, seq(
-      alias(choice(
-        $._tilde_operator,
-        $._type_order_operator,
-        $._unary_operator,
-        $._unary_plus_operator,
-      ), $.operator),
-      $._expression,
-    )),
+    unary_expression: $ => choice(
+      prec.right(PREC.prefix, seq(
+        alias(choice(
+          $._type_order_operator,
+          $._unary_operator,
+          $._unary_plus_operator,
+        ), $.operator),
+        $._expression,
+      )),
+      // `[x -y]`: a prefix operator starting a new element (decided by the scanner)
+      prec.right(PREC.prefix, seq(
+        alias($._space_prefix_operator, $.operator),
+        $._expression,
+      )),
+    ),
 
+    // `a:b`, `a : b`, `length(x) : -1 : 2` (the scanner applies JuliaSyntax's parse_range rule)
     range_expression: $ => prec.left(PREC.colon, seq(
       $._expression,
-      token.immediate(':'),
+      alias($._colon, ':'),
       $._expression,
     )),
 
     splat_expression: $ => prec(PREC.colon, seq($._expression, '...')),
 
+    // JuliaSyntax parses the middle branch with ranges switched off (parse_cond), so a `:` there ends it:
+    // the scanner emits `_ternary_colon` whenever that token is valid
     ternary_expression: $ => prec.right(PREC.conditional, seq(
       $._expression,
       '?',
-      $._bracket_form,
-      ':',
-      $._bracket_form,
+      choice($._expression, alias($._closed_assignment, $.assignment)),
+      alias($._ternary_colon, ':'),
+      choice($._expression, alias($._closed_assignment, $.assignment)),
     )),
 
     typed_expression: $ => prec(PREC.decl, seq(
       $._expression,
       '::',
-      $._primary_expression,
+      choice($._primary_expression, $.unary_typed_expression), // `g::::IsDirected` (SimpleTraits)
     )),
 
     unary_typed_expression: $ => prec.right(PREC.prefix, seq(
@@ -825,28 +793,36 @@ module.exports = grammar({
     )),
 
     arrow_function_expression: $ => prec.right(PREC.afunc, seq(
-      choice(
+      choice( // JuliaSyntax: any expression; here the atoms that occur
         $.identifier,
         alias($.tuple_expression, $.argument_list),
         $.typed_expression,
+        alias($._closed_macrocall_expression, $.macrocall_expression), // `@nospecialize(a) -> …`
+        $.interpolation_expression, // `$var -> $body`
+        $.parametrized_type_expression, // `Tuple{Float64}->_`
+        $.boolean_literal, // `@breaking true -> …`
+        $.character_literal, // `@trigger '*' -> …`
+        $.integer_literal,
+        $.float_literal,
       ),
       '->',
       $._bracket_form,
     )),
 
-    juxtaposition_expression: $ => prec.left(seq(
-      choice(
-        $.integer_literal,
-        $.float_literal,
-        $.adjoint_expression,
-      ),
-      $._primary_expression,
+    // `2x`, `(n+1)ε`, `VT'Vecs`, `2(x)`, `1√x`: the scanner says when (JuliaSyntax's is_juxtapose)
+    // Like a binary operator (so its tokens are valid exactly where operators are, which keeps the parse
+    // table small), at the level of `^` (see PREC).
+    juxtaposition_expression: $ => prec.right(PREC.power, seq(
+      // the scanner emits `_juxtapose` only where JuliaSyntax juxtaposes (never after an operator)
+      $._expression,
+      $._juxtapose,
+      $._expression,
     )),
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(
-      $._primary_expression,
-      alias(choice($._assignment_operator, $._tilde_operator), $.operator),
-      $._expression,
+      choice($._primary_expression, $._operation),
+      alias($._assignment_operator, $.operator),
+      $._bracket_form,
     )),
 
     where_expression: $ => prec.left(PREC.where, seq(
@@ -875,82 +851,7 @@ module.exports = grammar({
       ),
     ),
 
-    _word_identifier: _ => {
-      const nonIdentifierCharacters = [
-        '#',
-        '$',
-        ',',
-        ':',
-        ';',
-        '@',
-        '~',
-        '(', ')',
-        '{', '}',
-        ...Object.values(OPERATORS),
-      ].join(' ')
-        .trim()
-        .replace(/!/g, '')
-        .replace(/-/g, '')
-        .replace(/\\/g, '\\\\')
-        .replace(/\s+/g, '');
-
-      // Some symbols in Sm and So unicode categories that are identifiers
-      const validMathSymbols = '°∀-∇∎-∑∫-∳';
-
-      // Emojis are valid Julia identifiers but unsupported due to exploding parser size
-      // todo(clason): check if regex can be optimized
-      const start = `[_\\p{XID_Start}${validMathSymbols}&&[^0-9#*]]`;
-      const rest = `[^"'\`\\s\\.\\-\\[\\]${nonIdentifierCharacters}]*`;
-      return new RegExp(start + rest);
-    },
-
-    identifier: $ => $._word_identifier,
-
     // Literals
-
-    boolean_literal: _ => choice('true', 'false'),
-
-    integer_literal: _ => choice(
-      token(seq('0b', numeral('01'))),
-      token(seq('0o', numeral('0-7'))),
-      token(seq('0x', numeral('0-9a-fA-F'))),
-      numeral('0-9'),
-    ),
-
-    float_literal: _ => {
-      const dec = numeral('0-9');
-      const hex = numeral('0-9a-fA-F');
-      const exponent = /[eEf][+-]?\d+/;
-      const hex_exponent = /p[+-]?\d+/;
-
-      const leading_period = token(seq(
-        '.',
-        dec,
-        optional(exponent),
-      ));
-
-      // This has to be split into two tokens to avoid conflicts with ellipsis
-      const trailing_period = seq(
-        dec,
-        token.immediate(seq(
-          '.',
-          optional(dec),
-          optional(exponent),
-        )),
-      );
-
-      const just_exponent = token(seq(dec, exponent));
-
-      const hex_float = token(seq(
-        choice(
-          seq('0x', hex, optional('.'), optional(hex)),
-          seq('0x.', hex),
-        ),
-        hex_exponent,
-      ));
-
-      return choice(leading_period, trailing_period, just_exponent, hex_float);
-    },
 
     _string: $ => choice(
       $.character_literal,
@@ -960,31 +861,15 @@ module.exports = grammar({
       $.prefixed_command_literal,
     ),
 
-    escape_sequence: _ => ESCAPE_SEQUENCE,
-
-    character_literal: _ => token(seq(
-      '\'',
-      choice(
-        /[^'\\]/,
-        ESCAPE_SEQUENCE,
-      ),
-      '\'',
-    )),
-
-    _delimiter_str_1: _ => '"',
-    _delimiter_str_3: _ => '"""',
-    _delimiter_cmd_1: _ => '`',
-    _delimiter_cmd_3: _ => '```',
-
     string_literal: $ => choice(
       seq(
         $._delimiter_str_1,
-        repeat(choice(alias($._content_str_1, $.content), $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_str_1_run, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_str,
       ),
       seq(
         $._delimiter_str_3,
-        repeat(choice(alias($._content_str_3, $.content), $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_str_3_run, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_str,
       ),
     ),
@@ -992,12 +877,12 @@ module.exports = grammar({
     command_literal: $ => choice(
       seq(
         $._delimiter_cmd_1,
-        repeat(choice(alias($._content_cmd_1, $.content), $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_cmd_1_run, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_cmd,
       ),
       seq(
         $._delimiter_cmd_3,
-        repeat(choice(alias($._content_cmd_3, $.content), $.string_interpolation, $.escape_sequence)),
+        repeat(choice(alias($._content_cmd_3_run, $.content), $.string_interpolation, $.escape_sequence)),
         $._end_cmd,
       ),
     ),
@@ -1008,16 +893,16 @@ module.exports = grammar({
       choice(
         seq(
           $._delimiter_str_1,
-          repeat(choice(alias($._content_str_1_raw, $.content), $.escape_sequence)),
+          repeat(choice(alias($._content_str_1_raw_run, $.content), $.escape_sequence)),
           $._end_str,
         ),
         seq(
           $._delimiter_str_3,
-          repeat(choice(alias($._content_str_3_raw, $.content), $.escape_sequence)),
+          repeat(choice(alias($._content_str_3_raw_run, $.content), $.escape_sequence)),
           $._end_str,
         ),
       ),
-      optional(field('suffix', $.identifier)),
+      optional(field('suffix', alias($._string_suffix, $.identifier))),
     )),
 
     prefixed_command_literal: $ => prec.left(seq(
@@ -1026,16 +911,16 @@ module.exports = grammar({
       choice(
         seq(
           $._delimiter_cmd_1,
-          repeat(choice(alias($._content_cmd_1_raw, $.content), $.escape_sequence)),
+          repeat(choice(alias($._content_cmd_1_raw_run, $.content), $.escape_sequence)),
           $._end_cmd,
         ),
         seq(
           $._delimiter_cmd_3,
-          repeat(choice(alias($._content_cmd_3_raw, $.content), $.escape_sequence)),
+          repeat(choice(alias($._content_cmd_3_raw_run, $.content), $.escape_sequence)),
           $._end_cmd,
         ),
       ),
-      optional(field('suffix', $.identifier)),
+      optional(field('suffix', alias($._string_suffix, $.identifier))),
     )),
 
     string_interpolation: $ => seq(
@@ -1060,61 +945,28 @@ module.exports = grammar({
       $._rational_operator,
       $._bitshift_operator,
       $._power_operator,
-      $._tilde_operator,
+      // (`~` as a value, `map(~, x)`, is the scanner's unary operator: it has no left operand)
       $._type_order_operator,
       $._unary_operator,
       $._unary_plus_operator,
     ),
-
-    _assignment_operator: _ => choice(':=', '$=', '.=', addDot(OPERATORS.assignment)),
-
-    _pair_operator: _ => addDot('=>'),
-
-    _arrow_operator: _ => addDot(OPERATORS.arrow),
-
-    _lazy_or_operator: _ => addDot('||'),
-
-    _lazy_and_operator: _ => addDot('&&'),
-
-    _comparison_operator: _ => addDot(OPERATORS.comparison),
-
-    _pipe_right_operator: _ => addDot('|>'),
-
-    _pipe_left_operator: _ => addDot('<|'),
-
-    _ellipsis_operator: _ => token(choice('..', addDot(OPERATORS.ellipsis))),
-
-    _plus_operator: _ => addDot(OPERATORS.plus),
-
-    _times_operator: _ => addDot(OPERATORS.times),
-
-    _rational_operator: _ => addDot('//'),
-
-    _bitshift_operator: _ => addDot(OPERATORS.bitshift),
-
-    _power_operator: _ => addDot(OPERATORS.power),
-
-
-    _tilde_operator: _ => addDot('~'), // unary or assignment
-
-    _type_order_operator: _ => addDot('<: >:'), // unary or comparison
-
-    _unary_operator: _ => addDot(OPERATORS.unary),
-
-    _unary_plus_operator: _ => addDot(OPERATORS.unary_plus),
-
 
     _syntactic_operator: _ => choice('$', '.', '...', '->', '?'),
 
 
     _semicolon: _ => seq(';', repeat(token.immediate(';'))),
 
-    _terminator: $ => choice(/\r?\n/, $._semicolon),
+    _terminator: $ => choice($._newline, $._semicolon),
 
-    block_comment: $ => seq(/#=/, $._block_comment_rest),
-
-    // FIXME: This is currently a seq to avoid conflicts with block_comment
-    line_comment: _ => seq(/#/, /.*/),
+    // content: a run of content pieces (JuliaSyntax's chunks), between escapes and interpolations
+    _content_str_1_run: $ => prec.right(repeat1($._content_str_1)),
+    _content_str_3_run: $ => prec.right(repeat1($._content_str_3)),
+    _content_cmd_1_run: $ => prec.right(repeat1($._content_cmd_1)),
+    _content_cmd_3_run: $ => prec.right(repeat1($._content_cmd_3)),
+    _content_str_1_raw_run: $ => prec.right(repeat1($._content_str_1_raw)),
+    _content_str_3_raw_run: $ => prec.right(repeat1($._content_str_3_raw)),
+    _content_cmd_1_raw_run: $ => prec.right(repeat1($._content_cmd_1_raw)),
+    _content_cmd_3_raw_run: $ => prec.right(repeat1($._content_cmd_3_raw)),
   },
 });
 
@@ -1134,22 +986,6 @@ function sep(separator, rule) {
  */
 function sep1(separator, rule) {
   return seq(rule, repeat(seq(separator, rule)));
-}
-
-/**
- *
- * @param {string} operatorString
- */
-function addDot(operatorString) {
-  const operators = operatorString.trim().split(/\s+/);
-  return token(seq(optional('.'), operators.length > 1 ? choice(...operators) : operators[0]));
-}
-
-/**
- * @param {string} range
- */
-function numeral(range) {
-  return RegExp(`[${range}]([${range}]|_[${range}])*`);
 }
 
 /**

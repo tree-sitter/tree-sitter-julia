@@ -69,6 +69,32 @@ end
 
 
 ==============================
+inline let statements
+==============================
+
+let constructor = false end
+let x=1,y=2 end
+
+---
+
+(source_file
+  (let_statement
+    (assignment
+      (identifier)
+      (operator)
+      (boolean_literal)))
+  (let_statement
+    (assignment
+      (identifier)
+      (operator)
+      (integer_literal))
+    (assignment
+      (identifier)
+      (operator)
+      (integer_literal))))
+
+
+==============================
 if statements
 ==============================
 
@@ -383,6 +409,46 @@ import Base: @view as @v
       (import_alias (macro_identifier (identifier)) (macro_identifier (identifier))))))
 
 
+==============================
+import statements - macro names and var names
+==============================
+
+import Base.@kwdef
+import .Base.Math.@horner
+import $A.@x
+import Base.CoreLogging:
+    AbstractLogger,
+    var"@debug"
+
+---
+
+(source_file
+  (import_statement
+    (import_path
+      (identifier)
+      (macro_identifier
+        (identifier))))
+  (import_statement
+    (import_path
+      (identifier)
+      (identifier)
+      (macro_identifier
+        (identifier))))
+  (import_statement
+    (import_path
+      (interpolation_expression
+        (identifier))
+      (macro_identifier
+        (identifier))))
+  (import_statement
+    (selected_import
+      (import_path
+        (identifier)
+        (identifier))
+      (identifier)
+      (identifier))))
+
+
 ===============================
 const statements
 ===============================
@@ -472,3 +538,128 @@ global function bar() 4 end
         (call_expression (identifier) (argument_list)))
         (block
           (integer_literal)))))
+
+==============================
+infix plus/minus after a condition, prefix after return
+==============================
+
+if n - j; end
+while a + b > c end
+x = if a - b <= c d else e end
+f(x) = x && return -1
+return isa(t, T)
+
+---
+
+(source_file
+  (if_statement
+    condition: (binary_expression (identifier) (operator) (identifier)))
+  (while_statement
+    condition: (binary_expression
+      (binary_expression (identifier) (operator) (identifier))
+      (operator)
+      (identifier)))
+  (assignment
+    (identifier)
+    (operator)
+    (if_statement
+      condition: (binary_expression
+        (binary_expression (identifier) (operator) (identifier))
+        (operator)
+        (identifier))
+      (block (identifier))
+      alternative: (else_clause (block (identifier)))))
+  (assignment
+    (call_expression (identifier) (argument_list (identifier)))
+    (operator)
+    (binary_expression
+      (identifier)
+      (operator)
+      (return_statement (unary_expression (operator) (integer_literal)))))
+  (return_statement
+    (call_expression (identifier) (argument_list (identifier) (identifier)))))
+
+==============================
+block heads are not space-sensitive; public at top level
+==============================
+
+for i = 1 :n
+end
+if x :a end
+if n -j; end
+module A
+public ⊕, @m
+end
+function g()
+  public = 1
+end
+
+---
+
+(source_file
+  (for_statement
+    (for_binding (identifier) (operator) (range_expression (integer_literal) (identifier))))
+  (if_statement
+    condition: (range_expression (identifier) (identifier)))
+  (if_statement
+    condition: (binary_expression (identifier) (operator) (identifier)))
+  (module_definition
+    name: (identifier)
+    (block (public_statement (operator) (macro_identifier (identifier)))))
+  (function_definition
+    (signature (call_expression (identifier) (argument_list)))
+    (block (assignment (identifier) (operator) (integer_literal)))))
+
+==============================
+docstrings on the line of what they document, macros and operators in import paths
+==============================
+
+"""doc""" f
+"a" in xs
+module M
+"doc" g(x) = 1
+end
+import Lazy.@>, Base.(+)
+using .$lib: $lib
+if a >
+    b
+end
+function f(v; combine=+
+) where {T}
+end
+x = a + ([])
+y = foo +
+    (bar)
+"a $("b") c" #= c =# f
+
+---
+
+(source_file
+  (string_literal (content))
+  (identifier)
+  (binary_expression (string_literal (content)) (operator) (identifier))
+  (module_definition
+    name: (identifier)
+    (block
+      (string_literal (content))
+      (assignment (call_expression (identifier) (argument_list (identifier))) (operator) (integer_literal))))
+  (import_statement
+    (import_path (identifier) (macro_identifier (operator)))
+    (import_path (identifier) (operator)))
+  (using_statement
+    (selected_import (import_path (interpolation_expression (identifier))) (interpolation_expression (identifier))))
+  (if_statement condition: (binary_expression (identifier) (operator) (identifier)))
+  (function_definition
+    (signature
+      (where_expression
+        (call_expression
+          (identifier)
+          (argument_list (identifier) (assignment (identifier) (operator) (operator))))
+        (curly_expression (identifier)))))
+  (assignment (identifier) (operator)
+    (binary_expression (identifier) (operator) (parenthesized_expression (vector_expression))))
+  (assignment (identifier) (operator)
+    (binary_expression (identifier) (operator) (parenthesized_expression (identifier))))
+  (string_literal (content) (string_interpolation (string_literal (content))) (content))
+  (block_comment)
+  (identifier))

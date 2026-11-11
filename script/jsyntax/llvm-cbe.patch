@@ -1,0 +1,21 @@
+diff --git a/tools/llvm-cbe/CMakeLists.txt b/tools/llvm-cbe/CMakeLists.txt
+index c25ef09..cf24915 100644
+--- a/tools/llvm-cbe/CMakeLists.txt
++++ b/tools/llvm-cbe/CMakeLists.txt
+@@ -35,7 +35,14 @@ if(USE_SYSTEM_LLVM)
+     CBackendCodeGen
+     CBackendInfo
+     )
++  # prebuilt LLVM release tarballs ship static component libs only (no libLLVM.so)
++  execute_process(COMMAND ${LLVM_TOOLS_BINARY_DIR}/llvm-config --link-static --libs all
++                  OUTPUT_VARIABLE llvm_static OUTPUT_STRIP_TRAILING_WHITESPACE)
++  execute_process(COMMAND ${LLVM_TOOLS_BINARY_DIR}/llvm-config --link-static --system-libs
++                  OUTPUT_VARIABLE llvm_sys OUTPUT_STRIP_TRAILING_WHITESPACE)
++  separate_arguments(llvm_static)
++  separate_arguments(llvm_sys)
++  target_link_directories(llvm-cbe PRIVATE ${LLVM_LIBRARY_DIRS})
+   target_link_libraries(llvm-cbe
+-    LLVM
+-    ${llvm_libs})
++    ${llvm_libs} -Wl,--start-group ${llvm_static} -Wl,--end-group ${llvm_sys})
+ endif()

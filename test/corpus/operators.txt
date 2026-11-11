@@ -44,6 +44,60 @@ c &= d ÷= e
       (identifier))))
 
 ==============================
+assignment operators - trailing comma, typed and chained
+==============================
+
+ys, = f(x)
+lnz, unz, = h()
+is_interactive::Bool |= interactiveinput
+C .= C0 = rand(-10:10, size(C))
+
+---
+
+(source_file
+  (assignment
+    (open_tuple
+      (identifier))
+    (operator)
+    (call_expression
+      (identifier)
+      (argument_list
+        (identifier))))
+  (assignment
+    (open_tuple
+      (identifier)
+      (identifier))
+    (operator)
+    (call_expression
+      (identifier)
+      (argument_list)))
+  (compound_assignment_expression
+    (typed_expression
+      (identifier)
+      (identifier))
+    (operator)
+    (identifier))
+  (compound_assignment_expression
+    (identifier)
+    (operator)
+    (assignment
+      (identifier)
+      (operator)
+      (call_expression
+        (identifier)
+        (argument_list
+          (range_expression
+            (unary_expression
+              (operator)
+              (integer_literal))
+            (integer_literal))
+          (call_expression
+            (identifier)
+            (argument_list
+              (identifier))))))))
+
+
+==============================
 binary arithmetic operators
 ==============================
 
@@ -276,3 +330,90 @@ foo(^, ÷, -)
   (identifier)
   (argument_list (operator) (operator) (operator))))
 
+
+==============================
+operators as names
+==============================
+
+const ⊆ = issubset
+function ⊇ end
+function $name end
+≔
+
+---
+
+(source_file
+  (const_statement
+    (assignment
+      (operator)
+      (operator)
+      (identifier)))
+  (function_definition
+    (signature
+      (operator)))
+  (function_definition
+    (signature
+      (interpolation_expression
+        (identifier))))
+  (operator))
+
+
+
+==============================
+tilde, lazy operators, type order after an operand
+==============================
+
+eqs = [D(x) ~ y, 0 ~ z]
+return 2.0 ~ Normal(m)
+x = ~a
+a && b && c
+if T <: R end
+f(g::::IsDirected) = 1
+
+---
+
+(source_file
+  (assignment
+    (identifier)
+    (operator)
+    (vector_expression
+      (binary_expression (call_expression (identifier) (argument_list (identifier))) (operator) (identifier))
+      (binary_expression (integer_literal) (operator) (identifier))))
+  (return_statement
+    (binary_expression (float_literal) (operator) (call_expression (identifier) (argument_list (identifier)))))
+  (assignment (identifier) (operator) (unary_expression (operator) (identifier)))
+  (binary_expression (identifier) (operator) (binary_expression (identifier) (operator) (identifier)))
+  (if_statement condition: (binary_expression (identifier) (operator) (identifier)))
+  (assignment
+    (call_expression (identifier) (argument_list (typed_expression (identifier) (unary_typed_expression (identifier)))))
+    (operator)
+    (integer_literal)))
+
+==============================
+power and juxtaposition, operators after an operand in block heads
+==============================
+
+2^3^2
+2x::T
+x^2y
+if m[i]*(c - 1) > s
+end
+while a*(b)
+end
+
+---
+
+(source_file
+  (binary_expression (integer_literal) (operator) (binary_expression (integer_literal) (operator) (integer_literal)))
+  (juxtaposition_expression (integer_literal) (typed_expression (identifier) (identifier)))
+  (binary_expression (identifier) (operator) (juxtaposition_expression (integer_literal) (identifier)))
+  (if_statement
+    condition: (binary_expression
+      (binary_expression
+        (index_expression (identifier) (vector_expression (identifier)))
+        (operator)
+        (parenthesized_expression (binary_expression (identifier) (operator) (integer_literal))))
+      (operator)
+      (identifier)))
+  (while_statement
+    condition: (binary_expression (identifier) (operator) (parenthesized_expression (identifier)))))
