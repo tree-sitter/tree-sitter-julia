@@ -1,7 +1,7 @@
 /* jscompare LIST JSDUMP KINDS OUTPREFIX: tree-sitter-julia (the build this is linked with) against
    JuliaSyntax's trees (jsdump.mjs). See README.md.
 
-   A JuliaSyntax node is reproduced when a tree-sitter node has exactly its span. Spans on both sides are
+   A JuliaSyntax node is reproduced when a tree-sitter node has exactly its span (outside ERROR nodes). Spans on both sides are
    trimmed the same way: JuliaSyntax's leave out whitespace and comment tokens at either end; a tree-sitter
    node's span leaves out whitespace (newline terminators are tokens inside blocks) and whole comments
    (extras) at either end; a token keeps its own span (string content may end in spaces), and a token of
@@ -59,9 +59,9 @@ static int set_has(const Set *s, uint64_t v) {
     while (s->k[i] != UINT64_MAX) { if (s->k[i] == v) return 1; i = (i + 1) & m; }
     return 0;
 }
-// spans are < 2^31 bytes; the top bits of the start tag the set a span belongs to
-enum { T_ANY, T_CHAR, T_STR, T_OP, T_INTERP, T_ITER, T_SEP };
-#define SPAN(t, a, b) (((uint64_t)(t) << 60) | ((uint64_t)(a) << 30) | (uint32_t)(b))
+// a tag (which set), start and end in 4 + 30 + 30 bits: files under 1 GiB
+enum { T_ANY, T_CHAR, T_STR, T_OP, T_INTERP, T_ITER, T_BLOCK, T_ROW, T_ID };
+#define SPAN(t, a, b) (((uint64_t)(t) << 60) | ((uint64_t)(a) << 30) | ((uint64_t)(b) & 0x3fffffff))
 
 enum { N_CHAR, N_STRING, N_DOTOP, N_INTERP, N_ITER, N_SEP, N_VAR, N_TOMB, NNORM };
 static const char *norm_name[NNORM] = {"char", "string", "dotop", "interp", "iter", "sep", "var", "tomb"};
@@ -79,7 +79,7 @@ static long ktot[NK][2], kraw[NK][2], knorm[NK][2];
 static int core_out[NK][2];
 
 static const char *src; static long srclen;
-static int is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
+static int is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v'; }
 static void trim_ws(uint32_t *s, uint32_t *e) {
     while (*e > *s && is_ws(src[*e - 1])) (*e)--;
     while (*e > *s && is_ws(src[*s])) (*s)++;
@@ -109,6 +109,7 @@ int main(int argc, char **argv) {
     FILE *L = fopen(argv[1], "r"), *J = fopen(argv[2], "rb");
     if (!L || !J) { perror("open"); return 1; }
     static char kn[NK][64]; int nk = 0; FILE *K = fopen(argv[3], "r");
+    if (!K) { perror(argv[3]); return 1; }
     while (nk < NK && fgets(kn[nk], 64, K)) { kn[nk][strcspn(kn[nk], "\n")] = 0; nk++; }
     for (int k = 0; k < nk; k++) for (int l = 0; l < 2; l++) {
         char b[80]; snprintf(b, sizeof b, "%s/%d", kn[k], l);
@@ -139,6 +140,7 @@ int main(int argc, char **argv) {
     TSSymbol S_for = ts_language_symbol_for_name(lang, "for_clause", 10, true);
     TSSymbol S_row = ts_language_symbol_for_name(lang, "matrix_row", 10, true);
     TSSymbol S_block = ts_language_symbol_for_name(lang, "block", 5, true);
+    TSSymbol S_ident = ts_language_symbol_for_name(lang, "identifier", 10, true);
     static char strsym[4096]; // nodes whose children are string pieces
     for (uint32_t i = 0; i < ts_language_symbol_count(lang) && i < 4096; i++) {
         const char *nm = ts_language_symbol_name(lang, (TSSymbol)i);
@@ -162,7 +164,9 @@ int main(int argc, char **argv) {
         if (cnt * 12ul > jcap) { jcap = cnt * 24ul + 64; jb = realloc(jb, jcap); }
         if (fread(jb, 12, cnt, J) != cnt) { fprintf(stderr, "short dump\n"); return 1; }
         if (herr == 2) { skipped++; continue; } // JuliaSyntax (Wasm) failed on this file
-        FILE *f = fopen(path, "rb"); fseek(f, 0, SEEK_END); long n = ftell(f); fseek(f, 0, SEEK_SET);
+        FILE *f = fopen(path, "rb");
+        if (!f) { perror(path); return 1; }
+        fseek(f, 0, SEEK_END); long n = ftell(f); fseek(f, 0, SEEK_SET);
         char *buf = malloc(n + 1); if (fread(buf, 1, n, f) != (size_t)n) return 1; fclose(f);
         src = buf; srclen = n;
         struct timespec a, b; clock_gettime(CLOCK_MONOTONIC, &a);
@@ -173,19 +177,21 @@ int main(int argc, char **argv) {
         set_reset(&ts, (size_t)n + 64);
         // pass 1: every visible node in document order; comments (extras) separately
         TSTreeCursor c = ts_tree_cursor_new(root);
-        long eb = 0; uint32_t err_end = 0; nn = 0; ncm = 0;
+        long eb = 0; uint32_t err_s = 0, err_end = 0; nn = 0; ncm = 0;
         for (;;) {
             TSNode x = ts_tree_cursor_current_node(&c);
             uint32_t s = ts_node_start_byte(x), e = ts_node_end_byte(x);
-            if (ts_node_is_error(x) && s >= err_end) { eb += e - s; err_end = e; }
+            if (ts_node_is_error(x) && s >= err_end) { eb += e - s; err_s = s; err_end = e; }
+            // an ERROR node and everything in it reproduce nothing (only comments are kept, for trimming)
+            int in_err = err_end > err_s && s >= err_s && e <= err_end;
             if (ts_node_is_extra(x)) { // a comment
                 if (ncm == cmcap) { cmcap = cmcap ? cmcap * 2 : 1024; cm = realloc(cm, cmcap * sizeof *cm); }
                 cm[ncm++] = (Span){s, e};
             }
             if (nn == ndcap) { ndcap = ndcap ? ndcap * 2 : 4096; nd = realloc(nd, ndcap * sizeof *nd); }
-            nd[nn++] = (Node){s, e, ts_node_symbol(x), (uint8_t)ts_node_is_extra(x), ts_node_child_count(x) == 0};
+            if (!in_err) nd[nn++] = (Node){s, e, ts_node_symbol(x), (uint8_t)ts_node_is_extra(x), ts_node_child_count(x) == 0};
             TSSymbol sym = ts_node_symbol(x);
-            if (sym < 4096 && strsym[sym]) { // runs of adjacent content/escape_sequence children
+            if (!in_err && sym < 4096 && strsym[sym]) { // runs of adjacent content/escape_sequence children
                 TSTreeCursor cc = ts_tree_cursor_new(x);
                 int more = ts_tree_cursor_goto_first_child(&cc), in = 0; uint32_t rs = 0, re = 0;
                 for (;;) {
@@ -220,7 +226,9 @@ int main(int argc, char **argv) {
             if (sym == S_char) set_add(&ts, SPAN(T_CHAR, s, e));
             else if (sym == S_op) set_add(&ts, SPAN(T_OP, s, e));
             else if (sym == S_interp) set_add(&ts, SPAN(T_INTERP, s, e));
-            else if (sym == S_row || sym == S_block) set_add(&ts, SPAN(T_SEP, s, e));
+            else if (sym == S_row) set_add(&ts, SPAN(T_ROW, s, e));
+            else if (sym == S_block) set_add(&ts, SPAN(T_BLOCK, s, e));
+            else if (sym == S_ident) set_add(&ts, SPAN(T_ID, s, e));
             else if (sym == S_for && e - s > 3 && !memcmp(src + s, "for", 3)) { // minus `for` and what follows it
                 uint32_t q = s + 3, e2 = e; trim(&q, &e2);
                 if (e2 > q) set_add(&ts, SPAN(T_ITER, q, e2));
@@ -275,10 +283,10 @@ int main(int argc, char **argv) {
                         trim(&s2, &e2);
                         if (s2 == s0 && e2 == e0) break;
                     }
-                    if (e2 > s2 && set_has(&ts, SPAN(T_SEP, s2, e2))) why = N_SEP;
+                    if (e2 > s2 && set_has(&ts, SPAN(k == K_row ? T_ROW : T_BLOCK, s2, e2))) why = N_SEP;
                 }
                 else if (leaf && k == K_Identifier && s >= 4 && e < (uint32_t)n && !memcmp(src + s - 4, "var\"", 4) &&
-                         src[e] == '"' && set_has(&ts, SPAN(T_ANY, s - 4, e + 1))) why = N_VAR;
+                         src[e] == '"' && set_has(&ts, SPAN(T_ID, s - 4, e + 1))) why = N_VAR;
                 if (why >= 0) { norm = 1; norm_count[why]++; }
             }
             if (!norm && showk >= 0 && k == showk && leaf == showleaf && shown < showmax) {

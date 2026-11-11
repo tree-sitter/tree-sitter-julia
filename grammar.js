@@ -190,7 +190,10 @@ module.exports = grammar({
       alias($._type_head_where, $.where_expression),
     ),
 
-    _type_head_where: $ => prec(PREC.dot + 1, seq($._primary_expression, 'where', $._primary_expression)),
+    _type_head_where: $ => prec(PREC.dot + 1, seq($._primary_expression, 'where', $._where_bound)),
+
+    // the bound is a whole expression (`where N <: Int`): low precedence, so its operators shift
+    _where_bound: $ => prec(PREC.where, $._expression),
 
     abstract_definition: $ => seq(
       'abstract',

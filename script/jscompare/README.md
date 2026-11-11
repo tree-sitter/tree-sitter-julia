@@ -24,10 +24,11 @@ registered tree from a bare clone for the packages without a usable tag. Of the 
   normalized), `PREFIX.files.tsv` (per file: errors on each side, nodes, bytes in ERROR nodes) and a summary.
   `SHOWKIND=<kind> [SHOWLEAF=1] [SHOWN=n]` prints unmatched examples.
 
-A JuliaSyntax node is **reproduced** when a tree-sitter node has exactly its span. Both sides' spans leave
-out whitespace and comments at either end (tree-sitter's blocks end with newline terminators and can begin
-or end with comments; a token keeps its own span, so string content may be or end in spaces). Punctuation
-and keywords that JuliaSyntax marks as trivia are not counted.
+A JuliaSyntax node is **reproduced** when a tree-sitter node has exactly its span (not an ERROR node or a
+node inside one). Both sides' spans leave out whitespace and comments at either end (tree-sitter's blocks
+end with newline terminators and can begin or end with comments; a token keeps its own span, so string
+content may be or end in spaces). Punctuation and keywords that JuliaSyntax marks as trivia are not
+counted.
 
 **Raw** is that comparison and nothing else. **Normalized** adds mappings for conventions where both trees
 have a node for the same thing but draw its boundary differently. Each is counted separately, and none

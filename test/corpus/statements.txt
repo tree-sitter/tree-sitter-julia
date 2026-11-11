@@ -627,6 +627,10 @@ end
 function f(v; combine=+
 ) where {T}
 end
+x = a + ([])
+y = foo +
+    (bar)
+"a $("b") c" #= c =# f
 
 ---
 
@@ -651,4 +655,11 @@ end
         (call_expression
           (identifier)
           (argument_list (identifier) (assignment (identifier) (operator) (operator))))
-        (curly_expression (identifier))))))
+        (curly_expression (identifier)))))
+  (assignment (identifier) (operator)
+    (binary_expression (identifier) (operator) (parenthesized_expression (vector_expression))))
+  (assignment (identifier) (operator)
+    (binary_expression (identifier) (operator) (parenthesized_expression (identifier))))
+  (string_literal (content) (string_interpolation (string_literal (content))) (content))
+  (block_comment)
+  (identifier))

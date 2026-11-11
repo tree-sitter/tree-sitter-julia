@@ -592,9 +592,17 @@
           },
           {
             "type": "SYMBOL",
-            "name": "_primary_expression"
+            "name": "_where_bound"
           }
         ]
+      }
+    },
+    "_where_bound": {
+      "type": "PREC",
+      "value": 16,
+      "content": {
+        "type": "SYMBOL",
+        "name": "_expression"
       }
     },
     "abstract_definition": {
