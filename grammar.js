@@ -25,10 +25,10 @@ const PREC = [
   'rational',
   'bitshift',
   'prefix',
+  // `^` and juxtaposition (`2x`) share a level and associate to the right, as JuliaSyntax's
+  // parse_juxtapose/parse_factor nest: `2x^2` is `2(x^2)`, `x^2y` is `x^(2y)`, `2^3^2` is `2^(3^2)`,
+  // `2x::T` is `2(x::T)`; both bind tighter than prefix operators (`-2x` is `-(2x)`)
   'power',
-  // `2x`: tighter than prefix (`-2x` is `-(2x)`) and than a power's right side (`2^2x` is `2^(2x)`,
-  // JuliaSyntax parse_factor_after)
-  'juxtapose',
   'decl',
   'dot',
 ].reduce((result, name, index) => {
@@ -180,7 +180,17 @@ module.exports = grammar({
     type_head: $ => prec(PREC.stmt, choice(
       $._primary_expression,
       $.binary_expression,
+      alias($._subtype_where, $.binary_expression),
     )),
+
+    // `struct C{N} <: B where {N}`: `C{N} <: (B where {N})` (JuliaSyntax), where `<:` would otherwise bind first
+    _subtype_where: $ => seq(
+      $._expression,
+      alias(choice($._comparison_operator, $._type_order_operator), $.operator),
+      alias($._type_head_where, $.where_expression),
+    ),
+
+    _type_head_where: $ => prec(PREC.dot + 1, seq($._primary_expression, 'where', $._primary_expression)),
 
     abstract_definition: $ => seq(
       'abstract',
@@ -374,6 +384,7 @@ module.exports = grammar({
         $.identifier,
         $._import_dotted,
         $.operator, // `import .⋆`
+        $.interpolation_expression, // `using .$lib`
       ),
     ),
 
@@ -386,11 +397,12 @@ module.exports = grammar({
           choice($.identifier, $.interpolation_expression),
           alias($._simple_macro_identifier, $.macro_identifier),
           $.operator, // `import Base.*`: a dotted operator is not valid here, so the scanner leaves `.` to the lexer
+          parenthesize($.operator), // `import Base.(+)`
         ),
       )),
     ),
 
-    _simple_macro_identifier: $ => seq('@', $.identifier),
+    _simple_macro_identifier: $ => seq('@', choice($.identifier, $.operator)), // `import Lazy.@>`
 
     _exportable: $ => choice(
       $.identifier,
@@ -721,7 +733,7 @@ module.exports = grammar({
         [prec.left, PREC.times, $._times_operator],
         [prec.left, PREC.rational, $._rational_operator],
         [prec.left, PREC.bitshift, $._bitshift_operator],
-        [prec.left, PREC.power, $._power_operator],
+        [prec.right, PREC.power, $._power_operator],
       ];
 
       return choice(...table.map(([fn, prec, op]) => fn(prec, seq(
@@ -796,12 +808,12 @@ module.exports = grammar({
 
     // `2x`, `(n+1)ε`, `VT'Vecs`, `2(x)`, `1√x`: the scanner says when (JuliaSyntax's is_juxtapose)
     // Like a binary operator (so its tokens are valid exactly where operators are, which keeps the parse
-    // table small), between prefix and power: `-2x` is `-(2x)`, `2x^2` is `2(x^2)`.
-    juxtaposition_expression: $ => prec.left(PREC.juxtapose, seq(
+    // table small), at the level of `^` (see PREC).
+    juxtaposition_expression: $ => prec.right(PREC.power, seq(
       // the scanner emits `_juxtapose` only where JuliaSyntax juxtaposes (never after an operator)
       $._expression,
       $._juxtapose,
-      choice($._primary_expression, $.unary_expression),
+      $._expression,
     )),
 
     compound_assignment_expression: $ => prec.right(PREC.assign, seq(

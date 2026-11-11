@@ -609,3 +609,46 @@ end
   (function_definition
     (signature (call_expression (identifier) (argument_list)))
     (block (assignment (identifier) (operator) (integer_literal)))))
+
+==============================
+docstrings on the line of what they document, macros and operators in import paths
+==============================
+
+"""doc""" f
+"a" in xs
+module M
+"doc" g(x) = 1
+end
+import Lazy.@>, Base.(+)
+using .$lib: $lib
+if a >
+    b
+end
+function f(v; combine=+
+) where {T}
+end
+
+---
+
+(source_file
+  (string_literal (content))
+  (identifier)
+  (binary_expression (string_literal (content)) (operator) (identifier))
+  (module_definition
+    name: (identifier)
+    (block
+      (string_literal (content))
+      (assignment (call_expression (identifier) (argument_list (identifier))) (operator) (integer_literal))))
+  (import_statement
+    (import_path (identifier) (macro_identifier (operator)))
+    (import_path (identifier) (operator)))
+  (using_statement
+    (selected_import (import_path (interpolation_expression (identifier))) (interpolation_expression (identifier))))
+  (if_statement condition: (binary_expression (identifier) (operator) (identifier)))
+  (function_definition
+    (signature
+      (where_expression
+        (call_expression
+          (identifier)
+          (argument_list (identifier) (assignment (identifier) (operator) (operator))))
+        (curly_expression (identifier))))))

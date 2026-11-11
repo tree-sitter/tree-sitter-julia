@@ -388,3 +388,32 @@ f(g::::IsDirected) = 1
     (call_expression (identifier) (argument_list (typed_expression (identifier) (unary_typed_expression (identifier)))))
     (operator)
     (integer_literal)))
+
+==============================
+power and juxtaposition, operators after an operand in block heads
+==============================
+
+2^3^2
+2x::T
+x^2y
+if m[i]*(c - 1) > s
+end
+while a*(b)
+end
+
+---
+
+(source_file
+  (binary_expression (integer_literal) (operator) (binary_expression (integer_literal) (operator) (integer_literal)))
+  (juxtaposition_expression (integer_literal) (typed_expression (identifier) (identifier)))
+  (binary_expression (identifier) (operator) (juxtaposition_expression (integer_literal) (identifier)))
+  (if_statement
+    condition: (binary_expression
+      (binary_expression
+        (index_expression (identifier) (vector_expression (identifier)))
+        (operator)
+        (parenthesized_expression (binary_expression (identifier) (operator) (integer_literal))))
+      (operator)
+      (identifier)))
+  (while_statement
+    condition: (binary_expression (identifier) (operator) (parenthesized_expression (identifier)))))

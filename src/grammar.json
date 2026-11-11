@@ -527,6 +527,72 @@
           {
             "type": "SYMBOL",
             "name": "binary_expression"
+          },
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_subtype_where"
+            },
+            "named": true,
+            "value": "binary_expression"
+          }
+        ]
+      }
+    },
+    "_subtype_where": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_expression"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_comparison_operator"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_type_order_operator"
+              }
+            ]
+          },
+          "named": true,
+          "value": "operator"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_type_head_where"
+          },
+          "named": true,
+          "value": "where_expression"
+        }
+      ]
+    },
+    "_type_head_where": {
+      "type": "PREC",
+      "value": 29,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "_primary_expression"
+          },
+          {
+            "type": "STRING",
+            "value": "where"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_primary_expression"
           }
         ]
       }
@@ -1579,6 +1645,10 @@
             {
               "type": "SYMBOL",
               "name": "operator"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "interpolation_expression"
             }
           ]
         }
@@ -1640,6 +1710,23 @@
                   {
                     "type": "SYMBOL",
                     "name": "operator"
+                  },
+                  {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "("
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "operator"
+                      },
+                      {
+                        "type": "STRING",
+                        "value": ")"
+                      }
+                    ]
                   }
                 ]
               }
@@ -1656,8 +1743,17 @@
           "value": "@"
         },
         {
-          "type": "SYMBOL",
-          "name": "identifier"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "identifier"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "operator"
+            }
+          ]
         }
       ]
     },
@@ -2629,7 +2725,7 @@
     },
     "field_expression": {
       "type": "PREC",
-      "value": 29,
+      "value": 28,
       "content": {
         "type": "SEQ",
         "members": [
@@ -3714,7 +3810,7 @@
           }
         },
         {
-          "type": "PREC_LEFT",
+          "type": "PREC_RIGHT",
           "value": 26,
           "content": {
             "type": "SEQ",
@@ -3910,7 +4006,7 @@
     },
     "typed_expression": {
       "type": "PREC",
-      "value": 28,
+      "value": 27,
       "content": {
         "type": "SEQ",
         "members": [
@@ -4028,8 +4124,8 @@
       }
     },
     "juxtaposition_expression": {
-      "type": "PREC_LEFT",
-      "value": 27,
+      "type": "PREC_RIGHT",
+      "value": 26,
       "content": {
         "type": "SEQ",
         "members": [
@@ -4042,17 +4138,8 @@
             "name": "_juxtapose"
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "_primary_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "unary_expression"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_expression"
           }
         ]
       }

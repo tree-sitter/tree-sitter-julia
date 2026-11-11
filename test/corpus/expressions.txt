@@ -726,27 +726,27 @@ x'x
       (identifier))
     (identifier))
   (binary_expression
-    (binary_expression
-      (juxtaposition_expression
-        (integer_literal)
-        (identifier))
-      (operator)
-      (integer_literal))
+    (juxtaposition_expression
+      (integer_literal)
+      (binary_expression
+        (identifier)
+        (operator)
+        (integer_literal)))
     (operator)
     (juxtaposition_expression
       (float_literal)
       (identifier)))
   (binary_expression
-    (binary_expression
-      (juxtaposition_expression
-        (integer_literal)
+    (juxtaposition_expression
+      (integer_literal)
+      (binary_expression
         (parenthesized_expression
           (binary_expression
             (identifier)
             (operator)
-            (integer_literal))))
-      (operator)
-      (integer_literal))
+            (integer_literal)))
+        (operator)
+        (integer_literal)))
     (operator)
     (juxtaposition_expression
       (integer_literal)

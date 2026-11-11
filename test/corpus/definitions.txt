@@ -190,6 +190,8 @@ mutable struct MyVec <: AbstractArray
   foos::Vector{Foo}
 end
 
+struct CustomStyle{N} <: BroadcastStyle where {N} end
+
 ---
 
 (source_file
@@ -227,7 +229,15 @@ end
         (identifier)
         (parametrized_type_expression
           (identifier)
-          (curly_expression (identifier)))))))
+          (curly_expression (identifier))))))
+
+  ;; `<:` over `where`
+  (struct_definition
+    (type_head
+      (binary_expression
+        (parametrized_type_expression (identifier) (curly_expression (identifier)))
+        (operator)
+        (where_expression (identifier) (curly_expression (identifier)))))))
 
 
 ========================================
